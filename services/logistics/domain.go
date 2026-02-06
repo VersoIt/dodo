@@ -134,8 +134,11 @@ func (c *Courier) CompleteOrder() {
 }
 
 // Getters
+func (d *Delivery) OrderID() string { return d.orderID }
+func (d *Delivery) CourierID() string { return d.courierID }
 func (d *Delivery) Status() DeliveryStatus { return d.status }
 func (c *Courier) ID() string { return c.id }
+func (c *Courier) Status() CourierStatus { return c.status }
 
 // --- Repository ---
 

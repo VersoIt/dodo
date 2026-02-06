@@ -105,9 +105,20 @@ func (u *User) SpendBonuses(amount int) error {
 }
 
 // Getters
-func (u *User) ID() string    { return u.id }
+
+func (u *User) ID() string { return u.id }
+
 func (u *User) Email() string { return u.email }
-func (u *User) Role() Role    { return u.role }
+
+func (u *User) Role() Role { return u.role }
+
+func (u *User) HashedPassword() string { return u.passwordHash }
+
+func (u *User) IsClient() bool { return u.isClient }
+
+func (u *User) BonusPoints() int { return u.bonusPoints }
+
+
 
 // --- Repository ---
 

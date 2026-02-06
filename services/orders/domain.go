@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"diploma/pkg/common"
 	"errors"
 	"fmt"
 	"time"
@@ -10,13 +11,11 @@ import (
 
 // --- Value Objects ---
 
-type Money float64
-
 type OrderStatus int
 
 const (
 	StatusCreated    OrderStatus = 0
-	StatusPaid       OrderStatus = 1 // Оплачен, ждет кухни
+	StatusPaid       OrderStatus = 1
 	StatusCooking    OrderStatus = 2
 	StatusReady      OrderStatus = 3
 	StatusDelivering OrderStatus = 4
@@ -24,7 +23,6 @@ const (
 	StatusCanceled   OrderStatus = 6
 )
 
-// DeliveryAddress - Value Object. Неизменяем.
 type DeliveryAddress struct {
 	City      string
 	Street    string
@@ -34,51 +32,50 @@ type DeliveryAddress struct {
 	Comment   string
 }
 
-// Topping - добавка. Value Object.
 type Topping struct {
 	Name  string
-	Price Money
+	Price common.Money
 }
 
 // --- Entities ---
 
 // OrderItem - Позиция заказа.
-// Считает свою стоимость сама.
 type OrderItem struct {
 	productID      string
 	productName    string
 	quantity       int
-	basePrice      Money // Цена за 1 шт (уже с учетом size_m)
-	sizeMultiplier float64
+	basePrice      common.Money // Базовая цена товара (без размера)
+	sizeMultiplier float64      // Модификатор размера
 	toppings       []Topping
 }
 
-// CalculateTotal возвращает (Base * Qty) + ToppingsCost.
-// Формула из ТЗ (1): S_ki = (base_i * size_m + SUM(top_ij)) * (1 - d_k)
-// Здесь мы считаем часть до скидки: (base * size + toppings) * qty
-func (i *OrderItem) CalculateTotal() Money {
-	itemPrice := i.basePrice // basePrice уже может включать size_m, если так передали, или умножим тут
-	// В CatalogService мы сделали CalculateBasePrice(size).
-	// Допустим, сюда приходит уже "цена за размер".
+func (i *OrderItem) CalculateTotal() common.Money {
+	// Цена с учетом размера
+	sizedPrice := i.basePrice * common.Money(i.sizeMultiplier)
 
-	var toppingsPrice Money
+	var toppingsPrice common.Money
 	for _, t := range i.toppings {
 		toppingsPrice += t.Price
 	}
 
-	// Цена за единицу = (База + Топпинги)
-	unitPrice := itemPrice + toppingsPrice
-
-	return unitPrice * Money(i.quantity)
+	// (Base*Size + Toppings) * Qty
+	unitPrice := sizedPrice + toppingsPrice
+	return unitPrice * common.Money(i.quantity)
 }
+
+// Getters for Item
+func (i *OrderItem) ProductID() string       { return i.productID }
+func (i *OrderItem) ProductName() string     { return i.productName }
+func (i *OrderItem) Quantity() int           { return i.quantity }
+func (i *OrderItem) BasePrice() common.Money { return i.basePrice }
+func (i *OrderItem) Size() float64           { return i.sizeMultiplier }
+func (i *OrderItem) Toppings() []Topping     { return i.toppings }
 
 // --- Aggregate Root ---
 
-// Order - Агрегат заказа.
-// Гарантирует консистентность состояния и расчетов.
 type Order struct {
 	id          string
-	orderNumber string // PG-YYYY.MM.DD-NNNN
+	orderNumber string
 	customerID  string
 	status      OrderStatus
 	createdAt   time.Time
@@ -86,13 +83,11 @@ type Order struct {
 	items       []*OrderItem
 	address     DeliveryAddress
 	
-	// Финансы
-	deliveryPrice Money
-	discount      Money // Скидка в деньгах
+	deliveryPrice common.Money
+	discount      common.Money
 	promoCode     string
 	
-	// Кеш итоговой суммы (пересчитывается при изменении)
-	finalPrice    Money 
+	finalPrice    common.Money 
 }
 
 // --- Factory ---
@@ -100,7 +95,7 @@ type Order struct {
 func NewOrder(customerID string, address DeliveryAddress) *Order {
 	return &Order{
 		id:          uuid.New().String(),
-		orderNumber: generateOrderNumber(), // Заглушка, реальный генератор сложнее
+		orderNumber: generateOrderNumber(),
 		customerID:  customerID,
 		status:      StatusCreated,
 		createdAt:   time.Now(),
@@ -112,21 +107,25 @@ func NewOrder(customerID string, address DeliveryAddress) *Order {
 // --- Business Logic ---
 
 // AddItem добавляет товар.
-// basePriceWithSize - это цена товара с учетом размера (из Catalog Service).
-func (o *Order) AddItem(productID, name string, qty int, basePriceWithSize Money, toppings []Topping) error {
+// Передаем basePrice (чистую) и sizeMultiplier отдельно.
+func (o *Order) AddItem(productID, name string, qty int, basePrice common.Money, sizeMult float64, toppings []Topping) error {
 	if o.status != StatusCreated {
 		return errors.New("cannot add items to processed order")
 	}
 	if qty <= 0 {
 		return errors.New("quantity must be positive")
 	}
+	if sizeMult <= 0 {
+		sizeMult = 1.0
+	}
 
 	item := &OrderItem{
-		productID:   productID,
-		productName: name,
-		quantity:    qty,
-		basePrice:   basePriceWithSize,
-		toppings:    toppings,
+		productID:      productID,
+		productName:    name,
+		quantity:       qty,
+		basePrice:      basePrice,
+		sizeMultiplier: sizeMult,
+		toppings:       toppings,
 	}
 	
 	o.items = append(o.items, item)
@@ -134,9 +133,7 @@ func (o *Order) AddItem(productID, name string, qty int, basePriceWithSize Money
 	return nil
 }
 
-// ApplyPromoCode применяет скидку.
-// В реальности здесь была бы сложная логика проверки промокода.
-func (o *Order) ApplyPromoCode(code string, discountAmount Money) error {
+func (o *Order) ApplyPromoCode(code string, discountAmount common.Money) error {
 	if o.status != StatusCreated {
 		return errors.New("cannot apply promo to processed order")
 	}
@@ -146,8 +143,7 @@ func (o *Order) ApplyPromoCode(code string, discountAmount Money) error {
 	return nil
 }
 
-// SetDeliveryPrice устанавливает цену доставки.
-func (o *Order) SetDeliveryPrice(price Money) {
+func (o *Order) SetDeliveryPrice(price common.Money) {
 	if o.status != StatusCreated {
 		return 
 	}
@@ -155,10 +151,8 @@ func (o *Order) SetDeliveryPrice(price Money) {
 	o.recalculate()
 }
 
-// recalculate - внутренняя метод для обновления суммы.
-// Формула (2): S_total = SUM(S_ki) + Delivery
 func (o *Order) recalculate() {
-	var itemsTotal Money
+	var itemsTotal common.Money
 	for _, item := range o.items {
 		itemsTotal += item.CalculateTotal()
 	}
@@ -170,9 +164,8 @@ func (o *Order) recalculate() {
 	o.finalPrice = total
 }
 
-// --- State Machine Transitions ---
+// --- State Machine ---
 
-// MarkPaid переводит в статус "Оплачен".
 func (o *Order) MarkPaid() error {
 	if o.status != StatusCreated {
 		return fmt.Errorf("invalid transition: Created -> Paid from status %v", o.status)
@@ -181,7 +174,6 @@ func (o *Order) MarkPaid() error {
 	return nil
 }
 
-// SendToKitchen отправляет на кухню.
 func (o *Order) SendToKitchen() error {
 	if o.status != StatusPaid {
 		return errors.New("order must be paid before cooking")
@@ -190,7 +182,6 @@ func (o *Order) SendToKitchen() error {
 	return nil
 }
 
-// MarkReady - кухня закончила.
 func (o *Order) MarkReady() error {
 	if o.status != StatusCooking {
 		return errors.New("order is not cooking")
@@ -199,7 +190,6 @@ func (o *Order) MarkReady() error {
 	return nil
 }
 
-// ShipToDelivery - отдали курьеру.
 func (o *Order) ShipToDelivery() error {
 	if o.status != StatusReady {
 		return errors.New("order is not ready for delivery")
@@ -208,7 +198,6 @@ func (o *Order) ShipToDelivery() error {
 	return nil
 }
 
-// CompleteDelivery - успешно доставлено.
 func (o *Order) CompleteDelivery() error {
 	if o.status != StatusDelivering {
 		return errors.New("order was not being delivered")
@@ -219,16 +208,20 @@ func (o *Order) CompleteDelivery() error {
 
 // --- Getters ---
 
-func (o *Order) ID() string { return o.id }
-func (o *Order) FinalPrice() Money { return o.finalPrice }
-func (o *Order) Status() OrderStatus { return o.status }
-func (o *Order) Items() []*OrderItem { return o.items }
+func (o *Order) ID() string                  { return o.id }
+func (o *Order) OrderNumber() string         { return o.orderNumber }
+func (o *Order) CustomerID() string          { return o.customerID }
+func (o *Order) Status() OrderStatus         { return o.status }
+func (o *Order) CreatedAt() time.Time        { return o.createdAt }
+func (o *Order) Items() []*OrderItem         { return o.items }
+func (o *Order) Address() DeliveryAddress    { return o.address }
+func (o *Order) DeliveryPrice() common.Money { return o.deliveryPrice }
+func (o *Order) Discount() common.Money      { return o.discount }
+func (o *Order) FinalPrice() common.Money    { return o.finalPrice }
 
 // --- Helpers ---
 
 func generateOrderNumber() string {
-	// В реальности: PG-2026.02.06-0001
-	// Для MVP:
 	return fmt.Sprintf("PG-%s-%s", time.Now().Format("2006.01.02"), uuid.New().String()[:4])
 }
 

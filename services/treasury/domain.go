@@ -1,6 +1,7 @@
 package treasury
 
 import (
+	"diploma/pkg/common"
 	"errors"
 	"time"
 
@@ -26,16 +27,13 @@ const (
 	PayStatusRefund   PaymentStatus = 3
 )
 
-// Money - дублируем тип, чтобы сервис был независим (Bounded Context).
-type Money float64
-
 // --- Aggregate ---
 
 // Payment - Агрегат платежа.
 type Payment struct {
 	id            string
 	orderID       string
-	amount        Money
+	amount        common.Money
 	method        PaymentMethod
 	status        PaymentStatus
 	transactionID string // ID из банка
@@ -45,7 +43,7 @@ type Payment struct {
 
 // --- Factory ---
 
-func NewPayment(orderID string, amount Money, method PaymentMethod) *Payment {
+func NewPayment(orderID string, amount common.Money, method PaymentMethod) *Payment {
 	return &Payment{
 		id:        uuid.New().String(),
 		orderID:   orderID,
@@ -59,7 +57,6 @@ func NewPayment(orderID string, amount Money, method PaymentMethod) *Payment {
 
 // --- Behavior ---
 
-// Confirm подтверждает платеж (успех).
 func (p *Payment) Confirm(externalTransactionID string) error {
 	if p.status != PayStatusWaiting {
 		return errors.New("payment is already processed")
@@ -70,7 +67,6 @@ func (p *Payment) Confirm(externalTransactionID string) error {
 	return nil
 }
 
-// Decline отклоняет платеж.
 func (p *Payment) Decline() error {
 	if p.status != PayStatusWaiting {
 		return errors.New("payment is already processed")
@@ -80,7 +76,6 @@ func (p *Payment) Decline() error {
 	return nil
 }
 
-// Refund делает возврат.
 func (p *Payment) Refund() error {
 	if p.status != PayStatusSuccess {
 		return errors.New("can only refund successful payments")
@@ -90,9 +85,13 @@ func (p *Payment) Refund() error {
 	return nil
 }
 
-// Getters
-func (p *Payment) ID() string { return p.id }
+// --- Getters ---
+
+func (p *Payment) ID() string            { return p.id }
+func (p *Payment) OrderID() string       { return p.orderID }
+func (p *Payment) Amount() common.Money  { return p.amount }
 func (p *Payment) Status() PaymentStatus { return p.status }
+func (p *Payment) CreatedAt() time.Time  { return p.createdAt }
 
 // --- Repository ---
 

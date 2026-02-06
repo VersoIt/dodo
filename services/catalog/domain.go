@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"diploma/pkg/common"
 	"errors"
 	"time"
 
@@ -8,10 +9,6 @@ import (
 )
 
 // --- Value Objects ---
-
-// Money - денежная единица (чтобы не путать с просто числами).
-// В реальном проде лучше int64 (копейки), но для соответствия формулам ТЗ оставим float64.
-type Money float64
 
 // CategoryType - коды категорий
 type CategoryType int
@@ -28,16 +25,15 @@ const (
 // --- Entities ---
 
 // Ingredient - Сущность ингредиента.
-// Может существовать отдельно от продукта.
 type Ingredient struct {
 	ID      string
 	Name    string
-	Cost    Money  // cost_i
-	Unit    string // гр, мл
+	Cost    common.Money
+	Unit    string
 	InStock bool
 }
 
-// IngredientRef - Связь продукта с ингредиентом (Value Object внутри Product).
+// IngredientRef - Связь продукта с ингредиентом.
 type IngredientRef struct {
 	IngredientID string
 	Quantity     float64
@@ -47,14 +43,13 @@ type IngredientRef struct {
 // --- Aggregate ---
 
 // Product - Агрегат товара.
-// Поля скрыты (unexported), доступ только через методы. Это защищает инварианты.
 type Product struct {
 	id          string
 	name        string
 	description string
 	category    CategoryType
-	basePrice   Money           // base_i
-	ingredients []IngredientRef // Рецептура
+	basePrice   common.Money
+	ingredients []IngredientRef
 	imageUrl    string
 	isAvailable bool
 	createdAt   time.Time
@@ -62,8 +57,7 @@ type Product struct {
 
 // --- Factory ---
 
-// NewProduct создает новый продукт, проверяя правила (Инварианты).
-func NewProduct(name, desc string, cat CategoryType, basePrice Money) (*Product, error) {
+func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*Product, error) {
 	if name == "" {
 		return nil, errors.New("product name cannot be empty")
 	}
@@ -85,10 +79,6 @@ func NewProduct(name, desc string, cat CategoryType, basePrice Money) (*Product,
 
 // --- Behavior (Methods) ---
 
-// ID getter
-func (p *Product) ID() string { return p.id }
-
-// AddIngredient добавляет ингредиент в рецептуру.
 func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error {
 	if qty <= 0 {
 		return errors.New("quantity must be positive")
@@ -101,26 +91,28 @@ func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error
 	return nil
 }
 
-// CalculatePrice рассчитывает цену с учетом модификатора размера (size_m).
-// Формула (1) из ТЗ: base_i * size_m
-// Топпинги считаются уже в заказе, так как они опциональны для конкретного инстанса еды.
-func (p *Product) CalculateBasePrice(sizeMultiplier float64) Money {
+func (p *Product) CalculateBasePrice(sizeMultiplier float64) common.Money {
 	if sizeMultiplier <= 0 {
 		sizeMultiplier = 1.0
 	}
-	return p.basePrice * Money(sizeMultiplier)
+	return p.basePrice * common.Money(sizeMultiplier)
 }
 
-// MarkAvailable меняет доступность товара.
 func (p *Product) MarkAvailable(available bool) {
 	p.isAvailable = available
 }
 
-// IsAvailable getter
-func (p *Product) IsAvailable() bool { return p.isAvailable }
+// --- Getters (Accessors) ---
+// Необходимы для маппинга в DTO или сохранения в БД
 
-// BasePrice getter
-func (p *Product) BasePrice() Money { return p.basePrice }
+func (p *Product) ID() string                { return p.id }
+func (p *Product) Name() string              { return p.name }
+func (p *Product) Description() string       { return p.description }
+func (p *Product) Category() CategoryType    { return p.category }
+func (p *Product) BasePrice() common.Money   { return p.basePrice }
+func (p *Product) Ingredients() []IngredientRef { return p.ingredients } // Возвращаем копию слайса лучше, но пока ок
+func (p *Product) IsAvailable() bool         { return p.isAvailable }
+func (p *Product) CreatedAt() time.Time      { return p.createdAt }
 
 // --- Repository Interface ---
 

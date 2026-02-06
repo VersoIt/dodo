@@ -4,28 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/diploma.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Taskfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/about_project.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/analytics/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/auth/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/catalog/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/kitchen/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/logistics/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/notification/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/treasury/domain.go" afterDir="false" />
-    </list>
+    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

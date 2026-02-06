@@ -81,7 +81,9 @@ func (t *KitchenTicket) GetCookingDuration() time.Duration {
 
 // Getters
 func (t *KitchenTicket) ID() string { return t.id }
+func (t *KitchenTicket) OrderID() string { return t.orderID }
 func (t *KitchenTicket) Status() TicketStatus { return t.status }
+func (t *KitchenTicket) Items() []KitchenItem { return t.items }
 
 // --- Repository ---
 
