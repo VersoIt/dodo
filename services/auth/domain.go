@@ -20,6 +20,24 @@ const (
 	RoleClient  Role = 4
 )
 
+// String возвращает строковое представление роли.
+func (r Role) String() string {
+	switch r {
+	case RoleAdmin:
+		return "admin"
+	case RoleManager:
+		return "manager"
+	case RoleChef:
+		return "chef"
+	case RoleCourier:
+		return "courier"
+	case RoleClient:
+		return "client"
+	default:
+		return "unknown"
+	}
+}
+
 // --- Aggregate ---
 
 // User - Агрегат пользователя.

@@ -37,6 +37,27 @@ type Topping struct {
 	Price common.Money
 }
 
+func (s OrderStatus) String() string {
+	switch s {
+	case StatusCreated:
+		return "created"
+	case StatusPaid:
+		return "paid"
+	case StatusCooking:
+		return "cooking"
+	case StatusReady:
+		return "ready"
+	case StatusDelivering:
+		return "delivering"
+	case StatusCompleted:
+		return "completed"
+	case StatusCanceled:
+		return "canceled"
+	default:
+		return "unknown"
+	}
+}
+
 // --- Entities ---
 
 // OrderItem - Позиция заказа.
@@ -107,8 +128,8 @@ func NewOrder(customerID string, address DeliveryAddress) *Order {
 // --- Business Logic ---
 
 // AddItem добавляет товар.
-// Передаем basePrice (чистую) и sizeMultiplier отдельно.
-func (o *Order) AddItem(productID, name string, qty int, basePrice common.Money, sizeMult float64, toppings []Topping) error {
+// productBasePrice - цена за размер 1.0 (из каталога).
+func (o *Order) AddItem(productID, name string, qty int, productBasePrice common.Money, sizeMult float64, toppings []Topping) error {
 	if o.status != StatusCreated {
 		return errors.New("cannot add items to processed order")
 	}
@@ -123,7 +144,7 @@ func (o *Order) AddItem(productID, name string, qty int, basePrice common.Money,
 		productID:      productID,
 		productName:    name,
 		quantity:       qty,
-		basePrice:      basePrice,
+		basePrice:      productBasePrice, // Сохраняем базу
 		sizeMultiplier: sizeMult,
 		toppings:       toppings,
 	}

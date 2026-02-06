@@ -17,6 +17,19 @@ const (
 	TicketReady   TicketStatus = 2
 )
 
+func (s TicketStatus) String() string {
+	switch s {
+	case TicketQueued:
+		return "queued"
+	case TicketCooking:
+		return "cooking"
+	case TicketReady:
+		return "ready"
+	default:
+		return "unknown"
+	}
+}
+
 // --- Aggregate ---
 
 // KitchenTicket - Агрегат чека на кухне.
@@ -84,6 +97,9 @@ func (t *KitchenTicket) ID() string { return t.id }
 func (t *KitchenTicket) OrderID() string { return t.orderID }
 func (t *KitchenTicket) Status() TicketStatus { return t.status }
 func (t *KitchenTicket) Items() []KitchenItem { return t.items }
+func (t *KitchenTicket) CreatedAt() time.Time { return t.createdAt }
+func (t *KitchenTicket) StartTime() time.Time { return t.startCookingTime }
+func (t *KitchenTicket) ReadyTime() time.Time { return t.readyTime }
 
 // --- Repository ---
 

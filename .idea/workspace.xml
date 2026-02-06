@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="" />
+    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/services/analytics/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

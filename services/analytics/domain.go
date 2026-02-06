@@ -61,6 +61,9 @@ func (k *ManagerKPI) HasBonus() bool {
 }
 
 // Getters
+func (k *ManagerKPI) ManagerID() string { return k.managerID }
+func (k *ManagerKPI) ShiftDate() time.Time { return k.shiftDate }
+func (k *ManagerKPI) Plan() float64 { return k.planRevenue }
 func (k *ManagerKPI) Fact() float64 { return k.factRevenue }
 
 // --- Repository ---

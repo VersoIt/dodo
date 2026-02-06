@@ -55,6 +55,12 @@ func (n *Notification) MarkFailed(errStr string) {
 
 // Getters
 func (n *Notification) ID() string { return n.id }
+func (n *Notification) UserID() string { return n.userID }
+func (n *Notification) Title() string { return n.title }
+func (n *Notification) Message() string { return n.message }
+func (n *Notification) SentAt() time.Time { return n.sentAt }
+func (n *Notification) IsSent() bool { return n.isSent }
+func (n *Notification) Error() string { return n.error }
 
 // --- Repository ---
 

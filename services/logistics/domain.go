@@ -27,6 +27,36 @@ const (
 	CourierBusy    CourierStatus = 2
 )
 
+func (s DeliveryStatus) String() string {
+	switch s {
+	case DelStatusPending:
+		return "pending"
+	case DelStatusAssigned:
+		return "assigned"
+	case DelStatusOnWay:
+		return "on_way"
+	case DelStatusDelivered:
+		return "delivered"
+	case DelStatusFailed:
+		return "failed"
+	default:
+		return "unknown"
+	}
+}
+
+func (s CourierStatus) String() string {
+	switch s {
+	case CourierOffline:
+		return "offline"
+	case CourierFree:
+		return "free"
+	case CourierBusy:
+		return "busy"
+	default:
+		return "unknown"
+	}
+}
+
 // --- Aggregates ---
 
 type Delivery struct {
@@ -137,8 +167,15 @@ func (c *Courier) CompleteOrder() {
 func (d *Delivery) OrderID() string { return d.orderID }
 func (d *Delivery) CourierID() string { return d.courierID }
 func (d *Delivery) Status() DeliveryStatus { return d.status }
+func (d *Delivery) PickupTime() time.Time { return d.pickupTime }
+func (d *Delivery) DeliveryTime() time.Time { return d.deliveryTime }
+func (d *Delivery) Location() (lat, lng float64) { return d.currentLat, d.currentLng }
+
 func (c *Courier) ID() string { return c.id }
+func (c *Courier) Name() string { return c.name }
+func (c *Courier) Phone() string { return c.phone }
 func (c *Courier) Status() CourierStatus { return c.status }
+func (c *Courier) Location() (lat, lng float64) { return c.currentLat, c.currentLng }
 
 // --- Repository ---
 
