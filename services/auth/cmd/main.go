@@ -1,7 +1,8 @@
 package main
-
-import "log/slog"
-
+import ("log/slog"; "os"; "os/signal"; "syscall")
 func main() {
-	slog.Info("auth started!")
+	slog.Info("auth service started!")
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 }

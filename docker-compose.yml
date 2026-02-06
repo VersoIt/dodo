@@ -1,0 +1,124 @@
+services:
+  orders:
+    build:
+      context: .
+      dockerfile: services/orders/Dockerfile
+    container_name: orders-service
+    ports:
+      - "8081:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  auth:
+    build:
+      context: .
+      dockerfile: services/auth/Dockerfile
+    container_name: auth-service
+    ports:
+      - "8082:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  catalog:
+    build:
+      context: .
+      dockerfile: services/catalog/Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8083:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  kitchen:
+    build:
+      context: .
+      dockerfile: services/kitchen/Dockerfile
+    container_name: kitchen-service
+    ports:
+      - "8084:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  logistics:
+    build:
+      context: .
+      dockerfile: services/logistics/Dockerfile
+    container_name: logistics-service
+    ports:
+      - "8085:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  analytics:
+    build:
+      context: .
+      dockerfile: services/analytics/Dockerfile
+    container_name: analytics-service
+    ports:
+      - "8086:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  notification:
+    build:
+      context: .
+      dockerfile: services/notification/Dockerfile
+    container_name: notification-service
+    ports:
+      - "8087:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  treasury:
+    build:
+      context: .
+      dockerfile: services/treasury/Dockerfile
+    container_name: treasury-service
+    ports:
+      - "8088:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  pizza-network:
+    driver: bridge

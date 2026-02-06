@@ -5,15 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/services/analytics/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/auth/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/catalog/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/kitchen/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/logistics/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/notification/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/orders/cmd/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/treasury/cmd/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/analytics/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/auth/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/catalog/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/kitchen/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/logistics/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/notification/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/orders/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/treasury/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/cmd/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
