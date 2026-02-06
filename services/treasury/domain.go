@@ -1,7 +1,7 @@
 package treasury
 
 import (
-	"diploma/pkg/common"
+	"github.com/versoit/diploma/pkg/common"
 	"errors"
 	"time"
 

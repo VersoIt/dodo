@@ -1,6 +1,6 @@
 syntax = "proto3";
 package analytics.v1;
-option go_package = "diploma/services/analytics/pkg/api/proto;analytics_pb";
+option go_package = "./pb;analytics_pb";
 
 message ManagerKPI {
   string manager_id = 1;

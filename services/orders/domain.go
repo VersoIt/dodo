@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"diploma/pkg/common"
+	"github.com/versoit/diploma/pkg/common"
 
 	"github.com/google/uuid"
 )

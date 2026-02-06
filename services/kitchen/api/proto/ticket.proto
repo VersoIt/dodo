@@ -1,6 +1,6 @@
 syntax = "proto3";
 package kitchen.v1;
-option go_package = "diploma/services/kitchen/pkg/api/proto;kitchen_pb";
+option go_package = "./pb;kitchen_pb";
 
 message KitchenTicket {
   string id = 1;

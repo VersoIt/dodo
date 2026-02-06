@@ -1,6 +1,6 @@
 syntax = "proto3";
 package notification.v1;
-option go_package = "diploma/services/notification/pkg/api/proto;notification_pb";
+option go_package = "./pb;notification_pb";
 
 message Notification {
   string id = 1;

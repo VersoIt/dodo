@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package catalog.v1;
 
-option go_package = "diploma/services/catalog/pkg/api/proto;catalog_pb";
+option go_package = "./pb;catalog_pb";
 
 message Product {
   string id = 1;

@@ -1,7 +1,7 @@
 package orders
 
 import (
-	"diploma/pkg/common"
+	"github.com/versoit/diploma/pkg/common"
 	"testing"
 )
 

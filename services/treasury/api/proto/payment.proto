@@ -1,6 +1,6 @@
 syntax = "proto3";
 package treasury.v1;
-option go_package = "diploma/services/treasury/pkg/api/proto;treasury_pb";
+option go_package = "./pb;treasury_pb";
 
 message Payment {
   string id = 1;

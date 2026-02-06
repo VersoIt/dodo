@@ -5,8 +5,49 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Taskfile" beforeDir="false" afterPath="$PROJECT_DIR$/Taskfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/golinter.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Taskfile.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/analytics/api/proto/pb/kpi.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/analytics/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/analytics/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/auth/api/proto/pb/user.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/auth/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/auth/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/catalog/api/proto/pb/product.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/catalog/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/kitchen/api/proto/pb/ticket.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/kitchen/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/kitchen/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/logistics/api/proto/pb/delivery.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/logistics/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/logistics/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/notification/api/proto/pb/notification.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/notification/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/notification/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/orders/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/treasury/api/proto/pb/payment.pb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/treasury/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Taskfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/api/proto/kpi.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/api/proto/kpi.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/api/proto/user.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/user.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/api/proto/product.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/api/proto/product.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/api/proto/ticket.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/api/proto/ticket.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/api/proto/delivery.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/api/proto/delivery.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/api/proto/notification.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/api/proto/notification.proto" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/notification/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/order.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/order.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/domain_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/api/proto/payment.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/api/proto/payment.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/domain_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

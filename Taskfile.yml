@@ -1,0 +1,48 @@
+version: '3'
+
+tasks:
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v ./...
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  proto:
+    desc: Generate Go code into pb subfolders
+    cmds:
+      # Create pb directories
+      - powershell -Command "New-Item -ItemType Directory -Force services/orders/api/proto/pb, services/catalog/api/proto/pb, services/auth/api/proto/pb, services/analytics/api/proto/pb, services/kitchen/api/proto/pb, services/logistics/api/proto/pb, services/notification/api/proto/pb, services/treasury/api/proto/pb"
+      # Generate files
+      - protoc --proto_path=services/orders/api/proto --go_out=services/orders/api/proto services/orders/api/proto/*.proto
+      - protoc --proto_path=services/catalog/api/proto --go_out=services/catalog/api/proto services/catalog/api/proto/*.proto
+      - protoc --proto_path=services/auth/api/proto --go_out=services/auth/api/proto services/auth/api/proto/*.proto
+      - protoc --proto_path=services/analytics/api/proto --go_out=services/analytics/api/proto services/analytics/api/proto/*.proto
+      - protoc --proto_path=services/kitchen/api/proto --go_out=services/kitchen/api/proto services/kitchen/api/proto/*.proto
+      - protoc --proto_path=services/logistics/api/proto --go_out=services/logistics/api/proto services/logistics/api/proto/*.proto
+      - protoc --proto_path=services/notification/api/proto --go_out=services/notification/api/proto services/notification/api/proto/*.proto
+      - protoc --proto_path=services/treasury/api/proto --go_out=services/treasury/api/proto services/treasury/api/proto/*.proto
+
+  docker-up:
+    desc: Run infrastructure via docker-compose
+    cmds:
+      - docker-compose up --build -d
+
+  docker-down:
+    desc: Stop docker-compose
+    cmds:
+      - docker-compose down
+
+  k8s-deploy:
+    desc: Deploy all services to Kubernetes
+    cmds:
+      - kubectl apply -f deploy/k8s/namespace.yaml
+      - kubectl apply -f deploy/k8s/
+    
+  k8s-undeploy:
+    desc: Remove all services from Kubernetes
+    cmds:
+      - kubectl delete -f deploy/k8s/

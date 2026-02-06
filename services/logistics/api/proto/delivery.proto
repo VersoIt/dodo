@@ -1,6 +1,6 @@
 syntax = "proto3";
 package logistics.v1;
-option go_package = "diploma/services/logistics/pkg/api/proto;logistics_pb";
+option go_package = "./pb;logistics_pb";
 
 message Delivery {
   string order_id = 1;
