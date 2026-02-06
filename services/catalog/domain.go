@@ -100,9 +100,27 @@ func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error
 	return nil
 }
 
-// ... (остальные методы без изменений)
+func (p *Product) UpdatePrice(newPrice common.Money) error {
+	if newPrice < 0 {
+		return ErrNegativePrice
+	}
+	p.basePrice = newPrice
+	return nil
+}
+
+func (p *Product) SetAvailability(available bool) {
+	p.isAvailable = available
+}
 
 // --- Getters (Accessors) ---
+
+func (p *Product) ID() string               { return p.id }
+func (p *Product) Name() string             { return p.name }
+func (p *Product) Description() string      { return p.description }
+func (p *Product) Category() CategoryType   { return p.category }
+func (p *Product) BasePrice() common.Money  { return p.basePrice }
+func (p *Product) ImageURL() string         { return p.imageUrl }
+func (p *Product) IsAvailable() bool        { return p.isAvailable }
 
 // Ingredients возвращает КОПИЮ списка ингредиентов для защиты внутреннего состояния.
 func (p *Product) Ingredients() []IngredientRef {

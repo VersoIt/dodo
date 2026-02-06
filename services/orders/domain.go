@@ -148,13 +148,17 @@ func (o *Order) AddItem(productID, name string, qty int, productBasePrice common
 		return ErrInvalidQty
 	}
 
+	// Defensive copy of toppings
+	toppingsCopy := make([]Topping, len(toppings))
+	copy(toppingsCopy, toppings)
+
 	o.items = append(o.items, &OrderItem{
 		productID:      productID,
 		productName:    name,
 		quantity:       qty,
 		basePrice:      productBasePrice,
 		sizeMultiplier: sizeMult,
-		toppings:       toppings,
+		toppings:       toppingsCopy,
 	})
 
 	o.recalculate()
