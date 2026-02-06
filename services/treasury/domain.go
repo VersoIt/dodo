@@ -8,6 +8,13 @@ import (
 	"github.com/google/uuid"
 )
 
+// --- Errors ---
+
+var (
+	ErrPaymentProcessed = errors.New("payment is already processed")
+	ErrInvalidRefund    = errors.New("can only refund successful payments")
+)
+
 // --- Enums ---
 
 type PaymentMethod int
@@ -18,6 +25,19 @@ const (
 	MethodCard   PaymentMethod = 2
 )
 
+func (m PaymentMethod) String() string {
+	switch m {
+	case MethodOnline:
+		return "online"
+	case MethodCash:
+		return "cash"
+	case MethodCard:
+		return "card"
+	default:
+		return "unknown"
+	}
+}
+
 type PaymentStatus int
 
 const (
@@ -26,6 +46,21 @@ const (
 	PayStatusDeclined PaymentStatus = 2
 	PayStatusRefund   PaymentStatus = 3
 )
+
+func (s PaymentStatus) String() string {
+	switch s {
+	case PayStatusWaiting:
+		return "waiting"
+	case PayStatusSuccess:
+		return "success"
+	case PayStatusDeclined:
+		return "declined"
+	case PayStatusRefund:
+		return "refund"
+	default:
+		return "unknown"
+	}
+}
 
 // --- Aggregate ---
 
@@ -59,7 +94,7 @@ func NewPayment(orderID string, amount common.Money, method PaymentMethod) *Paym
 
 func (p *Payment) Confirm(externalTransactionID string) error {
 	if p.status != PayStatusWaiting {
-		return errors.New("payment is already processed")
+		return ErrPaymentProcessed
 	}
 	p.transactionID = externalTransactionID
 	p.status = PayStatusSuccess
@@ -69,7 +104,7 @@ func (p *Payment) Confirm(externalTransactionID string) error {
 
 func (p *Payment) Decline() error {
 	if p.status != PayStatusWaiting {
-		return errors.New("payment is already processed")
+		return ErrPaymentProcessed
 	}
 	p.status = PayStatusDeclined
 	p.updatedAt = time.Now()
@@ -78,7 +113,7 @@ func (p *Payment) Decline() error {
 
 func (p *Payment) Refund() error {
 	if p.status != PayStatusSuccess {
-		return errors.New("can only refund successful payments")
+		return ErrInvalidRefund
 	}
 	p.status = PayStatusRefund
 	p.updatedAt = time.Now()

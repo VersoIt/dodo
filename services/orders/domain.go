@@ -1,10 +1,11 @@
 package orders
 
 import (
-	"diploma/pkg/common"
 	"errors"
 	"fmt"
 	"time"
+
+	"diploma/pkg/common"
 
 	"github.com/google/uuid"
 )
@@ -100,15 +101,15 @@ type Order struct {
 	customerID  string
 	status      OrderStatus
 	createdAt   time.Time
-	
-	items       []*OrderItem
-	address     DeliveryAddress
-	
+
+	items   []*OrderItem
+	address DeliveryAddress
+
 	deliveryPrice common.Money
 	discount      common.Money
 	promoCode     string
-	
-	finalPrice    common.Money 
+
+	finalPrice common.Money
 }
 
 // --- Factory ---
@@ -125,39 +126,49 @@ func NewOrder(customerID string, address DeliveryAddress) *Order {
 	}
 }
 
+// --- Errors ---
+
+var (
+	ErrOrderLocked       = errors.New("order is locked for changes")
+	ErrInvalidQty        = errors.New("quantity must be positive")
+	ErrInvalidDiscount   = errors.New("invalid discount")
+	ErrInvalidTransition = errors.New("invalid status transition")
+	ErrOrderNotFound     = errors.New("order not found")
+)
+
+// ...
+
 // --- Business Logic ---
 
-// AddItem добавляет товар.
-// productBasePrice - цена за размер 1.0 (из каталога).
 func (o *Order) AddItem(productID, name string, qty int, productBasePrice common.Money, sizeMult float64, toppings []Topping) error {
 	if o.status != StatusCreated {
-		return errors.New("cannot add items to processed order")
+		return ErrOrderLocked
 	}
 	if qty <= 0 {
-		return errors.New("quantity must be positive")
-	}
-	if sizeMult <= 0 {
-		sizeMult = 1.0
+		return ErrInvalidQty
 	}
 
-	item := &OrderItem{
+	o.items = append(o.items, &OrderItem{
 		productID:      productID,
 		productName:    name,
 		quantity:       qty,
-		basePrice:      productBasePrice, // Сохраняем базу
+		basePrice:      productBasePrice,
 		sizeMultiplier: sizeMult,
 		toppings:       toppings,
-	}
-	
-	o.items = append(o.items, item)
+	})
+
 	o.recalculate()
 	return nil
 }
 
 func (o *Order) ApplyPromoCode(code string, discountAmount common.Money) error {
 	if o.status != StatusCreated {
-		return errors.New("cannot apply promo to processed order")
+		return ErrOrderLocked
 	}
+	if discountAmount < 0 {
+		return ErrInvalidDiscount
+	}
+
 	o.promoCode = code
 	o.discount = discountAmount
 	o.recalculate()
@@ -165,31 +176,27 @@ func (o *Order) ApplyPromoCode(code string, discountAmount common.Money) error {
 }
 
 func (o *Order) SetDeliveryPrice(price common.Money) {
-	if o.status != StatusCreated {
-		return 
-	}
 	o.deliveryPrice = price
 	o.recalculate()
 }
 
 func (o *Order) recalculate() {
-	var itemsTotal common.Money
+	var total common.Money
 	for _, item := range o.items {
-		itemsTotal += item.CalculateTotal()
+		total += item.CalculateTotal()
 	}
-	
-	total := itemsTotal + o.deliveryPrice - o.discount
-	if total < 0 {
-		total = 0
+
+	o.finalPrice = total + o.deliveryPrice - o.discount
+	if o.finalPrice < 0 {
+		o.finalPrice = 0
 	}
-	o.finalPrice = total
 }
 
 // --- State Machine ---
 
 func (o *Order) MarkPaid() error {
 	if o.status != StatusCreated {
-		return fmt.Errorf("invalid transition: Created -> Paid from status %v", o.status)
+		return fmt.Errorf("%w: cannot pay for order in status %s", ErrInvalidTransition, o.status)
 	}
 	o.status = StatusPaid
 	return nil
@@ -197,7 +204,7 @@ func (o *Order) MarkPaid() error {
 
 func (o *Order) SendToKitchen() error {
 	if o.status != StatusPaid {
-		return errors.New("order must be paid before cooking")
+		return fmt.Errorf("%w: order must be paid", ErrInvalidTransition)
 	}
 	o.status = StatusCooking
 	return nil
@@ -205,7 +212,7 @@ func (o *Order) SendToKitchen() error {
 
 func (o *Order) MarkReady() error {
 	if o.status != StatusCooking {
-		return errors.New("order is not cooking")
+		return fmt.Errorf("%w: order is not cooking", ErrInvalidTransition)
 	}
 	o.status = StatusReady
 	return nil
@@ -213,7 +220,7 @@ func (o *Order) MarkReady() error {
 
 func (o *Order) ShipToDelivery() error {
 	if o.status != StatusReady {
-		return errors.New("order is not ready for delivery")
+		return fmt.Errorf("%w: order is not ready", ErrInvalidTransition)
 	}
 	o.status = StatusDelivering
 	return nil
@@ -221,7 +228,7 @@ func (o *Order) ShipToDelivery() error {
 
 func (o *Order) CompleteDelivery() error {
 	if o.status != StatusDelivering {
-		return errors.New("order was not being delivered")
+		return fmt.Errorf("%w: order is not in delivery", ErrInvalidTransition)
 	}
 	o.status = StatusCompleted
 	return nil
@@ -229,12 +236,13 @@ func (o *Order) CompleteDelivery() error {
 
 // --- Getters ---
 
-func (o *Order) ID() string                  { return o.id }
-func (o *Order) OrderNumber() string         { return o.orderNumber }
-func (o *Order) CustomerID() string          { return o.customerID }
-func (o *Order) Status() OrderStatus         { return o.status }
-func (o *Order) CreatedAt() time.Time        { return o.createdAt }
-func (o *Order) Items() []*OrderItem         { return o.items }
+// Items возвращает КОПИЮ позиций.
+func (o *Order) Items() []*OrderItem {
+	result := make([]*OrderItem, len(o.items))
+	// Копируем указатели, но сами OrderItem иммутабельны (у них только геттеры), так что это безопасно.
+	copy(result, o.items)
+	return result
+}
 func (o *Order) Address() DeliveryAddress    { return o.address }
 func (o *Order) DeliveryPrice() common.Money { return o.deliveryPrice }
 func (o *Order) Discount() common.Money      { return o.discount }

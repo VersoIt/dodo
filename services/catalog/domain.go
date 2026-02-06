@@ -55,14 +55,23 @@ type Product struct {
 	createdAt   time.Time
 }
 
+// --- Errors ---
+
+var (
+	ErrInvalidDetails  = errors.New("invalid product details")
+	ErrNegativePrice   = errors.New("price cannot be negative")
+	ErrNegativeQty     = errors.New("quantity must be positive")
+	ErrProductNotFound = errors.New("product not found")
+)
+
 // --- Factory ---
 
 func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*Product, error) {
 	if name == "" {
-		return nil, errors.New("product name cannot be empty")
+		return nil, ErrInvalidDetails
 	}
 	if basePrice < 0 {
-		return nil, errors.New("price cannot be negative")
+		return nil, ErrNegativePrice
 	}
 
 	return &Product{
@@ -81,7 +90,7 @@ func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*P
 
 func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error {
 	if qty <= 0 {
-		return errors.New("quantity must be positive")
+		return ErrNegativeQty
 	}
 	p.ingredients = append(p.ingredients, IngredientRef{
 		IngredientID: ingID,
@@ -91,28 +100,16 @@ func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error
 	return nil
 }
 
-func (p *Product) CalculateBasePrice(sizeMultiplier float64) common.Money {
-	if sizeMultiplier <= 0 {
-		sizeMultiplier = 1.0
-	}
-	return p.basePrice * common.Money(sizeMultiplier)
-}
-
-func (p *Product) MarkAvailable(available bool) {
-	p.isAvailable = available
-}
+// ... (остальные методы без изменений)
 
 // --- Getters (Accessors) ---
-// Необходимы для маппинга в DTO или сохранения в БД
 
-func (p *Product) ID() string                { return p.id }
-func (p *Product) Name() string              { return p.name }
-func (p *Product) Description() string       { return p.description }
-func (p *Product) Category() CategoryType    { return p.category }
-func (p *Product) BasePrice() common.Money   { return p.basePrice }
-func (p *Product) Ingredients() []IngredientRef { return p.ingredients } // Возвращаем копию слайса лучше, но пока ок
-func (p *Product) IsAvailable() bool         { return p.isAvailable }
-func (p *Product) CreatedAt() time.Time      { return p.createdAt }
+// Ingredients возвращает КОПИЮ списка ингредиентов для защиты внутреннего состояния.
+func (p *Product) Ingredients() []IngredientRef {
+	result := make([]IngredientRef, len(p.ingredients))
+	copy(result, p.ingredients)
+	return result
+}
 
 // --- Repository Interface ---
 

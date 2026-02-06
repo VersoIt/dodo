@@ -103,7 +103,7 @@ func NewCourier(name, phone string) *Courier {
 
 func (d *Delivery) AssignCourier(courierID string) error {
 	if d.status != DelStatusPending {
-		return errors.New("delivery already assigned or processed")
+		return ErrDeliveryNotPending
 	}
 	d.courierID = courierID
 	d.status = DelStatusAssigned
@@ -112,7 +112,7 @@ func (d *Delivery) AssignCourier(courierID string) error {
 
 func (d *Delivery) Pickup() error {
 	if d.status != DelStatusAssigned {
-		return errors.New("courier must be assigned before pickup")
+		return ErrCourierNotAssigned
 	}
 	d.status = DelStatusOnWay
 	d.pickupTime = time.Now()
@@ -121,16 +121,43 @@ func (d *Delivery) Pickup() error {
 
 func (d *Delivery) Complete() error {
 	if d.status != DelStatusOnWay {
-		return errors.New("delivery not in progress")
+		return ErrInvalidStatus
 	}
 	d.status = DelStatusDelivered
 	d.deliveryTime = time.Now()
 	return nil
 }
 
-func (d *Delivery) UpdateLocation(lat, lng float64) {
+// --- Errors ---
+
+var (
+	ErrDeliveryNotPending  = errors.New("delivery is not in pending state")
+	ErrCourierNotAssigned  = errors.New("courier is not assigned")
+	ErrInvalidStatus       = errors.New("invalid status for operation")
+	ErrCourierBusy         = errors.New("courier is busy")
+	ErrInvalidCoordinates  = errors.New("invalid coordinates")
+)
+
+// ...
+
+func (d *Delivery) UpdateLocation(lat, lng float64) error {
+	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
+		return ErrInvalidCoordinates
+	}
 	d.currentLat = lat
 	d.currentLng = lng
+	return nil
+}
+
+// ...
+
+func (c *Courier) UpdateLocation(lat, lng float64) error {
+	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
+		return ErrInvalidCoordinates
+	}
+	c.currentLat = lat
+	c.currentLng = lng
+	return nil
 }
 
 // --- Behavior: Courier ---
@@ -143,7 +170,7 @@ func (c *Courier) GoOnline() {
 
 func (c *Courier) GoOffline() error {
 	if c.status == CourierBusy {
-		return errors.New("cannot go offline while busy")
+		return ErrCourierBusy
 	}
 	c.status = CourierOffline
 	return nil
@@ -151,7 +178,7 @@ func (c *Courier) GoOffline() error {
 
 func (c *Courier) TakeOrder() error {
 	if c.status != CourierFree {
-		return errors.New("courier is not free")
+		return ErrCourierBusy
 	}
 	c.status = CourierBusy
 	return nil
@@ -187,4 +214,5 @@ type DeliveryRepository interface {
 type CourierRepository interface {
 	FindAvailable() ([]*Courier, error)
 	Save(c *Courier) error
+	UpdateLocation(id string, lat, lng float64) error
 }
