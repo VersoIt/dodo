@@ -1,0 +1,10 @@
+syntax = "proto3";
+package analytics.v1;
+option go_package = "diploma/services/analytics/pkg/api/proto;analytics_pb";
+
+message ManagerKPI {
+  string manager_id = 1;
+  double plan_revenue = 2;
+  double fact_revenue = 3;
+  double kpi_percent = 4;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package notification.v1;
+option go_package = "diploma/services/notification/pkg/api/proto;notification_pb";
+
+message Notification {
+  string id = 1;
+  string user_id = 2;
+  string channel = 3;
+  string title = 4;
+  string message = 5;
+  bool is_sent = 6;
+}

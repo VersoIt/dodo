@@ -1,0 +1,11 @@
+syntax = "proto3";
+package logistics.v1;
+option go_package = "diploma/services/logistics/pkg/api/proto;logistics_pb";
+
+message Delivery {
+  string order_id = 1;
+  string courier_id = 2;
+  string status = 3;
+  double lat = 4;
+  double lng = 5;
+}

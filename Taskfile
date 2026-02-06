@@ -11,6 +11,21 @@ tasks:
     cmds:
       - golangci-lint run
 
+  proto:
+    desc: Generate Go code from proto files in all services
+    cmds:
+      # Create target directories
+      - powershell -Command "New-Item -ItemType Directory -Force services/orders/pkg/api/proto, services/catalog/pkg/api/proto, services/auth/pkg/api/proto, services/analytics/pkg/api/proto, services/kitchen/pkg/api/proto, services/logistics/pkg/api/proto, services/notification/pkg/api/proto, services/treasury/pkg/api/proto"
+      # Generate from each service
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/orders/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/catalog/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/auth/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/analytics/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/kitchen/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/logistics/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/notification/api/proto/*.proto
+      - protoc --proto_path=. --go_out=. --go_opt=paths=import services/treasury/api/proto/*.proto
+
   docker-up:
     desc: Run infrastructure via docker-compose
     cmds:

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package kitchen.v1;
+option go_package = "diploma/services/kitchen/pkg/api/proto;kitchen_pb";
+
+message KitchenTicket {
+  string id = 1;
+  string order_id = 2;
+  string status = 3;
+  repeated KitchenItem items = 4;
+}
+
+message KitchenItem {
+  string product_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+}

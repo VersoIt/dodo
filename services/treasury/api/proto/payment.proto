@@ -1,0 +1,12 @@
+syntax = "proto3";
+package treasury.v1;
+option go_package = "diploma/services/treasury/pkg/api/proto;treasury_pb";
+
+message Payment {
+  string id = 1;
+  string order_id = 2;
+  double amount = 3;
+  string status = 4;
+  string method = 5;
+  string transaction_id = 6;
+}

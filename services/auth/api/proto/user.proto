@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "diploma/services/auth/pkg/api/proto;auth_pb";
+
+message User {
+  string id = 1;
+  string email = 2;
+  string role = 3;
+  int32 bonus_points = 4;
+}

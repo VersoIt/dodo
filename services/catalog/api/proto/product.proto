@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package catalog.v1;
+
+option go_package = "diploma/services/catalog/pkg/api/proto;catalog_pb";
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double base_price = 4;
+  bool is_available = 5;
+}
