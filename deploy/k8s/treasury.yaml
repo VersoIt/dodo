@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: treasury
+  namespace: pizza-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: treasury
+  template:
+    metadata:
+      labels:
+        app: treasury
+    spec:
+      containers:
+      - name: treasury
+        image: pizza-treasury:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: treasury
+  namespace: pizza-app
+spec:
+  selector:
+    app: treasury
+  ports:
+    - port: 80
+      targetPort: 8080

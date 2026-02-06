@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v ./...
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  docker-up:
+    desc: Run infrastructure via docker-compose
+    cmds:
+      - docker-compose up --build -d
+
+  docker-down:
+    desc: Stop docker-compose
+    cmds:
+      - docker-compose down
+
+  k8s-deploy:
+    desc: Deploy all services to Kubernetes
+    cmds:
+      - kubectl apply -f deploy/k8s/namespace.yaml
+      - kubectl apply -f deploy/k8s/
+    
+  k8s-undeploy:
+    desc: Remove all services from Kubernetes
+    cmds:
+      - kubectl delete -f deploy/k8s/
