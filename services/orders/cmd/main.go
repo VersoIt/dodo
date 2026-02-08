@@ -1,19 +1,50 @@
 package main
 
 import (
-	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
+	"context"
+	"net"
+
+	"github.com/versoit/diploma/services/orders/internal/api/grpc"
+	"github.com/versoit/diploma/services/orders/usecase"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+	stdgrpc "google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	slog.Info("orders service started!")
+	fx.New(
+		fx.Provide(
+			zap.NewDevelopment,
+		),
+		usecase.Module,
+		fx.Invoke(RunServer),
+	).Run()
+}
 
-	// Keep the service alive
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
+func RunServer(lc fx.Lifecycle, handler *grpc.OrdersHandler, logger *zap.Logger) {
+	server := stdgrpc.NewServer()
+	handler.Register(server)
+	reflection.Register(server)
 
-	slog.Info("orders service shutting down...")
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			lis, err := net.Listen("tcp", ":8080")
+			if err != nil {
+				return err
+			}
+			logger.Info("Starting gRPC server", zap.String("port", "8080"))
+			go func() {
+				if err := server.Serve(lis); err != nil {
+					logger.Error("gRPC server failed", zap.Error(err))
+				}
+			}()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			logger.Info("Stopping gRPC server")
+			server.GracefulStop()
+			return nil
+		},
+	})
 }
