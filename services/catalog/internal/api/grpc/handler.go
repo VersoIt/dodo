@@ -24,7 +24,7 @@ func (h *CatalogHandler) Register(server *grpc.Server) {
 }
 
 func (h *CatalogHandler) CreateProduct(ctx context.Context, req *catalog_pb.CreateProductRequest) (*catalog_pb.ProductResponse, error) {
-	p, err := h.uc.CreateProduct(ctx, req.Name, req.Description, catalog.CategoryType(req.CategoryId), common.Money(req.Price))
+	p, err := h.uc.CreateProduct(ctx, req.Name, req.Description, catalog.CategoryType(req.CategoryId), common.NewMoney(req.Price))
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (h *CatalogHandler) CreateProduct(ctx context.Context, req *catalog_pb.Crea
 		Id:          p.ID(),
 		Name:        p.Name(),
 		Description: p.Description(),
-		Price:       float64(p.BasePrice()),
+		Price:       p.BasePrice().InexactFloat64(),
 	}, nil
 }
 

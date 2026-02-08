@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/orders"
 )
 
@@ -44,7 +45,7 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 				ProductID: "p1",
 				Name:      "Pizza",
 				Quantity:  1,
-				BasePrice: 500,
+				BasePrice: common.NewMoney(500),
 				SizeMult:  1.0,
 			},
 		},
@@ -63,11 +64,8 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to find saved order: %v", err)
 	}
-	if savedOrder == nil {
-		t.Error("order should be saved in repo")
-	}
-
-	if savedOrder.FinalPrice() != 500 {
+	
+	if !savedOrder.FinalPrice().Equal(common.NewMoney(500)) {
 		t.Errorf("expected price 500, got %v", savedOrder.FinalPrice())
 	}
 }
@@ -78,7 +76,7 @@ func TestOrderUseCase_PayOrder(t *testing.T) {
 
 	order := orders.NewOrder("cust1", orders.DeliveryAddress{})
 	if err := repo.Save(context.Background(), order); err != nil {
-		t.Fatalf("failed to save order: %v", err)
+		t.Fatalf("failed to save: %v", err)
 	}
 
 	err := uc.PayOrder(context.Background(), order.ID())
@@ -86,10 +84,7 @@ func TestOrderUseCase_PayOrder(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	updatedOrder, err := repo.FindByID(context.Background(), order.ID())
-	if err != nil {
-		t.Fatalf("failed to find updated order: %v", err)
-	}
+	updatedOrder, _ := repo.FindByID(context.Background(), order.ID())
 	if updatedOrder.Status() != orders.StatusPaid {
 		t.Errorf("expected status paid, got %v", updatedOrder.Status())
 	}

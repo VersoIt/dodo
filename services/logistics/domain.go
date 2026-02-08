@@ -8,16 +8,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// --- Enums ---
-
 type DeliveryStatus int
 
 const (
-	DelStatusPending   DeliveryStatus = 0 // Ждет курьера
-	DelStatusAssigned  DeliveryStatus = 1 // Курьер назначен
-	DelStatusOnWay     DeliveryStatus = 2 // Забрал, везет
-	DelStatusDelivered DeliveryStatus = 3 // Успех
-	DelStatusFailed    DeliveryStatus = 4 // Неудача
+	DelStatusPending   DeliveryStatus = 0
+	DelStatusAssigned  DeliveryStatus = 1
+	DelStatusOnWay     DeliveryStatus = 2
+	DelStatusDelivered DeliveryStatus = 3
+	DelStatusFailed    DeliveryStatus = 4
 )
 
 type CourierStatus int
@@ -58,8 +56,6 @@ func (s CourierStatus) String() string {
 	}
 }
 
-// --- Aggregates ---
-
 type Delivery struct {
 	orderID      string
 	courierID    string
@@ -81,8 +77,6 @@ type Courier struct {
 	currentLng float64
 }
 
-// --- Factories ---
-
 func NewDelivery(orderID string) *Delivery {
 	return &Delivery{
 		orderID:   orderID,
@@ -92,15 +86,14 @@ func NewDelivery(orderID string) *Delivery {
 }
 
 func NewCourier(name, phone string) *Courier {
+	id, _ := uuid.NewV7()
 	return &Courier{
-		id:     uuid.New().String(),
+		id:     id.String(),
 		name:   name,
 		phone:  phone,
 		status: CourierOffline,
 	}
 }
-
-// --- Behavior: Delivery ---
 
 func (d *Delivery) AssignCourier(courierID string) error {
 	if d.status != DelStatusPending {
@@ -129,8 +122,6 @@ func (d *Delivery) Complete() error {
 	return nil
 }
 
-// --- Errors ---
-
 var (
 	ErrDeliveryNotPending = errors.New("delivery is not in pending state")
 	ErrCourierNotAssigned = errors.New("courier is not assigned")
@@ -138,8 +129,6 @@ var (
 	ErrCourierBusy        = errors.New("courier is busy")
 	ErrInvalidCoordinates = errors.New("invalid coordinates")
 )
-
-// ...
 
 func (d *Delivery) UpdateLocation(lat, lng float64) error {
 	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
@@ -150,8 +139,6 @@ func (d *Delivery) UpdateLocation(lat, lng float64) error {
 	return nil
 }
 
-// ...
-
 func (c *Courier) UpdateLocation(lat, lng float64) error {
 	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
 		return ErrInvalidCoordinates
@@ -160,8 +147,6 @@ func (c *Courier) UpdateLocation(lat, lng float64) error {
 	c.currentLng = lng
 	return nil
 }
-
-// --- Behavior: Courier ---
 
 func (c *Courier) GoOnline() {
 	if c.status == CourierOffline {
@@ -191,21 +176,18 @@ func (c *Courier) CompleteOrder() {
 	}
 }
 
-// Getters
-func (d *Delivery) OrderID() string              { return d.orderID }
-func (d *Delivery) CourierID() string            { return d.courierID }
-func (d *Delivery) Status() DeliveryStatus       { return d.status }
-func (d *Delivery) PickupTime() time.Time        { return d.pickupTime }
-func (d *Delivery) DeliveryTime() time.Time      { return d.deliveryTime }
+func (d *Delivery) OrderID() string      { return d.orderID }
+func (d *Delivery) CourierID() string    { return d.courierID }
+func (d *Delivery) Status() DeliveryStatus { return d.status }
+func (d *Delivery) PickupTime() time.Time  { return d.pickupTime }
+func (d *Delivery) DeliveryTime() time.Time { return d.deliveryTime }
 func (d *Delivery) Location() (lat, lng float64) { return d.currentLat, d.currentLng }
 
-func (c *Courier) ID() string                   { return c.id }
-func (c *Courier) Name() string                 { return c.name }
-func (c *Courier) Phone() string                { return c.phone }
-func (c *Courier) Status() CourierStatus        { return c.status }
+func (c *Courier) ID() string           { return c.id }
+func (c *Courier) Name() string         { return c.name }
+func (c *Courier) Phone() string        { return c.phone }
+func (c *Courier) Status() CourierStatus { return c.status }
 func (c *Courier) Location() (lat, lng float64) { return c.currentLat, c.currentLng }
-
-// --- Repository ---
 
 type DeliveryRepository interface {
 	Save(ctx context.Context, d *Delivery) error

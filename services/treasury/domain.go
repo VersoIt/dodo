@@ -3,20 +3,16 @@ package treasury
 import (
 	"context"
 	"errors"
-	"github.com/versoit/diploma/pkg/common"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/versoit/diploma/pkg/common"
 )
-
-// --- Errors ---
 
 var (
 	ErrPaymentProcessed = errors.New("payment is already processed")
 	ErrInvalidRefund    = errors.New("can only refund successful payments")
 )
-
-// --- Enums ---
 
 type PaymentMethod int
 
@@ -63,25 +59,21 @@ func (s PaymentStatus) String() string {
 	}
 }
 
-// --- Aggregate ---
-
-// Payment - Агрегат платежа.
 type Payment struct {
 	id            string
 	orderID       string
 	amount        common.Money
 	method        PaymentMethod
 	status        PaymentStatus
-	transactionID string // ID из банка
+	transactionID string
 	createdAt     time.Time
 	updatedAt     time.Time
 }
 
-// --- Factory ---
-
 func NewPayment(orderID string, amount common.Money, method PaymentMethod) *Payment {
+	id, _ := uuid.NewV7()
 	return &Payment{
-		id:        uuid.New().String(),
+		id:        id.String(),
 		orderID:   orderID,
 		amount:    amount,
 		method:    method,
@@ -90,8 +82,6 @@ func NewPayment(orderID string, amount common.Money, method PaymentMethod) *Paym
 		updatedAt: time.Now(),
 	}
 }
-
-// --- Behavior ---
 
 func (p *Payment) Confirm(externalTransactionID string) error {
 	if p.status != PayStatusWaiting {
@@ -121,15 +111,11 @@ func (p *Payment) Refund() error {
 	return nil
 }
 
-// --- Getters ---
-
 func (p *Payment) ID() string            { return p.id }
 func (p *Payment) OrderID() string       { return p.orderID }
 func (p *Payment) Amount() common.Money  { return p.amount }
 func (p *Payment) Status() PaymentStatus { return p.status }
 func (p *Payment) CreatedAt() time.Time  { return p.createdAt }
-
-// --- Repository ---
 
 type PaymentRepository interface {
 	Save(ctx context.Context, p *Payment) error

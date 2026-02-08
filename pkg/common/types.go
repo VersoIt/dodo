@@ -1,12 +1,17 @@
 package common
 
-import "math"
+import "github.com/shopspring/decimal"
 
 // Money - денежный тип для всей системы.
-// Используем float64 для соответствия формулам в ТЗ (деление, проценты).
-type Money float64
+// Используем decimal.Decimal для предотвращения ошибок округления floating-point.
+type Money = decimal.Decimal
 
-// Метод для округления до 2 знаков (для красоты в JSON/БД)
-func (m Money) Round() float64 {
-	return math.Round(float64(m)*100) / 100
+// NewMoney - хелпер для создания Money из float64.
+func NewMoney(v float64) Money {
+	return decimal.NewFromFloat(v)
+}
+
+// ZeroMoney - нулевое значение.
+func ZeroMoney() Money {
+	return decimal.NewFromInt(0)
 }

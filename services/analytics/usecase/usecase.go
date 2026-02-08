@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/shopspring/decimal"
 	"github.com/versoit/diploma/services/analytics"
 )
 
@@ -20,18 +21,17 @@ func NewAnalyticsUseCase(repo analytics.AnalyticsRepository) *AnalyticsUseCase {
 	return &AnalyticsUseCase{repo: repo}
 }
 
-func (uc *AnalyticsUseCase) RecordSale(ctx context.Context, managerID string, amount float64) error {
+func (uc *AnalyticsUseCase) RecordSale(ctx context.Context, managerID string, amount decimal.Decimal) error {
 	if managerID == "" {
 		return fmt.Errorf("%w: manager ID is required", ErrInvalidInput)
 	}
-	if amount <= 0 {
+	if !amount.IsPositive() {
 		return fmt.Errorf("%w: sale amount must be positive", ErrInvalidInput)
 	}
 
 	kpi, err := uc.repo.GetKPI(ctx, managerID)
 	if err != nil {
-		// В реальной системе здесь может быть логика получения дефолтного плана из конфига
-		kpi = analytics.NewManagerKPI(managerID, 100000)
+		kpi = analytics.NewManagerKPI(managerID, decimal.NewFromInt(100000))
 	}
 
 	kpi.AddRevenue(amount)

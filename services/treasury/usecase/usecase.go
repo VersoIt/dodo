@@ -25,7 +25,7 @@ func (uc *TreasuryUseCase) InitiatePayment(ctx context.Context, orderID string, 
 	if orderID == "" {
 		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
 	}
-	if amount <= 0 {
+	if !amount.IsPositive() {
 		return nil, fmt.Errorf("%w: payment amount must be positive", ErrInvalidInput)
 	}
 

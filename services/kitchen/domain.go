@@ -8,8 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// --- Enums ---
-
 type TicketStatus int
 
 const (
@@ -31,9 +29,6 @@ func (s TicketStatus) String() string {
 	}
 }
 
-// --- Aggregate ---
-
-// KitchenTicket - Агрегат чека на кухне.
 type KitchenTicket struct {
 	id               string
 	orderID          string
@@ -44,28 +39,24 @@ type KitchenTicket struct {
 	readyTime        time.Time
 }
 
-// KitchenItem - Value Object позиции в чеке.
 type KitchenItem struct {
-	ProductID   string // ID товара из каталога (для связи/картинки/статистики)
+	ProductID   string
 	Name        string
 	Ingredients []string
 	Quantity    int
 	Comment     string
 }
 
-// --- Factory ---
-
 func NewTicket(orderID string, items []KitchenItem) *KitchenTicket {
+	id, _ := uuid.NewV7()
 	return &KitchenTicket{
-		id:        uuid.New().String(),
+		id:        id.String(),
 		orderID:   orderID,
 		items:     items,
 		status:    TicketQueued,
 		createdAt: time.Now(),
 	}
 }
-
-// --- Behavior ---
 
 func (t *KitchenTicket) StartCooking() error {
 	if t.status != TicketQueued {
@@ -85,7 +76,6 @@ func (t *KitchenTicket) MarkReady() error {
 	return nil
 }
 
-// GetCookingDuration возвращает время приготовления.
 func (t *KitchenTicket) GetCookingDuration() time.Duration {
 	if t.readyTime.IsZero() || t.startCookingTime.IsZero() {
 		return 0
@@ -93,7 +83,6 @@ func (t *KitchenTicket) GetCookingDuration() time.Duration {
 	return t.readyTime.Sub(t.startCookingTime)
 }
 
-// Getters
 func (t *KitchenTicket) ID() string           { return t.id }
 func (t *KitchenTicket) OrderID() string      { return t.orderID }
 func (t *KitchenTicket) Status() TicketStatus { return t.status }
@@ -101,8 +90,6 @@ func (t *KitchenTicket) Items() []KitchenItem { return t.items }
 func (t *KitchenTicket) CreatedAt() time.Time { return t.createdAt }
 func (t *KitchenTicket) StartTime() time.Time { return t.startCookingTime }
 func (t *KitchenTicket) ReadyTime() time.Time { return t.readyTime }
-
-// --- Repository ---
 
 type TicketRepository interface {
 	Save(ctx context.Context, t *KitchenTicket) error

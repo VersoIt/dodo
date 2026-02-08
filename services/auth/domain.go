@@ -21,7 +21,6 @@ const (
 	RoleClient  Role = 4
 )
 
-// String возвращает строковое представление роли.
 func (r Role) String() string {
 	switch r {
 	case RoleAdmin:
@@ -50,7 +49,6 @@ var (
 
 // --- Aggregate ---
 
-// User - Агрегат пользователя.
 type User struct {
 	id           string
 	email        string
@@ -59,7 +57,6 @@ type User struct {
 	createdAt    time.Time
 	updatedAt    time.Time
 
-	// Профиль клиента
 	isClient    bool
 	name        string
 	phone       string
@@ -76,15 +73,15 @@ func NewUser(email, password string, role Role) (*User, error) {
 		return nil, ErrWeakPassword
 	}
 
+	id, _ := uuid.NewV7()
 	u := &User{
-		id:        uuid.New().String(),
+		id:        id.String(),
 		email:     email,
 		role:      role,
 		createdAt: time.Now(),
 		updatedAt: time.Now(),
 	}
 
-	// Хеш будет установлен здесь
 	if err := u.SetPassword(password); err != nil {
 		return nil, err
 	}
@@ -98,16 +95,12 @@ func (u *User) SetPassword(plainPassword string) error {
 	if len(plainPassword) < 6 {
 		return ErrWeakPassword
 	}
-	// TODO: Реализовать здесь реальное хеширование (bcrypt) в Infrastructure слое,
-	// но домен может принимать уже хэш или использовать интерфейс PasswordHasher.
-	// Для упрощения пока имитируем:
 	u.passwordHash = "hash_" + plainPassword
 	u.updatedAt = time.Now()
 	return nil
 }
 
 func (u *User) CheckPassword(plainPassword string) bool {
-	// TODO: compare hash
 	return u.passwordHash == "hash_"+plainPassword
 }
 
@@ -139,25 +132,14 @@ func (u *User) SpendBonuses(amount int) error {
 	return nil
 }
 
-// Getters
-
-func (u *User) ID() string { return u.id }
-
-func (u *User) Email() string { return u.email }
-
-func (u *User) Role() Role { return u.role }
-
+func (u *User) ID() string             { return u.id }
+func (u *User) Email() string          { return u.email }
+func (u *User) Role() Role             { return u.role }
 func (u *User) HashedPassword() string { return u.passwordHash }
-
-func (u *User) IsClient() bool { return u.isClient }
-
-func (u *User) BonusPoints() int { return u.bonusPoints }
-
-func (u *User) Name() string { return u.name }
-
-func (u *User) Phone() string { return u.phone }
-
-// --- Repository ---
+func (u *User) IsClient() bool         { return u.isClient }
+func (u *User) BonusPoints() int       { return u.bonusPoints }
+func (u *User) Name() string           { return u.name }
+func (u *User) Phone() string          { return u.phone }
 
 type UserRepository interface {
 	Save(ctx context.Context, u *User) error

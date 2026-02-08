@@ -29,9 +29,9 @@ func (h *AnalyticsHandler) GetManagerKPI(ctx context.Context, req *analytics_pb.
 
 	return &analytics_pb.KpiResponse{
 		ManagerId:   kpi.ManagerID(),
-		FactRevenue: kpi.Fact(),
-		PlanRevenue: kpi.Plan(),
-		KpiPercent:  kpi.CalculateKPIPercent(),
+		FactRevenue: kpi.Fact().InexactFloat64(),
+		PlanRevenue: kpi.Plan().InexactFloat64(),
+		KpiPercent:  kpi.CalculateKPIPercent().InexactFloat64(),
 		HasBonus:    kpi.HasBonus(),
 	}, nil
 }

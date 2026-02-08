@@ -24,7 +24,7 @@ func (h *TreasuryHandler) Register(server *grpc.Server) {
 }
 
 func (h *TreasuryHandler) ProcessPayment(ctx context.Context, req *treasury_pb.PaymentRequest) (*treasury_pb.PaymentResponse, error) {
-	payment, err := h.uc.InitiatePayment(ctx, req.OrderId, common.Money(req.Amount), treasury.PaymentMethod(req.Method))
+	payment, err := h.uc.InitiatePayment(ctx, req.OrderId, common.NewMoney(req.Amount), treasury.PaymentMethod(req.Method))
 	if err != nil {
 		return nil, err
 	}

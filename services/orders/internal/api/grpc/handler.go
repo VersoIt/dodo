@@ -6,6 +6,7 @@ import (
 	"github.com/versoit/diploma/services/orders"
 	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
 	"github.com/versoit/diploma/services/orders/usecase"
+	"github.com/versoit/diploma/pkg/common"
 	"google.golang.org/grpc"
 )
 
@@ -29,7 +30,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 			ProductID: item.ProductId,
 			Name:      item.ProductName,
 			Quantity:  int(item.Quantity),
-			BasePrice: 0,
+			BasePrice: common.ZeroMoney(),
 			SizeMult:  1.0,
 		}
 	}
@@ -49,7 +50,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 	return &orders_pb.OrderResponse{
 		OrderId:     order.ID(),
 		Status:      order.Status().String(),
-		FinalPrice:  float64(order.FinalPrice()),
+		FinalPrice:  order.FinalPrice().InexactFloat64(),
 		OrderNumber: order.OrderNumber(),
 	}, nil
 }

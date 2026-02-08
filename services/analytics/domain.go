@@ -3,71 +3,55 @@ package analytics
 import (
 	"context"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
-// --- Aggregates ---
-
-// SalesReport - Отчет. Value Object или Entity (зависит от использования).
-// Оставим простым DTO, так как это результат вычислений, а не машина состояний.
 type SalesReport struct {
 	PeriodStart  time.Time
 	PeriodEnd    time.Time
-	TotalRevenue float64
+	TotalRevenue decimal.Decimal
 	TotalOrders  int
-	AverageCheck float64
+	AverageCheck decimal.Decimal
 }
 
-// ManagerKPI - Агрегат для расчета премии.
 type ManagerKPI struct {
 	managerID   string
 	shiftDate   time.Time
-	planRevenue float64 // Plan_j
-	factRevenue float64 // Revenue_fact
+	planRevenue decimal.Decimal
+	factRevenue decimal.Decimal
 }
 
-// --- Factory ---
-
-func NewManagerKPI(managerID string, plan float64) *ManagerKPI {
+func NewManagerKPI(managerID string, plan decimal.Decimal) *ManagerKPI {
 	return &ManagerKPI{
 		managerID:   managerID,
-		shiftDate:   time.Now(), // или конкретная дата
+		shiftDate:   time.Now(),
 		planRevenue: plan,
-		factRevenue: 0,
+		factRevenue: decimal.Zero,
 	}
 }
 
-// --- Behavior ---
-
-// AddRevenue добавляет выручку к факту.
-// Формула (5): Revenue_fact = SUM(Fact_order)
-func (k *ManagerKPI) AddRevenue(amount float64) {
-	if amount > 0 {
-		k.factRevenue += amount
+func (k *ManagerKPI) AddRevenue(amount decimal.Decimal) {
+	if amount.IsPositive() {
+		k.factRevenue = k.factRevenue.Add(amount)
 	}
 }
 
-// CalculateKPIPercent возвращает процент выполнения плана.
-// Формула (6): KPI = (Revenue_fact / Plan_j) * 100%
-func (k *ManagerKPI) CalculateKPIPercent() float64 {
-	if k.planRevenue == 0 {
-		return 100 // Или 0, зависит от логики. Если плана нет - молодцы?
+func (k *ManagerKPI) CalculateKPIPercent() decimal.Decimal {
+	if k.planRevenue.IsZero() {
+		return decimal.NewFromInt(100)
 	}
-	return (k.factRevenue / k.planRevenue) * 100
+	return k.factRevenue.Div(k.planRevenue).Mul(decimal.NewFromInt(100))
 }
 
-// HasBonus возвращает true, если бонус положен.
-// Формула (7): delta = 1 если KPI >= 100%
 func (k *ManagerKPI) HasBonus() bool {
-	return k.CalculateKPIPercent() >= 100
+	return k.CalculateKPIPercent().GreaterThanOrEqual(decimal.NewFromInt(100))
 }
 
-// Getters
-func (k *ManagerKPI) ManagerID() string    { return k.managerID }
-func (k *ManagerKPI) ShiftDate() time.Time { return k.shiftDate }
-func (k *ManagerKPI) Plan() float64        { return k.planRevenue }
-func (k *ManagerKPI) Fact() float64        { return k.factRevenue }
-
-// --- Repository ---
+func (k *ManagerKPI) ManagerID() string         { return k.managerID }
+func (k *ManagerKPI) ShiftDate() time.Time      { return k.shiftDate }
+func (k *ManagerKPI) Plan() decimal.Decimal     { return k.planRevenue }
+func (k *ManagerKPI) Fact() decimal.Decimal     { return k.factRevenue }
 
 type AnalyticsRepository interface {
 	SaveKPI(ctx context.Context, k *ManagerKPI) error

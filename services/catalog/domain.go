@@ -3,15 +3,12 @@ package catalog
 import (
 	"context"
 	"errors"
-	"github.com/versoit/diploma/pkg/common"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/versoit/diploma/pkg/common"
 )
 
-// --- Value Objects ---
-
-// CategoryType - коды категорий
 type CategoryType int
 
 const (
@@ -23,9 +20,6 @@ const (
 	CatDesserts   CategoryType = 5
 )
 
-// --- Entities ---
-
-// Ingredient - Сущность ингредиента.
 type Ingredient struct {
 	ID      string
 	Name    string
@@ -34,16 +28,12 @@ type Ingredient struct {
 	InStock bool
 }
 
-// IngredientRef - Связь продукта с ингредиентом.
 type IngredientRef struct {
 	IngredientID string
 	Quantity     float64
 	IsRemovable  bool
 }
 
-// --- Aggregate ---
-
-// Product - Агрегат товара.
 type Product struct {
 	id          string
 	name        string
@@ -56,8 +46,6 @@ type Product struct {
 	createdAt   time.Time
 }
 
-// --- Errors ---
-
 var (
 	ErrInvalidDetails  = errors.New("invalid product details")
 	ErrNegativePrice   = errors.New("price cannot be negative")
@@ -65,18 +53,17 @@ var (
 	ErrProductNotFound = errors.New("product not found")
 )
 
-// --- Factory ---
-
 func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*Product, error) {
 	if name == "" {
 		return nil, ErrInvalidDetails
 	}
-	if basePrice < 0 {
+	if basePrice.IsNegative() {
 		return nil, ErrNegativePrice
 	}
 
+	id, _ := uuid.NewV7()
 	return &Product{
-		id:          uuid.New().String(),
+		id:          id.String(),
 		name:        name,
 		description: desc,
 		category:    cat,
@@ -86,8 +73,6 @@ func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*P
 		createdAt:   time.Now(),
 	}, nil
 }
-
-// --- Behavior (Methods) ---
 
 func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error {
 	if qty <= 0 {
@@ -102,7 +87,7 @@ func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error
 }
 
 func (p *Product) UpdatePrice(newPrice common.Money) error {
-	if newPrice < 0 {
+	if newPrice.IsNegative() {
 		return ErrNegativePrice
 	}
 	p.basePrice = newPrice
@@ -113,24 +98,19 @@ func (p *Product) SetAvailability(available bool) {
 	p.isAvailable = available
 }
 
-// --- Getters (Accessors) ---
+func (p *Product) ID() string               { return p.id }
+func (p *Product) Name() string             { return p.name }
+func (p *Product) Description() string      { return p.description }
+func (p *Product) Category() CategoryType   { return p.category }
+func (p *Product) BasePrice() common.Money  { return p.basePrice }
+func (p *Product) ImageURL() string         { return p.imageUrl }
+func (p *Product) IsAvailable() bool        { return p.isAvailable }
 
-func (p *Product) ID() string              { return p.id }
-func (p *Product) Name() string            { return p.name }
-func (p *Product) Description() string     { return p.description }
-func (p *Product) Category() CategoryType  { return p.category }
-func (p *Product) BasePrice() common.Money { return p.basePrice }
-func (p *Product) ImageURL() string        { return p.imageUrl }
-func (p *Product) IsAvailable() bool       { return p.isAvailable }
-
-// Ingredients возвращает КОПИЮ списка ингредиентов для защиты внутреннего состояния.
 func (p *Product) Ingredients() []IngredientRef {
 	result := make([]IngredientRef, len(p.ingredients))
 	copy(result, p.ingredients)
 	return result
 }
-
-// --- Repository Interface ---
 
 type ProductRepository interface {
 	FindAll(ctx context.Context) ([]*Product, error)

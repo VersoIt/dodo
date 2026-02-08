@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/treasury"
 )
 
@@ -27,7 +28,7 @@ func TestTreasuryUseCase_PaymentFlow(t *testing.T) {
 	repo := &MockTreasuryRepo{store: make(map[string]*treasury.Payment)}
 	uc := NewTreasuryUseCase(repo)
 
-	_, err := uc.InitiatePayment(context.Background(), "ord-1", 1000, treasury.MethodCard)
+	_, err := uc.InitiatePayment(context.Background(), "ord-1", common.NewMoney(1000), treasury.MethodCard)
 	if err != nil {
 		t.Fatalf("init failed: %v", err)
 	}

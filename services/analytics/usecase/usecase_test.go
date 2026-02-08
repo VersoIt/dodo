@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/shopspring/decimal"
 	"github.com/versoit/diploma/services/analytics"
 )
 
@@ -28,7 +29,7 @@ func TestAnalyticsUseCase_RecordSale(t *testing.T) {
 	repo := &MockAnalyticsRepo{store: make(map[string]*analytics.ManagerKPI)}
 	uc := NewAnalyticsUseCase(repo)
 
-	err := uc.RecordSale(context.Background(), "man1", 5000)
+	err := uc.RecordSale(context.Background(), "man1", decimal.NewFromInt(5000))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -37,7 +38,7 @@ func TestAnalyticsUseCase_RecordSale(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to get kpi: %v", err)
 	}
-	if kpi.Fact() != 5000 {
+	if !kpi.Fact().Equal(decimal.NewFromInt(5000)) {
 		t.Errorf("expected 5000, got %v", kpi.Fact())
 	}
 }
