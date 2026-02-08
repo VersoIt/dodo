@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/versoit/diploma/services/logistics/internal/api/grpc"
-	"github.com/versoit/diploma/services/logistics/usecase"
+	"github.com/versoit/diploma/services/logistics/internal/app"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	stdgrpc "google.golang.org/grpc"
@@ -17,7 +17,7 @@ func main() {
 		fx.Provide(
 			zap.NewDevelopment,
 		),
-		usecase.Module,
+		app.Module,
 		fx.Invoke(RunServer),
 	).Run()
 }

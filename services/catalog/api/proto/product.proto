@@ -1,13 +1,33 @@
 syntax = "proto3";
-
 package catalog.v1;
-
 option go_package = "./pb;catalog_pb";
 
-message Product {
+service ProductService {
+  rpc CreateProduct(CreateProductRequest) returns (ProductResponse);
+  rpc GetProduct(GetProductRequest) returns (ProductResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  int32 category_id = 3;
+  double price = 4;
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message ListProductsRequest {}
+
+message ProductResponse {
   string id = 1;
   string name = 2;
   string description = 3;
-  double base_price = 4;
-  bool is_available = 5;
+  double price = 4;
+}
+
+message ListProductsResponse {
+  repeated ProductResponse products = 1;
 }

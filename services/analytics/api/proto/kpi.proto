@@ -2,6 +2,22 @@ syntax = "proto3";
 package analytics.v1;
 option go_package = "./pb;analytics_pb";
 
+service KpiService {
+  rpc GetManagerKPI(KpiRequest) returns (KpiResponse);
+}
+
+message KpiRequest {
+  string manager_id = 1;
+}
+
+message KpiResponse {
+  string manager_id = 1;
+  double plan_revenue = 2;
+  double fact_revenue = 3;
+  double kpi_percent = 4;
+  bool has_bonus = 5;
+}
+
 message ManagerKPI {
   string manager_id = 1;
   double plan_revenue = 2;

@@ -2,11 +2,17 @@ syntax = "proto3";
 package treasury.v1;
 option go_package = "./pb;treasury_pb";
 
-message Payment {
-  string id = 1;
-  string order_id = 2;
-  double amount = 3;
-  string status = 4;
-  string method = 5;
-  string transaction_id = 6;
+service PaymentService {
+  rpc ProcessPayment(PaymentRequest) returns (PaymentResponse);
+}
+
+message PaymentRequest {
+  string order_id = 1;
+  double amount = 2;
+  int32 method = 3;
+}
+
+message PaymentResponse {
+  string payment_id = 1;
+  string status = 2;
 }

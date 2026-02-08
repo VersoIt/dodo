@@ -21,31 +21,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Delivery struct {
+type CreateDeliveryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	CourierId     string                 `protobuf:"bytes,2,opt,name=courier_id,json=courierId,proto3" json:"courier_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Lat           float64                `protobuf:"fixed64,4,opt,name=lat,proto3" json:"lat,omitempty"`
-	Lng           float64                `protobuf:"fixed64,5,opt,name=lng,proto3" json:"lng,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Delivery) Reset() {
-	*x = Delivery{}
+func (x *CreateDeliveryRequest) Reset() {
+	*x = CreateDeliveryRequest{}
 	mi := &file_delivery_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Delivery) String() string {
+func (x *CreateDeliveryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Delivery) ProtoMessage() {}
+func (*CreateDeliveryRequest) ProtoMessage() {}
 
-func (x *Delivery) ProtoReflect() protoreflect.Message {
+func (x *CreateDeliveryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_delivery_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,58 +53,147 @@ func (x *Delivery) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Delivery.ProtoReflect.Descriptor instead.
-func (*Delivery) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateDeliveryRequest.ProtoReflect.Descriptor instead.
+func (*CreateDeliveryRequest) Descriptor() ([]byte, []int) {
 	return file_delivery_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Delivery) GetOrderId() string {
+func (x *CreateDeliveryRequest) GetOrderId() string {
 	if x != nil {
 		return x.OrderId
 	}
 	return ""
 }
 
-func (x *Delivery) GetCourierId() string {
+type UpdateLocationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Lat           float64                `protobuf:"fixed64,2,opt,name=lat,proto3" json:"lat,omitempty"`
+	Lng           float64                `protobuf:"fixed64,3,opt,name=lng,proto3" json:"lng,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLocationRequest) Reset() {
+	*x = UpdateLocationRequest{}
+	mi := &file_delivery_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLocationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLocationRequest) ProtoMessage() {}
+
+func (x *UpdateLocationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[1]
 	if x != nil {
-		return x.CourierId
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLocationRequest.ProtoReflect.Descriptor instead.
+func (*UpdateLocationRequest) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *UpdateLocationRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
 	}
 	return ""
 }
 
-func (x *Delivery) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *Delivery) GetLat() float64 {
+func (x *UpdateLocationRequest) GetLat() float64 {
 	if x != nil {
 		return x.Lat
 	}
 	return 0
 }
 
-func (x *Delivery) GetLng() float64 {
+func (x *UpdateLocationRequest) GetLng() float64 {
 	if x != nil {
 		return x.Lng
 	}
 	return 0
 }
 
+type DeliveryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeliveryResponse) Reset() {
+	*x = DeliveryResponse{}
+	mi := &file_delivery_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeliveryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeliveryResponse) ProtoMessage() {}
+
+func (x *DeliveryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeliveryResponse.ProtoReflect.Descriptor instead.
+func (*DeliveryResponse) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DeliveryResponse) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *DeliveryResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 var File_delivery_proto protoreflect.FileDescriptor
 
 const file_delivery_proto_rawDesc = "" +
 	"\n" +
-	"\x0edelivery.proto\x12\flogistics.v1\"\x80\x01\n" +
-	"\bDelivery\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x1d\n" +
-	"\n" +
-	"courier_id\x18\x02 \x01(\tR\tcourierId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12\x10\n" +
-	"\x03lat\x18\x04 \x01(\x01R\x03lat\x12\x10\n" +
-	"\x03lng\x18\x05 \x01(\x01R\x03lngB\x13Z\x11./pb;logistics_pbb\x06proto3"
+	"\x0edelivery.proto\x12\flogistics.v1\"2\n" +
+	"\x15CreateDeliveryRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"V\n" +
+	"\x15UpdateLocationRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x10\n" +
+	"\x03lat\x18\x02 \x01(\x01R\x03lat\x12\x10\n" +
+	"\x03lng\x18\x03 \x01(\x01R\x03lng\"E\n" +
+	"\x10DeliveryResponse\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status2\xbf\x01\n" +
+	"\x0fDeliveryService\x12U\n" +
+	"\x0eCreateDelivery\x12#.logistics.v1.CreateDeliveryRequest\x1a\x1e.logistics.v1.DeliveryResponse\x12U\n" +
+	"\x0eUpdateLocation\x12#.logistics.v1.UpdateLocationRequest\x1a\x1e.logistics.v1.DeliveryResponseB\x13Z\x11./pb;logistics_pbb\x06proto3"
 
 var (
 	file_delivery_proto_rawDescOnce sync.Once
@@ -122,13 +207,19 @@ func file_delivery_proto_rawDescGZIP() []byte {
 	return file_delivery_proto_rawDescData
 }
 
-var file_delivery_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_delivery_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_delivery_proto_goTypes = []any{
-	(*Delivery)(nil), // 0: logistics.v1.Delivery
+	(*CreateDeliveryRequest)(nil), // 0: logistics.v1.CreateDeliveryRequest
+	(*UpdateLocationRequest)(nil), // 1: logistics.v1.UpdateLocationRequest
+	(*DeliveryResponse)(nil),      // 2: logistics.v1.DeliveryResponse
 }
 var file_delivery_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
+	0, // 0: logistics.v1.DeliveryService.CreateDelivery:input_type -> logistics.v1.CreateDeliveryRequest
+	1, // 1: logistics.v1.DeliveryService.UpdateLocation:input_type -> logistics.v1.UpdateLocationRequest
+	2, // 2: logistics.v1.DeliveryService.CreateDelivery:output_type -> logistics.v1.DeliveryResponse
+	2, // 3: logistics.v1.DeliveryService.UpdateLocation:output_type -> logistics.v1.DeliveryResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -145,9 +236,9 @@ func file_delivery_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_delivery_proto_rawDesc), len(file_delivery_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_delivery_proto_goTypes,
 		DependencyIndexes: file_delivery_proto_depIdxs,

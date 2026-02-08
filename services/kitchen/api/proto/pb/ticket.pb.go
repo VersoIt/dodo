@@ -21,78 +21,10 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type KitchenTicket struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Items         []*KitchenItem         `protobuf:"bytes,4,rep,name=items,proto3" json:"items,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *KitchenTicket) Reset() {
-	*x = KitchenTicket{}
-	mi := &file_ticket_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *KitchenTicket) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*KitchenTicket) ProtoMessage() {}
-
-func (x *KitchenTicket) ProtoReflect() protoreflect.Message {
-	mi := &file_ticket_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use KitchenTicket.ProtoReflect.Descriptor instead.
-func (*KitchenTicket) Descriptor() ([]byte, []int) {
-	return file_ticket_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *KitchenTicket) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *KitchenTicket) GetOrderId() string {
-	if x != nil {
-		return x.OrderId
-	}
-	return ""
-}
-
-func (x *KitchenTicket) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *KitchenTicket) GetItems() []*KitchenItem {
-	if x != nil {
-		return x.Items
-	}
-	return nil
-}
-
 type KitchenItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProductId     string                 `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ProductName   string                 `protobuf:"bytes,2,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
 	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -100,7 +32,7 @@ type KitchenItem struct {
 
 func (x *KitchenItem) Reset() {
 	*x = KitchenItem{}
-	mi := &file_ticket_proto_msgTypes[1]
+	mi := &file_ticket_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -112,7 +44,7 @@ func (x *KitchenItem) String() string {
 func (*KitchenItem) ProtoMessage() {}
 
 func (x *KitchenItem) ProtoReflect() protoreflect.Message {
-	mi := &file_ticket_proto_msgTypes[1]
+	mi := &file_ticket_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -125,7 +57,7 @@ func (x *KitchenItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KitchenItem.ProtoReflect.Descriptor instead.
 func (*KitchenItem) Descriptor() ([]byte, []int) {
-	return file_ticket_proto_rawDescGZIP(), []int{1}
+	return file_ticket_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *KitchenItem) GetProductId() string {
@@ -135,9 +67,9 @@ func (x *KitchenItem) GetProductId() string {
 	return ""
 }
 
-func (x *KitchenItem) GetName() string {
+func (x *KitchenItem) GetProductName() string {
 	if x != nil {
-		return x.Name
+		return x.ProductName
 	}
 	return ""
 }
@@ -149,22 +81,185 @@ func (x *KitchenItem) GetQuantity() int32 {
 	return 0
 }
 
+type CreateTicketRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Items         []*KitchenItem         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateTicketRequest) Reset() {
+	*x = CreateTicketRequest{}
+	mi := &file_ticket_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTicketRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTicketRequest) ProtoMessage() {}
+
+func (x *CreateTicketRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ticket_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateTicketRequest.ProtoReflect.Descriptor instead.
+func (*CreateTicketRequest) Descriptor() ([]byte, []int) {
+	return file_ticket_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateTicketRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *CreateTicketRequest) GetItems() []*KitchenItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type UpdateTicketStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TicketId      string                 `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	Status        int32                  `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTicketStatusRequest) Reset() {
+	*x = UpdateTicketStatusRequest{}
+	mi := &file_ticket_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTicketStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTicketStatusRequest) ProtoMessage() {}
+
+func (x *UpdateTicketStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ticket_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTicketStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTicketStatusRequest) Descriptor() ([]byte, []int) {
+	return file_ticket_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateTicketStatusRequest) GetTicketId() string {
+	if x != nil {
+		return x.TicketId
+	}
+	return ""
+}
+
+func (x *UpdateTicketStatusRequest) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type TicketResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TicketId      string                 `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TicketResponse) Reset() {
+	*x = TicketResponse{}
+	mi := &file_ticket_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TicketResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TicketResponse) ProtoMessage() {}
+
+func (x *TicketResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ticket_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TicketResponse.ProtoReflect.Descriptor instead.
+func (*TicketResponse) Descriptor() ([]byte, []int) {
+	return file_ticket_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TicketResponse) GetTicketId() string {
+	if x != nil {
+		return x.TicketId
+	}
+	return ""
+}
+
+func (x *TicketResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 var File_ticket_proto protoreflect.FileDescriptor
 
 const file_ticket_proto_rawDesc = "" +
 	"\n" +
 	"\fticket.proto\x12\n" +
-	"kitchen.v1\"\x81\x01\n" +
-	"\rKitchenTicket\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12-\n" +
-	"\x05items\x18\x04 \x03(\v2\x17.kitchen.v1.KitchenItemR\x05items\"\\\n" +
+	"kitchen.v1\"k\n" +
 	"\vKitchenItem\x12\x1d\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\tR\tproductId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
-	"\bquantity\x18\x03 \x01(\x05R\bquantityB\x11Z\x0f./pb;kitchen_pbb\x06proto3"
+	"product_id\x18\x01 \x01(\tR\tproductId\x12!\n" +
+	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x05R\bquantity\"_\n" +
+	"\x13CreateTicketRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12-\n" +
+	"\x05items\x18\x02 \x03(\v2\x17.kitchen.v1.KitchenItemR\x05items\"P\n" +
+	"\x19UpdateTicketStatusRequest\x12\x1b\n" +
+	"\tticket_id\x18\x01 \x01(\tR\bticketId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\x05R\x06status\"E\n" +
+	"\x0eTicketResponse\x12\x1b\n" +
+	"\tticket_id\x18\x01 \x01(\tR\bticketId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status2\xb5\x01\n" +
+	"\rTicketService\x12K\n" +
+	"\fCreateTicket\x12\x1f.kitchen.v1.CreateTicketRequest\x1a\x1a.kitchen.v1.TicketResponse\x12W\n" +
+	"\x12UpdateTicketStatus\x12%.kitchen.v1.UpdateTicketStatusRequest\x1a\x1a.kitchen.v1.TicketResponseB\x11Z\x0f./pb;kitchen_pbb\x06proto3"
 
 var (
 	file_ticket_proto_rawDescOnce sync.Once
@@ -178,15 +273,21 @@ func file_ticket_proto_rawDescGZIP() []byte {
 	return file_ticket_proto_rawDescData
 }
 
-var file_ticket_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_ticket_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_ticket_proto_goTypes = []any{
-	(*KitchenTicket)(nil), // 0: kitchen.v1.KitchenTicket
-	(*KitchenItem)(nil),   // 1: kitchen.v1.KitchenItem
+	(*KitchenItem)(nil),               // 0: kitchen.v1.KitchenItem
+	(*CreateTicketRequest)(nil),       // 1: kitchen.v1.CreateTicketRequest
+	(*UpdateTicketStatusRequest)(nil), // 2: kitchen.v1.UpdateTicketStatusRequest
+	(*TicketResponse)(nil),            // 3: kitchen.v1.TicketResponse
 }
 var file_ticket_proto_depIdxs = []int32{
-	1, // 0: kitchen.v1.KitchenTicket.items:type_name -> kitchen.v1.KitchenItem
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
+	0, // 0: kitchen.v1.CreateTicketRequest.items:type_name -> kitchen.v1.KitchenItem
+	1, // 1: kitchen.v1.TicketService.CreateTicket:input_type -> kitchen.v1.CreateTicketRequest
+	2, // 2: kitchen.v1.TicketService.UpdateTicketStatus:input_type -> kitchen.v1.UpdateTicketStatusRequest
+	3, // 3: kitchen.v1.TicketService.CreateTicket:output_type -> kitchen.v1.TicketResponse
+	3, // 4: kitchen.v1.TicketService.UpdateTicketStatus:output_type -> kitchen.v1.TicketResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -203,9 +304,9 @@ func file_ticket_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ticket_proto_rawDesc), len(file_ticket_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_ticket_proto_goTypes,
 		DependencyIndexes: file_ticket_proto_depIdxs,

@@ -21,6 +21,126 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type KpiRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ManagerId     string                 `protobuf:"bytes,1,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KpiRequest) Reset() {
+	*x = KpiRequest{}
+	mi := &file_kpi_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KpiRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KpiRequest) ProtoMessage() {}
+
+func (x *KpiRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_kpi_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KpiRequest.ProtoReflect.Descriptor instead.
+func (*KpiRequest) Descriptor() ([]byte, []int) {
+	return file_kpi_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *KpiRequest) GetManagerId() string {
+	if x != nil {
+		return x.ManagerId
+	}
+	return ""
+}
+
+type KpiResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ManagerId     string                 `protobuf:"bytes,1,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
+	PlanRevenue   float64                `protobuf:"fixed64,2,opt,name=plan_revenue,json=planRevenue,proto3" json:"plan_revenue,omitempty"`
+	FactRevenue   float64                `protobuf:"fixed64,3,opt,name=fact_revenue,json=factRevenue,proto3" json:"fact_revenue,omitempty"`
+	KpiPercent    float64                `protobuf:"fixed64,4,opt,name=kpi_percent,json=kpiPercent,proto3" json:"kpi_percent,omitempty"`
+	HasBonus      bool                   `protobuf:"varint,5,opt,name=has_bonus,json=hasBonus,proto3" json:"has_bonus,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KpiResponse) Reset() {
+	*x = KpiResponse{}
+	mi := &file_kpi_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KpiResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KpiResponse) ProtoMessage() {}
+
+func (x *KpiResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_kpi_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KpiResponse.ProtoReflect.Descriptor instead.
+func (*KpiResponse) Descriptor() ([]byte, []int) {
+	return file_kpi_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *KpiResponse) GetManagerId() string {
+	if x != nil {
+		return x.ManagerId
+	}
+	return ""
+}
+
+func (x *KpiResponse) GetPlanRevenue() float64 {
+	if x != nil {
+		return x.PlanRevenue
+	}
+	return 0
+}
+
+func (x *KpiResponse) GetFactRevenue() float64 {
+	if x != nil {
+		return x.FactRevenue
+	}
+	return 0
+}
+
+func (x *KpiResponse) GetKpiPercent() float64 {
+	if x != nil {
+		return x.KpiPercent
+	}
+	return 0
+}
+
+func (x *KpiResponse) GetHasBonus() bool {
+	if x != nil {
+		return x.HasBonus
+	}
+	return false
+}
+
 type ManagerKPI struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ManagerId     string                 `protobuf:"bytes,1,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
@@ -33,7 +153,7 @@ type ManagerKPI struct {
 
 func (x *ManagerKPI) Reset() {
 	*x = ManagerKPI{}
-	mi := &file_kpi_proto_msgTypes[0]
+	mi := &file_kpi_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +165,7 @@ func (x *ManagerKPI) String() string {
 func (*ManagerKPI) ProtoMessage() {}
 
 func (x *ManagerKPI) ProtoReflect() protoreflect.Message {
-	mi := &file_kpi_proto_msgTypes[0]
+	mi := &file_kpi_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +178,7 @@ func (x *ManagerKPI) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ManagerKPI.ProtoReflect.Descriptor instead.
 func (*ManagerKPI) Descriptor() ([]byte, []int) {
-	return file_kpi_proto_rawDescGZIP(), []int{0}
+	return file_kpi_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ManagerKPI) GetManagerId() string {
@@ -93,7 +213,19 @@ var File_kpi_proto protoreflect.FileDescriptor
 
 const file_kpi_proto_rawDesc = "" +
 	"\n" +
-	"\tkpi.proto\x12\fanalytics.v1\"\x92\x01\n" +
+	"\tkpi.proto\x12\fanalytics.v1\"+\n" +
+	"\n" +
+	"KpiRequest\x12\x1d\n" +
+	"\n" +
+	"manager_id\x18\x01 \x01(\tR\tmanagerId\"\xb0\x01\n" +
+	"\vKpiResponse\x12\x1d\n" +
+	"\n" +
+	"manager_id\x18\x01 \x01(\tR\tmanagerId\x12!\n" +
+	"\fplan_revenue\x18\x02 \x01(\x01R\vplanRevenue\x12!\n" +
+	"\ffact_revenue\x18\x03 \x01(\x01R\vfactRevenue\x12\x1f\n" +
+	"\vkpi_percent\x18\x04 \x01(\x01R\n" +
+	"kpiPercent\x12\x1b\n" +
+	"\thas_bonus\x18\x05 \x01(\bR\bhasBonus\"\x92\x01\n" +
 	"\n" +
 	"ManagerKPI\x12\x1d\n" +
 	"\n" +
@@ -101,7 +233,10 @@ const file_kpi_proto_rawDesc = "" +
 	"\fplan_revenue\x18\x02 \x01(\x01R\vplanRevenue\x12!\n" +
 	"\ffact_revenue\x18\x03 \x01(\x01R\vfactRevenue\x12\x1f\n" +
 	"\vkpi_percent\x18\x04 \x01(\x01R\n" +
-	"kpiPercentB\x13Z\x11./pb;analytics_pbb\x06proto3"
+	"kpiPercent2R\n" +
+	"\n" +
+	"KpiService\x12D\n" +
+	"\rGetManagerKPI\x12\x18.analytics.v1.KpiRequest\x1a\x19.analytics.v1.KpiResponseB\x13Z\x11./pb;analytics_pbb\x06proto3"
 
 var (
 	file_kpi_proto_rawDescOnce sync.Once
@@ -115,13 +250,17 @@ func file_kpi_proto_rawDescGZIP() []byte {
 	return file_kpi_proto_rawDescData
 }
 
-var file_kpi_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_kpi_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_kpi_proto_goTypes = []any{
-	(*ManagerKPI)(nil), // 0: analytics.v1.ManagerKPI
+	(*KpiRequest)(nil),  // 0: analytics.v1.KpiRequest
+	(*KpiResponse)(nil), // 1: analytics.v1.KpiResponse
+	(*ManagerKPI)(nil),  // 2: analytics.v1.ManagerKPI
 }
 var file_kpi_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
+	0, // 0: analytics.v1.KpiService.GetManagerKPI:input_type -> analytics.v1.KpiRequest
+	1, // 1: analytics.v1.KpiService.GetManagerKPI:output_type -> analytics.v1.KpiResponse
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -138,9 +277,9 @@ func file_kpi_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_kpi_proto_rawDesc), len(file_kpi_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_kpi_proto_goTypes,
 		DependencyIndexes: file_kpi_proto_depIdxs,

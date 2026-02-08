@@ -8,7 +8,7 @@ import (
 )
 
 type InMemoryUserRepository struct {
-	mu    sync.RWMutex
+	mu      sync.RWMutex
 	byEmail map[string]*auth.User
 	byID    map[string]*auth.User
 }

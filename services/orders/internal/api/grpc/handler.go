@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/versoit/diploma/services/orders"
-	"github.com/versoit/diploma/services/orders/api/proto/pb"
+	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
 	"github.com/versoit/diploma/services/orders/usecase"
 	"google.golang.org/grpc"
 )
 
 type OrdersHandler struct {
-	pb.UnimplementedOrderServiceServer
+	orders_pb.UnimplementedOrderServiceServer
 	uc *usecase.OrderUseCase
 }
 
@@ -19,17 +19,17 @@ func NewOrdersHandler(uc *usecase.OrderUseCase) *OrdersHandler {
 }
 
 func (h *OrdersHandler) Register(server *grpc.Server) {
-	pb.RegisterOrderServiceServer(server, h)
+	orders_pb.RegisterOrderServiceServer(server, h)
 }
 
-func (h *OrdersHandler) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.OrderResponse, error) {
+func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOrderRequest) (*orders_pb.OrderResponse, error) {
 	items := make([]usecase.OrderItemInput, len(req.Items))
 	for i, item := range req.Items {
 		items[i] = usecase.OrderItemInput{
 			ProductID: item.ProductId,
 			Name:      item.ProductName,
 			Quantity:  int(item.Quantity),
-			BasePrice: 0, // In real app, fetch from catalog
+			BasePrice: 0,
 			SizeMult:  1.0,
 		}
 	}
@@ -46,7 +46,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *pb.CreateOrderRequ
 		return nil, err
 	}
 
-	return &pb.OrderResponse{
+	return &orders_pb.OrderResponse{
 		OrderId:     order.ID(),
 		Status:      order.Status().String(),
 		FinalPrice:  float64(order.FinalPrice()),
@@ -54,11 +54,11 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *pb.CreateOrderRequ
 	}, nil
 }
 
-func (h *OrdersHandler) PayOrder(ctx context.Context, req *pb.PayOrderRequest) (*pb.OrderResponse, error) {
+func (h *OrdersHandler) PayOrder(ctx context.Context, req *orders_pb.PayOrderRequest) (*orders_pb.OrderResponse, error) {
 	err := h.uc.PayOrder(ctx, req.OrderId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.OrderResponse{OrderId: req.OrderId, Status: "paid"}, nil
+	return &orders_pb.OrderResponse{OrderId: req.OrderId, Status: "paid"}, nil
 }

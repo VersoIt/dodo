@@ -2,15 +2,28 @@ syntax = "proto3";
 package kitchen.v1;
 option go_package = "./pb;kitchen_pb";
 
-message KitchenTicket {
-  string id = 1;
-  string order_id = 2;
-  string status = 3;
-  repeated KitchenItem items = 4;
+service TicketService {
+  rpc CreateTicket(CreateTicketRequest) returns (TicketResponse);
+  rpc UpdateTicketStatus(UpdateTicketStatusRequest) returns (TicketResponse);
 }
 
 message KitchenItem {
   string product_id = 1;
-  string name = 2;
+  string product_name = 2;
   int32 quantity = 3;
+}
+
+message CreateTicketRequest {
+  string order_id = 1;
+  repeated KitchenItem items = 2;
+}
+
+message UpdateTicketStatusRequest {
+  string ticket_id = 1;
+  int32 status = 2;
+}
+
+message TicketResponse {
+  string ticket_id = 1;
+  string status = 2;
 }

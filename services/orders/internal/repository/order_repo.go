@@ -8,8 +8,8 @@ import (
 )
 
 type InMemoryOrderRepository struct {
-	mu     sync.RWMutex
-	store  map[string]*orders.Order
+	mu    sync.RWMutex
+	store map[string]*orders.Order
 }
 
 func NewInMemoryOrderRepository() orders.OrderRepository {
