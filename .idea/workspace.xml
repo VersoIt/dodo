@@ -5,49 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/golinter.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Taskfile.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/analytics/api/proto/pb/kpi.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/analytics/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/analytics/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/auth/api/proto/pb/user.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/auth/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/auth/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/catalog/api/proto/pb/product.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/catalog/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/kitchen/api/proto/pb/ticket.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/kitchen/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/kitchen/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/logistics/api/proto/pb/delivery.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/logistics/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/logistics/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/notification/api/proto/pb/notification.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/notification/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/notification/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/orders/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/treasury/api/proto/pb/payment.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/treasury/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Taskfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/api/proto/kpi.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/api/proto/kpi.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/api/proto/user.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/user.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/api/proto/product.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/api/proto/product.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/kitchen/api/proto/ticket.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/api/proto/ticket.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/logistics/api/proto/delivery.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/api/proto/delivery.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/api/proto/notification.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/api/proto/notification.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/order.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/order.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/domain_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/api/proto/payment.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/api/proto/payment.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/domain_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,14 +23,26 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "versoooit"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/VersoIt/diploma.git",
+    "accountId": "e6c0894e-b341-473c-a8a8-1e2032bf1468"
+  }
+}]]></component>
   <component name="GoLinterSelectedExecutable" path="$PROJECT_DIR$/../../../../ProgramData/chocolatey/bin/golangci-lint.exe" />
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="39I1hqg0w64ljqHXVS95QoDXorb" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -86,6 +56,7 @@
     "RunOnceActivity.GoLinterPluginStorageMigration": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",

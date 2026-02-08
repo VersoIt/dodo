@@ -1,3 +1,3 @@
 module github.com/versoit/diploma/services/orders
 
-go 1.25.3
+go 1.24
