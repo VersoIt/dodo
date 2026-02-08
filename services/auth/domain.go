@@ -116,6 +116,12 @@ func (u *User) ChangeRole(newRole Role) {
 	u.updatedAt = time.Now()
 }
 
+func (u *User) UpdateProfile(name, phone string) {
+	u.name = name
+	u.phone = phone
+	u.updatedAt = time.Now()
+}
+
 func (u *User) AccrueBonuses(amount int) {
 	if amount > 0 {
 		u.bonusPoints += amount
@@ -146,6 +152,10 @@ func (u *User) HashedPassword() string { return u.passwordHash }
 func (u *User) IsClient() bool { return u.isClient }
 
 func (u *User) BonusPoints() int { return u.bonusPoints }
+
+func (u *User) Name() string { return u.name }
+
+func (u *User) Phone() string { return u.phone }
 
 // --- Repository ---
 
