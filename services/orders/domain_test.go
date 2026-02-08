@@ -10,12 +10,12 @@ func TestOrder_AddItem_CalculatesPriceCorrectly(t *testing.T) {
 	addr := DeliveryAddress{City: "Test City", Street: "Main St"}
 	order := NewOrder("cust-123", addr)
 
-	basePrice := common.Money(100.0)
+	basePrice := common.NewMoney(100.0)
 	sizeMult := 1.2 // +20%
 	qty := 2
 	toppings := []Topping{
-		{Name: "Cheese", Price: 10.0},
-		{Name: "Sauce", Price: 5.0},
+		{Name: "Cheese", Price: common.NewMoney(10.0)},
+		{Name: "Sauce", Price: common.NewMoney(5.0)},
 	}
 	// Unit price calculation:
 	// Sized Price = 100 * 1.2 = 120
@@ -31,23 +31,23 @@ func TestOrder_AddItem_CalculatesPriceCorrectly(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expectedPrice := common.Money(270.0)
-	if order.FinalPrice() != expectedPrice {
+	expectedPrice := common.NewMoney(270.0)
+	if !order.FinalPrice().Equal(expectedPrice) {
 		t.Errorf("expected final price %v, got %v", expectedPrice, order.FinalPrice())
 	}
 }
 
 func TestOrder_ApplyPromoCode(t *testing.T) {
 	order := NewOrder("cust-1", DeliveryAddress{})
-	_ = order.AddItem("p1", "Item", 1, 100, 1.0, nil) // Total 100
+	_ = order.AddItem("p1", "Item", 1, common.NewMoney(100), 1.0, nil) // Total 100
 
-	err := order.ApplyPromoCode("PROMO10", 10.0)
+	err := order.ApplyPromoCode("PROMO10", common.NewMoney(10.0))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := common.Money(90.0) // 100 - 10
-	if order.FinalPrice() != expected {
+	expected := common.NewMoney(90.0) // 100 - 10
+	if !order.FinalPrice().Equal(expected) {
 		t.Errorf("expected %v, got %v", expected, order.FinalPrice())
 	}
 }
@@ -92,7 +92,7 @@ func TestOrder_CannotAddItem_WhenLocked(t *testing.T) {
 	order := NewOrder("c1", DeliveryAddress{})
 	_ = order.MarkPaid() // Lock order
 
-	err := order.AddItem("p1", "Item", 1, 100, 1, nil)
+	err := order.AddItem("p1", "Item", 1, common.NewMoney(100), 1, nil)
 	if err != ErrOrderLocked {
 		t.Errorf("expected ErrOrderLocked, got %v", err)
 	}

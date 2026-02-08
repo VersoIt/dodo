@@ -6,7 +6,7 @@ import (
 )
 
 func TestPayment_Confirm(t *testing.T) {
-	p := NewPayment("order-1", common.Money(100.0), MethodOnline)
+	p := NewPayment("order-1", common.NewMoney(100.0), MethodOnline)
 
 	err := p.Confirm("tx-999")
 	if err != nil {
@@ -19,7 +19,7 @@ func TestPayment_Confirm(t *testing.T) {
 }
 
 func TestPayment_Refund(t *testing.T) {
-	p := NewPayment("order-1", 100, MethodOnline)
+	p := NewPayment("order-1", common.NewMoney(100), MethodOnline)
 
 	// Cannot refund waiting payment
 	if err := p.Refund(); err != ErrInvalidRefund {

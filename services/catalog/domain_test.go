@@ -2,10 +2,11 @@ package catalog
 
 import (
 	"testing"
+	"github.com/versoit/diploma/pkg/common"
 )
 
 func TestNewProduct(t *testing.T) {
-	p, err := NewProduct("Pizza", "Tasty", CatClassic, 500)
+	p, err := NewProduct("Pizza", "Tasty", CatClassic, common.NewMoney(500))
 	if err != nil {
 		t.Fatalf("failed to create product: %v", err)
 	}
@@ -13,26 +14,26 @@ func TestNewProduct(t *testing.T) {
 	if p.Name() != "Pizza" {
 		t.Errorf("expected Pizza, got %s", p.Name())
 	}
-	if p.BasePrice() != 500 {
+	if !p.BasePrice().Equal(common.NewMoney(500)) {
 		t.Errorf("expected 500, got %v", p.BasePrice())
 	}
 }
 
 func TestProduct_UpdatePrice(t *testing.T) {
-	p, _ := NewProduct("Pizza", "", CatClassic, 500)
+	p, _ := NewProduct("Pizza", "", CatClassic, common.NewMoney(500))
 
-	err := p.UpdatePrice(600)
-	if err != nil || p.BasePrice() != 600 {
+	err := p.UpdatePrice(common.NewMoney(600))
+	if err != nil || !p.BasePrice().Equal(common.NewMoney(600)) {
 		t.Errorf("failed to update price")
 	}
 
-	if err := p.UpdatePrice(-1); err != ErrNegativePrice {
+	if err := p.UpdatePrice(common.NewMoney(-1)); err != ErrNegativePrice {
 		t.Errorf("expected ErrNegativePrice, got %v", err)
 	}
 }
 
 func TestProduct_AddIngredient(t *testing.T) {
-	p, _ := NewProduct("Pizza", "", CatClassic, 500)
+	p, _ := NewProduct("Pizza", "", CatClassic, common.NewMoney(500))
 	err := p.AddIngredient("ing-1", 10.5, true)
 
 	if err != nil {
