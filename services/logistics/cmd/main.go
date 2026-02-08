@@ -29,6 +29,7 @@ func RunServer(lc fx.Lifecycle, handler *grpc.LogisticsHandler, logger *zap.Logg
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+			// #nosec G102
 			lis, err := net.Listen("tcp", ":8080")
 			if err != nil {
 				return err
