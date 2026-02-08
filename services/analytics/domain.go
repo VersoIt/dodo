@@ -53,6 +53,16 @@ func (k *ManagerKPI) ShiftDate() time.Time      { return k.shiftDate }
 func (k *ManagerKPI) Plan() decimal.Decimal     { return k.planRevenue }
 func (k *ManagerKPI) Fact() decimal.Decimal     { return k.factRevenue }
 
+// ReconstructKPI is used by repositories to rebuild a KPI from storage.
+func ReconstructKPI(managerID string, plan, fact float64) *ManagerKPI {
+	return &ManagerKPI{
+		managerID:   managerID,
+		shiftDate:   time.Now(),
+		planRevenue: decimal.NewFromFloat(plan),
+		factRevenue: decimal.NewFromFloat(fact),
+	}
+}
+
 type AnalyticsRepository interface {
 	SaveKPI(ctx context.Context, k *ManagerKPI) error
 	GetKPI(ctx context.Context, managerID string) (*ManagerKPI, error)

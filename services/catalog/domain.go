@@ -112,6 +112,19 @@ func (p *Product) Ingredients() []IngredientRef {
 	return result
 }
 
+// ReconstructProduct is used by repositories to rebuild a Product from storage.
+func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, isAvail bool) *Product {
+	return &Product{
+		id:          id,
+		name:        name,
+		description: desc,
+		category:    cat,
+		basePrice:   common.NewMoney(price),
+		isAvailable: isAvail,
+		createdAt:   time.Now(),
+	}
+}
+
 type ProductRepository interface {
 	FindAll(ctx context.Context) ([]*Product, error)
 	FindByID(ctx context.Context, id string) (*Product, error)

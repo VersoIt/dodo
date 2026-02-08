@@ -114,7 +114,9 @@ func (p *Payment) Refund() error {
 func (p *Payment) ID() string            { return p.id }
 func (p *Payment) OrderID() string       { return p.orderID }
 func (p *Payment) Amount() common.Money  { return p.amount }
+func (p *Payment) Method() PaymentMethod { return p.method }
 func (p *Payment) Status() PaymentStatus { return p.status }
+func (p *Payment) TransactionID() string { return p.transactionID }
 func (p *Payment) CreatedAt() time.Time  { return p.createdAt }
 
 type PaymentRepository interface {

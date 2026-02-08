@@ -4,7 +4,42 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="" />
+    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/internal/repository/analytics_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/internal/repository/analytics_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/internal/repository/user_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/internal/repository/user_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/internal/repository/product_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/internal/repository/product_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/internal/repository/payment_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/internal/repository/payment_repo.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

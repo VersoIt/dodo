@@ -3,35 +3,65 @@ package repository
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	"github.com/versoit/diploma/services/analytics"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/Masterminds/squirrel"
 )
 
-type InMemoryAnalyticsRepository struct {
-	mu    sync.RWMutex
-	store map[string]*analytics.ManagerKPI
+type analyticsRepo struct {
+	pool *pgxpool.Pool
+	sb   squirrel.StatementBuilderType
 }
 
-func NewInMemoryAnalyticsRepository() analytics.AnalyticsRepository {
-	return &InMemoryAnalyticsRepository{
-		store: make(map[string]*analytics.ManagerKPI),
+func NewAnalyticsRepository(pool *pgxpool.Pool) analytics.AnalyticsRepository {
+	return &analyticsRepo{
+		pool: pool,
+		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
-func (r *InMemoryAnalyticsRepository) SaveKPI(ctx context.Context, k *analytics.ManagerKPI) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.store[k.ManagerID()] = k
-	return nil
+func (r *analyticsRepo) SaveKPI(ctx context.Context, k *analytics.ManagerKPI) error {
+	sql, args, err := r.sb.Insert("manager_kpis").
+		Columns("manager_id", "shift_date", "plan_revenue", "fact_revenue").
+		Values(k.ManagerID(), k.ShiftDate(), k.Plan(), k.Fact()).
+		Suffix("ON CONFLICT (manager_id, shift_date) DO UPDATE SET plan_revenue = EXCLUDED.plan_revenue, fact_revenue = EXCLUDED.fact_revenue").
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.Exec(ctx, sql, args...)
+	return err
 }
 
-func (r *InMemoryAnalyticsRepository) GetKPI(ctx context.Context, managerID string) (*analytics.ManagerKPI, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	k, ok := r.store[managerID]
-	if !ok {
-		return nil, fmt.Errorf("kpi not found")
+func (r *analyticsRepo) GetKPI(ctx context.Context, managerID string) (*analytics.ManagerKPI, error) {
+	// Simple query for the latest KPI
+	sql, args, err := r.sb.Select("manager_id", "shift_date", "plan_revenue", "fact_revenue").
+		From("manager_kpis").
+		Where(squirrel.Eq{"manager_id": managerID}).
+		OrderBy("shift_date DESC").
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return nil, err
 	}
-	return k, nil
+
+	var (
+		mid  string
+		date interface{} // time.Time
+		plan float64
+		fact float64
+	)
+
+	err = r.pool.QueryRow(ctx, sql, args...).Scan(&mid, &date, &plan, &fact)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, fmt.Errorf("kpi not found")
+		}
+		return nil, err
+	}
+
+	return analytics.ReconstructKPI(mid, plan, fact), nil
 }

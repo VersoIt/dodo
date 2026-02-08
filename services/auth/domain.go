@@ -89,6 +89,20 @@ func NewUser(email, password string, role Role) (*User, error) {
 	return u, nil
 }
 
+// ReconstructUser is used by repositories to rebuild a User from storage.
+func ReconstructUser(id, email, pwdHash string, role Role, isClient bool, name, phone string, bonus int) *User {
+	return &User{
+		id:           id,
+		email:        email,
+		passwordHash: pwdHash,
+		role:         role,
+		isClient:     isClient,
+		name:         name,
+		phone:        phone,
+		bonusPoints:  bonus,
+	}
+}
+
 // --- Behavior ---
 
 func (u *User) SetPassword(plainPassword string) error {

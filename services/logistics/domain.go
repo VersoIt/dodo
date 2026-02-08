@@ -176,6 +176,11 @@ func (c *Courier) CompleteOrder() {
 	}
 }
 
+func (d *Delivery) ID() string {
+	// For Delivery, orderID is effectively the unique ID if 1 order = 1 delivery
+	return d.orderID
+}
+
 func (d *Delivery) OrderID() string      { return d.orderID }
 func (d *Delivery) CourierID() string    { return d.courierID }
 func (d *Delivery) Status() DeliveryStatus { return d.status }

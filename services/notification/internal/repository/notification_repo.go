@@ -2,25 +2,36 @@ package repository
 
 import (
 	"context"
-	"sync"
 
 	"github.com/versoit/diploma/services/notification"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/Masterminds/squirrel"
 )
 
-type InMemoryNotificationRepository struct {
-	mu    sync.RWMutex
-	store []*notification.Notification
+type notificationRepo struct {
+	pool *pgxpool.Pool
+	sb   squirrel.StatementBuilderType
 }
 
-func NewInMemoryNotificationRepository() notification.NotificationRepository {
-	return &InMemoryNotificationRepository{
-		store: make([]*notification.Notification, 0),
+func NewNotificationRepository(pool *pgxpool.Pool) notification.NotificationRepository {
+	return &notificationRepo{
+		pool: pool,
+		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
-func (r *InMemoryNotificationRepository) Save(ctx context.Context, n *notification.Notification) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.store = append(r.store, n)
-	return nil
+func (r *notificationRepo) Save(ctx context.Context, n *notification.Notification) error {
+	sql, args, err := r.sb.Insert("notifications").
+		Columns("id", "user_id", "channel", "title", "message", "status").
+		Values(n.ID(), n.UserID(), n.Channel(), n.Title(), n.Message(), n.Status()).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.pool.Exec(ctx, sql, args...)
+	return err
+}
+
+func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*notification.Notification, error) {
+	return nil, nil
 }

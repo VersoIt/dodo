@@ -64,12 +64,21 @@ func (s OrderStatus) String() string {
 // --- Entities ---
 
 type OrderItem struct {
+	id             string
 	productID      string
 	productName    string
 	quantity       int
 	basePrice      common.Money
 	sizeMultiplier float64
 	toppings       []Topping
+}
+
+func (i *OrderItem) ID() string {
+	if i.id == "" {
+		id, _ := uuid.NewV7()
+		i.id = id.String()
+	}
+	return i.id
 }
 
 func (i *OrderItem) CalculateTotal() common.Money {
@@ -250,6 +259,7 @@ func (o *Order) Items() []*OrderItem {
 func (o *Order) Address() DeliveryAddress    { return o.address }
 func (o *Order) DeliveryPrice() common.Money { return o.deliveryPrice }
 func (o *Order) Discount() common.Money      { return o.discount }
+func (o *Order) PromoCode() string           { return o.promoCode }
 func (o *Order) FinalPrice() common.Money    { return o.finalPrice }
 
 func generateOrderNumber() string {

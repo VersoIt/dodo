@@ -44,6 +44,15 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
+      - name: Start Postgres
+        run: docker compose up postgres -d
+      - name: Wait for Postgres
+        run: |
+          until docker exec pizza-postgres pg_isready -U pizza_user; do
+            sleep 1
+          done
+      - name: Run Migrations
+        run: docker compose up migrations --exit-code-from migrations
       - name: Run Tests
         run: |
           go test -v ./pkg/...

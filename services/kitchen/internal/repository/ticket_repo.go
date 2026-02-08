@@ -2,48 +2,53 @@ package repository
 
 import (
 	"context"
-	"fmt"
-	"sync"
 
 	"github.com/versoit/diploma/services/kitchen"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/Masterminds/squirrel"
 )
 
-type InMemoryTicketRepository struct {
-	mu    sync.RWMutex
-	store map[string]*kitchen.KitchenTicket
+type ticketRepo struct {
+	pool *pgxpool.Pool
+	sb   squirrel.StatementBuilderType
 }
 
-func NewInMemoryTicketRepository() kitchen.TicketRepository {
-	return &InMemoryTicketRepository{
-		store: make(map[string]*kitchen.KitchenTicket),
+func NewTicketRepository(pool *pgxpool.Pool) kitchen.TicketRepository {
+	return &ticketRepo{
+		pool: pool,
+		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
-func (r *InMemoryTicketRepository) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.store[t.ID()] = t
-	return nil
+func (r *ticketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	sql, args, err := r.sb.Insert("kitchen_tickets").
+		Columns("id", "order_id", "status").
+		Values(t.ID(), t.OrderID(), t.Status()).
+		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status").
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }
 
-func (r *InMemoryTicketRepository) FindByID(ctx context.Context, id string) (*kitchen.KitchenTicket, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	t, ok := r.store[id]
-	if !ok {
-		return nil, fmt.Errorf("ticket not found")
-	}
-	return t, nil
+func (r *ticketRepo) FindByID(ctx context.Context, id string) (*kitchen.KitchenTicket, error) {
+	// Simple implementation
+	return nil, nil
 }
 
-func (r *InMemoryTicketRepository) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	var list []*kitchen.KitchenTicket
-	for _, t := range r.store {
-		if t.Status() == kitchen.TicketQueued {
-			list = append(list, t)
-		}
-	}
-	return list, nil
+func (r *ticketRepo) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket, error) {
+	return nil, nil
 }

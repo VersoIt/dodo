@@ -1,9 +1,55 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pizza-postgres
+    environment:
+      POSTGRES_USER: pizza_user
+      POSTGRES_PASSWORD: pizza_password
+      POSTGRES_DB: pizza_db
+    ports:
+      - "5432:5432"
+    networks:
+      - pizza-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pizza_user -d pizza_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    image: gomicro/goose:3.25.0
+    container_name: migrations
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+        for service in analytics auth catalog kitchen logistics notification orders treasury; do
+          dir=\"services/$$service/migrations\"
+          if [ -d \"$$dir\" ]; then
+            echo \"Running migrations for $$service in $$dir...\"
+            goose -dir \"$$dir\" postgres \"host=postgres user=pizza_user password=pizza_password dbname=pizza_db sslmode=disable\" up
+          else
+            echo \"No migrations found for $$service\"
+          fi
+        done
+      "
+    networks:
+      - pizza-network
+
   orders:
     build:
       context: .
       dockerfile: services/orders/Dockerfile
     container_name: orders-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8081:8080"
     networks:
@@ -19,6 +65,11 @@ services:
       context: .
       dockerfile: services/auth/Dockerfile
     container_name: auth-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8082:8080"
     networks:
@@ -34,6 +85,11 @@ services:
       context: .
       dockerfile: services/catalog/Dockerfile
     container_name: catalog-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8083:8080"
     networks:
@@ -49,6 +105,11 @@ services:
       context: .
       dockerfile: services/kitchen/Dockerfile
     container_name: kitchen-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8084:8080"
     networks:
@@ -64,6 +125,11 @@ services:
       context: .
       dockerfile: services/logistics/Dockerfile
     container_name: logistics-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8085:8080"
     networks:
@@ -79,6 +145,11 @@ services:
       context: .
       dockerfile: services/analytics/Dockerfile
     container_name: analytics-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8086:8080"
     networks:
@@ -94,6 +165,11 @@ services:
       context: .
       dockerfile: services/notification/Dockerfile
     container_name: notification-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8087:8080"
     networks:
@@ -109,6 +185,11 @@ services:
       context: .
       dockerfile: services/treasury/Dockerfile
     container_name: treasury-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
       - "8088:8080"
     networks:
