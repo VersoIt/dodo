@@ -213,6 +213,7 @@ type DeliveryRepository interface {
 
 type CourierRepository interface {
 	FindAvailable() ([]*Courier, error)
+	FindByID(id string) (*Courier, error)
 	Save(c *Courier) error
 	UpdateLocation(id string, lat, lng float64) error
 }

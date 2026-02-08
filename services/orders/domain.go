@@ -238,9 +238,11 @@ func (o *Order) CompleteDelivery() error {
 	return nil
 }
 
-// --- Getters ---
-
-// Items возвращает КОПИЮ позиций.
+func (o *Order) ID() string                { return o.id }
+func (o *Order) OrderNumber() string       { return o.orderNumber }
+func (o *Order) CustomerID() string        { return o.customerID }
+func (o *Order) Status() OrderStatus       { return o.status }
+func (o *Order) CreatedAt() time.Time      { return o.createdAt }
 func (o *Order) Items() []*OrderItem {
 	result := make([]*OrderItem, len(o.items))
 	// Копируем указатели, но сами OrderItem иммутабельны (у них только геттеры), так что это безопасно.

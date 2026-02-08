@@ -106,5 +106,6 @@ func (t *KitchenTicket) ReadyTime() time.Time { return t.readyTime }
 type TicketRepository interface {
 	Save(t *KitchenTicket) error
 	FindPending() ([]*KitchenTicket, error)
+	FindByID(id string) (*KitchenTicket, error)
 }
 

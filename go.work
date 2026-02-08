@@ -1,6 +1,7 @@
-go 1.25.3
+go 1.24
 
 use (
+	.
 	./pkg
 	./services/analytics
 	./services/auth
