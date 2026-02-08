@@ -2,10 +2,15 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/treasury"
+)
+
+var (
+	ErrInvalidInput = errors.New("invalid input data")
 )
 
 type TreasuryUseCase struct {
@@ -16,27 +21,40 @@ func NewTreasuryUseCase(repo treasury.PaymentRepository) *TreasuryUseCase {
 	return &TreasuryUseCase{repo: repo}
 }
 
-// InitiatePayment создает запись о намерении произвести платеж.
 func (uc *TreasuryUseCase) InitiatePayment(ctx context.Context, orderID string, amount common.Money, method treasury.PaymentMethod) (*treasury.Payment, error) {
+	if orderID == "" {
+		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
+	}
+	if amount <= 0 {
+		return nil, fmt.Errorf("%w: payment amount must be positive", ErrInvalidInput)
+	}
+
 	payment := treasury.NewPayment(orderID, amount, method)
 	
-	if err := uc.repo.Save(payment); err != nil {
-		return nil, fmt.Errorf("failed to save payment: %w", err)
+	if err := uc.repo.Save(ctx, payment); err != nil {
+		return nil, fmt.Errorf("failed to register payment attempt for order %s: %w", orderID, err)
 	}
 	
 	return payment, nil
 }
 
-// ConfirmPayment подтверждает успешное прохождение транзакции от банка.
 func (uc *TreasuryUseCase) ConfirmPayment(ctx context.Context, orderID string, transactionID string) error {
-	payment, err := uc.repo.FindByOrderID(orderID)
+	if orderID == "" || transactionID == "" {
+		return fmt.Errorf("%w: order ID and transaction ID are required", ErrInvalidInput)
+	}
+
+	payment, err := uc.repo.FindByOrderID(ctx, orderID)
 	if err != nil {
-		return fmt.Errorf("payment record not found: %w", err)
+		return fmt.Errorf("payment record for order %s not found: %w", orderID, err)
 	}
 
 	if err := payment.Confirm(transactionID); err != nil {
-		return err
+		return fmt.Errorf("domain logic error while confirming payment: %w", err)
 	}
 
-	return uc.repo.Save(payment)
+	if err := uc.repo.Save(ctx, payment); err != nil {
+		return fmt.Errorf("failed to persist payment confirmation: %w", err)
+	}
+
+	return nil
 }

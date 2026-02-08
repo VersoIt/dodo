@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"time"
@@ -151,7 +152,7 @@ func (u *User) BonusPoints() int { return u.bonusPoints }
 // --- Repository ---
 
 type UserRepository interface {
-	Save(u *User) error
-	FindByEmail(email string) (*User, error)
-	FindByID(id string) (*User, error)
+	Save(ctx context.Context, u *User) error
+	FindByEmail(ctx context.Context, email string) (*User, error)
+	FindByID(ctx context.Context, id string) (*User, error)
 }

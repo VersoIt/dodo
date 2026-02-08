@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -263,6 +264,6 @@ func generateOrderNumber() string {
 // --- Repository ---
 
 type OrderRepository interface {
-	Save(o *Order) error
-	FindByID(id string) (*Order, error)
+	Save(ctx context.Context, o *Order) error
+	FindByID(ctx context.Context, id string) (*Order, error)
 }

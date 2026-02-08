@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"context"
 	"github.com/versoit/diploma/pkg/common"
 	"errors"
 	"time"
@@ -132,8 +133,8 @@ func (p *Product) Ingredients() []IngredientRef {
 // --- Repository Interface ---
 
 type ProductRepository interface {
-	FindAll() ([]*Product, error)
-	FindByID(id string) (*Product, error)
-	Save(p *Product) error
+	FindAll(ctx context.Context) ([]*Product, error)
+	FindByID(ctx context.Context, id string) (*Product, error)
+	Save(ctx context.Context, p *Product) error
 }
 

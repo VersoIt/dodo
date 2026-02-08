@@ -1,6 +1,7 @@
 package logistics
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -207,13 +208,13 @@ func (c *Courier) Location() (lat, lng float64) { return c.currentLat, c.current
 // --- Repository ---
 
 type DeliveryRepository interface {
-	Save(d *Delivery) error
-	FindByOrderID(orderID string) (*Delivery, error)
+	Save(ctx context.Context, d *Delivery) error
+	FindByOrderID(ctx context.Context, orderID string) (*Delivery, error)
 }
 
 type CourierRepository interface {
-	FindAvailable() ([]*Courier, error)
-	FindByID(id string) (*Courier, error)
-	Save(c *Courier) error
-	UpdateLocation(id string, lat, lng float64) error
+	FindAvailable(ctx context.Context) ([]*Courier, error)
+	FindByID(ctx context.Context, id string) (*Courier, error)
+	Save(ctx context.Context, c *Courier) error
+	UpdateLocation(ctx context.Context, id string, lat, lng float64) error
 }

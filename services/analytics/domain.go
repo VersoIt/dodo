@@ -1,6 +1,7 @@
 package analytics
 
 import (
+	"context"
 	"time"
 )
 
@@ -69,6 +70,6 @@ func (k *ManagerKPI) Fact() float64 { return k.factRevenue }
 // --- Repository ---
 
 type AnalyticsRepository interface {
-	SaveKPI(k *ManagerKPI) error
-	GetKPI(managerID string) (*ManagerKPI, error)
+	SaveKPI(ctx context.Context, k *ManagerKPI) error
+	GetKPI(ctx context.Context, managerID string) (*ManagerKPI, error)
 }

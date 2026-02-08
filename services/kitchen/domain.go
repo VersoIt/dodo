@@ -1,6 +1,7 @@
 package kitchen
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -104,8 +105,8 @@ func (t *KitchenTicket) ReadyTime() time.Time { return t.readyTime }
 // --- Repository ---
 
 type TicketRepository interface {
-	Save(t *KitchenTicket) error
-	FindPending() ([]*KitchenTicket, error)
-	FindByID(id string) (*KitchenTicket, error)
+	Save(ctx context.Context, t *KitchenTicket) error
+	FindPending(ctx context.Context) ([]*KitchenTicket, error)
+	FindByID(ctx context.Context, id string) (*KitchenTicket, error)
 }
 

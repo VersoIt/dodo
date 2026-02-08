@@ -2,13 +2,17 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/orders"
 )
 
-// CreateOrderInput - входные данные для создания заказа.
+var (
+	ErrInvalidInput = errors.New("invalid input data")
+)
+
 type CreateOrderInput struct {
 	CustomerID string
 	Address    orders.DeliveryAddress
@@ -24,22 +28,33 @@ type OrderItemInput struct {
 	Toppings  []orders.Topping
 }
 
-// OrderUseCase - оркестратор бизнес-логики заказов.
 type OrderUseCase struct {
 	repo orders.OrderRepository
-	// Здесь могут быть клиенты других сервисов (через интерфейсы)
 }
 
 func NewOrderUseCase(repo orders.OrderRepository) *OrderUseCase {
 	return &OrderUseCase{repo: repo}
 }
 
-// CreateOrder реализует сценарий создания нового заказа.
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput) (*orders.Order, error) {
-	// 1. Создаем агрегат заказа
+	// Валидация входных данных
+	if input.CustomerID == "" {
+		return nil, fmt.Errorf("%w: customer ID is required", ErrInvalidInput)
+	}
+	if len(input.Items) == 0 {
+		return nil, fmt.Errorf("%w: order must have at least one item", ErrInvalidInput)
+	}
+	if input.Address.City == "" || input.Address.Street == "" {
+		return nil, fmt.Errorf("%w: incomplete delivery address", ErrInvalidInput)
+	}
+
+	// Проверка контекста перед началом тяжелой операции
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	order := orders.NewOrder(input.CustomerID, input.Address)
 
-	// 2. Добавляем позиции
 	for _, item := range input.Items {
 		if err := order.AddItem(
 			item.ProductID,
@@ -49,36 +64,34 @@ func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput)
 			item.SizeMult,
 			item.Toppings,
 		); err != nil {
-			return nil, fmt.Errorf("failed to add item %s: %w", item.ProductID, err)
+			return nil, fmt.Errorf("failed to add item %s to order: %w", item.ProductID, err)
 		}
 	}
 
-	// 3. Сохраняем заказ
-	if err := uc.repo.Save(order); err != nil {
-		return nil, fmt.Errorf("failed to save order: %w", err)
+	if err := uc.repo.Save(ctx, order); err != nil {
+		return nil, fmt.Errorf("failed to save order to repository: %w", err)
 	}
 
 	return order, nil
 }
 
-// PayOrder реализует сценарий оплаты заказа.
 func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
-	// 1. Получаем заказ из репозитория
-	order, err := uc.repo.FindByID(orderID)
+	if orderID == "" {
+		return fmt.Errorf("%w: order ID is required", ErrInvalidInput)
+	}
+
+	order, err := uc.repo.FindByID(ctx, orderID)
 	if err != nil {
-		return fmt.Errorf("order not found: %w", err)
+		return fmt.Errorf("failed to find order %s: %w", orderID, err)
 	}
 
-	// 2. Выполняем доменное действие
 	if err := order.MarkPaid(); err != nil {
-		return err
+		return fmt.Errorf("could not process payment for order %s: %w", orderID, err)
 	}
 
-	// 3. Сохраняем изменения
-	if err := uc.repo.Save(order); err != nil {
-		return fmt.Errorf("failed to update order status: %w", err)
+	if err := uc.repo.Save(ctx, order); err != nil {
+		return fmt.Errorf("failed to update order status after payment: %w", err)
 	}
 
-	// TODO: Здесь должен быть вызов Event Bus для уведомления Kitchen и Analytics
 	return nil
 }

@@ -2,31 +2,37 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/versoit/diploma/services/notification"
 )
 
+var (
+	ErrInvalidInput = errors.New("invalid input data")
+)
+
 type NotificationUseCase struct {
 	repo notification.NotificationRepository
-	// Здесь мог бы быть интерфейс отправителя (email/sms provider)
 }
 
 func NewNotificationUseCase(repo notification.NotificationRepository) *NotificationUseCase {
 	return &NotificationUseCase{repo: repo}
 }
 
-// NotifyUser создает уведомление и сохраняет его (имитация отправки).
 func (uc *NotificationUseCase) NotifyUser(ctx context.Context, userID string, title, msg string) error {
-	// Для простоты используем Push как основной канал
+	if userID == "" || title == "" || msg == "" {
+		return fmt.Errorf("%w: user ID, title and message are mandatory", ErrInvalidInput)
+	}
+
 	n := notification.NewNotification(userID, notification.ChannelPush, title, msg)
 
-	// Имитируем отправку
-	// В реальности здесь был бы вызов провайдера
+	// Здесь может быть вызов внешнего API. В случае ошибки мы все равно можем захотеть
+	// сохранить запись о неудачном уведомлении.
 	n.MarkSent()
 
-	if err := uc.repo.Save(n); err != nil {
-		return fmt.Errorf("failed to log notification: %w", err)
+	if err := uc.repo.Save(ctx, n); err != nil {
+		return fmt.Errorf("failed to persist notification log: %w", err)
 	}
 
 	return nil

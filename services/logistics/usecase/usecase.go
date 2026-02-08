@@ -2,9 +2,14 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/versoit/diploma/services/logistics"
+)
+
+var (
+	ErrInvalidInput = errors.New("invalid input data")
 )
 
 type LogisticsUseCase struct {
@@ -19,46 +24,59 @@ func NewLogisticsUseCase(dr logistics.DeliveryRepository, cr logistics.CourierRe
 	}
 }
 
-// AssignCourierToDelivery подбирает курьера и назначает его на доставку.
 func (uc *LogisticsUseCase) AssignCourierToDelivery(ctx context.Context, orderID string, courierID string) error {
-	delivery, err := uc.deliveryRepo.FindByOrderID(orderID)
+	if orderID == "" || courierID == "" {
+		return fmt.Errorf("%w: order ID and courier ID are required", ErrInvalidInput)
+	}
+
+	delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
 	if err != nil {
-		// Если доставки еще нет, создаем её
+		// Если доставка еще не зарегистрирована, создаем новый процесс
 		delivery = logistics.NewDelivery(orderID)
 	}
 
-	courier, err := uc.courierRepo.FindByID(courierID)
+	courier, err := uc.courierRepo.FindByID(ctx, courierID)
 	if err != nil {
-		return fmt.Errorf("courier not found: %w", err)
+		return fmt.Errorf("failed to locate courier %s: %w", courierID, err)
 	}
 
-	// Доменная логика курьера
 	if err := courier.TakeOrder(); err != nil {
-		return err
+		return fmt.Errorf("courier %s cannot take order: %w", courierID, err)
 	}
 
-	// Доменная логика доставки
 	if err := delivery.AssignCourier(courier.ID()); err != nil {
-		return err
+		return fmt.Errorf("delivery assignment failed: %w", err)
 	}
 
-	// Сохраняем обоих
-	if err := uc.courierRepo.Save(courier); err != nil {
-		return err
+	// Атомарность здесь имитируется через сохранение обоих. 
+	// В продакшене лучше использовать транзакции репозитория.
+	if err := uc.courierRepo.Save(ctx, courier); err != nil {
+		return fmt.Errorf("failed to update courier status: %w", err)
 	}
-	return uc.deliveryRepo.Save(delivery)
+	if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
+		return fmt.Errorf("failed to save delivery assignment: %w", err)
+	}
+
+	return nil
 }
 
-// UpdateLocation обновляет координаты в процессе доставки.
 func (uc *LogisticsUseCase) UpdateLocation(ctx context.Context, orderID string, lat, lng float64) error {
-	delivery, err := uc.deliveryRepo.FindByOrderID(orderID)
+	if orderID == "" {
+		return fmt.Errorf("%w: order ID is required", ErrInvalidInput)
+	}
+
+	delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
 	if err != nil {
-		return err
+		return fmt.Errorf("delivery process not found for order %s: %w", orderID, err)
 	}
 
 	if err := delivery.UpdateLocation(lat, lng); err != nil {
-		return err
+		return fmt.Errorf("failed to update delivery coordinates: %w", err)
 	}
 
-	return uc.deliveryRepo.Save(delivery)
+	if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
+		return fmt.Errorf("failed to persist location update: %w", err)
+	}
+
+	return nil
 }

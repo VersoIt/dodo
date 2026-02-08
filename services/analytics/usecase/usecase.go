@@ -2,9 +2,14 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/versoit/diploma/services/analytics"
+)
+
+var (
+	ErrInvalidInput = errors.New("invalid input data")
 )
 
 type AnalyticsUseCase struct {
@@ -15,24 +20,38 @@ func NewAnalyticsUseCase(repo analytics.AnalyticsRepository) *AnalyticsUseCase {
 	return &AnalyticsUseCase{repo: repo}
 }
 
-// RecordSale добавляет выручку к KPI менеджера.
 func (uc *AnalyticsUseCase) RecordSale(ctx context.Context, managerID string, amount float64) error {
-	kpi, err := uc.repo.GetKPI(managerID)
+	if managerID == "" {
+		return fmt.Errorf("%w: manager ID is required", ErrInvalidInput)
+	}
+	if amount <= 0 {
+		return fmt.Errorf("%w: sale amount must be positive", ErrInvalidInput)
+	}
+
+	kpi, err := uc.repo.GetKPI(ctx, managerID)
 	if err != nil {
-		// Если KPI на сегодня еще нет, создаем (в реальности план берется из БД)
-		kpi = analytics.NewManagerKPI(managerID, 100000) // Пример плана
+		// В реальной системе здесь может быть логика получения дефолтного плана из конфига
+		kpi = analytics.NewManagerKPI(managerID, 100000)
 	}
 
 	kpi.AddRevenue(amount)
 
-	if err := uc.repo.SaveKPI(kpi); err != nil {
-		return fmt.Errorf("failed to save kpi: %w", err)
+	if err := uc.repo.SaveKPI(ctx, kpi); err != nil {
+		return fmt.Errorf("failed to update analytics data for manager %s: %w", managerID, err)
 	}
 
 	return nil
 }
 
-// GetManagerPerformance возвращает текущие показатели выполнения плана.
 func (uc *AnalyticsUseCase) GetManagerPerformance(ctx context.Context, managerID string) (*analytics.ManagerKPI, error) {
-	return uc.repo.GetKPI(managerID)
+	if managerID == "" {
+		return nil, fmt.Errorf("%w: manager ID is required", ErrInvalidInput)
+	}
+
+	kpi, err := uc.repo.GetKPI(ctx, managerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve kpi for manager %s: %w", managerID, err)
+	}
+
+	return kpi, nil
 }

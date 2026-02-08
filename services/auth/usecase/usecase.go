@@ -10,6 +10,8 @@ import (
 
 var (
 	ErrUnauthorized = errors.New("unauthorized: invalid email or password")
+	ErrUserExists   = errors.New("user with this email already exists")
+	ErrInvalidInput = errors.New("invalid input data")
 )
 
 type AuthUseCase struct {
@@ -20,32 +22,43 @@ func NewAuthUseCase(repo auth.UserRepository) *AuthUseCase {
 	return &AuthUseCase{repo: repo}
 }
 
-// Register создает нового пользователя.
 func (uc *AuthUseCase) Register(ctx context.Context, email, password string, role auth.Role) (*auth.User, error) {
-	// Проверка на существование
-	existing, _ := uc.repo.FindByEmail(email)
-	if existing != nil {
-		return nil, errors.New("user already exists")
+	if email == "" || password == "" {
+		return nil, fmt.Errorf("%w: email and password are required", ErrInvalidInput)
 	}
 
-	// Создание через доменную фабрику
+	// Проверяем, существует ли пользователь
+	existing, err := uc.repo.FindByEmail(ctx, email)
+	if err != nil && !errors.Is(err, auth.ErrUserNotFound) {
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
+	}
+	if existing != nil {
+		return nil, ErrUserExists
+	}
+
 	user, err := auth.NewUser(email, password, role)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("domain validation failed: %w", err)
 	}
 
-	if err := uc.repo.Save(user); err != nil {
-		return nil, fmt.Errorf("failed to save user: %w", err)
+	if err := uc.repo.Save(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to save new user: %w", err)
 	}
 
 	return user, nil
 }
 
-// Login проверяет данные и возвращает пользователя (без генерации JWT здесь, это задача API слоя).
 func (uc *AuthUseCase) Login(ctx context.Context, email, password string) (*auth.User, error) {
-	user, err := uc.repo.FindByEmail(email)
+	if email == "" || password == "" {
+		return nil, fmt.Errorf("%w: credentials required", ErrInvalidInput)
+	}
+
+	user, err := uc.repo.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, ErrUnauthorized
+		if errors.Is(err, auth.ErrUserNotFound) {
+			return nil, ErrUnauthorized
+		}
+		return nil, fmt.Errorf("database error during login: %w", err)
 	}
 
 	if !user.CheckPassword(password) {

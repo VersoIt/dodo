@@ -1,6 +1,7 @@
 package treasury
 
 import (
+	"context"
 	"github.com/versoit/diploma/pkg/common"
 	"errors"
 	"time"
@@ -131,6 +132,6 @@ func (p *Payment) CreatedAt() time.Time  { return p.createdAt }
 // --- Repository ---
 
 type PaymentRepository interface {
-	Save(p *Payment) error
-	FindByOrderID(orderID string) (*Payment, error)
+	Save(ctx context.Context, p *Payment) error
+	FindByOrderID(ctx context.Context, orderID string) (*Payment, error)
 }

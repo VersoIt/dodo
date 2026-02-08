@@ -7,7 +7,6 @@ import (
 	"github.com/versoit/diploma/services/orders"
 )
 
-// MockRepo - простая реализация для тестов
 type MockOrderRepo struct {
 	store map[string]*orders.Order
 }
@@ -18,12 +17,12 @@ func NewMockRepo() *MockOrderRepo {
 	}
 }
 
-func (m *MockOrderRepo) Save(o *orders.Order) error {
+func (m *MockOrderRepo) Save(ctx context.Context, o *orders.Order) error {
 	m.store[o.ID()] = o
 	return nil
 }
 
-func (m *MockOrderRepo) FindByID(id string) (*orders.Order, error) {
+func (m *MockOrderRepo) FindByID(ctx context.Context, id string) (*orders.Order, error) {
 	if o, ok := m.store[id]; ok {
 		return o, nil
 	}
@@ -37,7 +36,8 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 	input := CreateOrderInput{
 		CustomerID: "cust1",
 		Address: orders.DeliveryAddress{
-			City: "Moscow",
+			City:   "Moscow",
+			Street: "Red Square",
 		},
 		Items: []OrderItemInput{
 			{
@@ -59,7 +59,7 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 		t.Error("order ID should be generated")
 	}
 
-	savedOrder, _ := repo.FindByID(order.ID())
+	savedOrder, _ := repo.FindByID(context.Background(), order.ID())
 	if savedOrder == nil {
 		t.Error("order should be saved in repo")
 	}
@@ -73,18 +73,15 @@ func TestOrderUseCase_PayOrder(t *testing.T) {
 	repo := NewMockRepo()
 	uc := NewOrderUseCase(repo)
 
-	// Setup: create an order
 	order := orders.NewOrder("cust1", orders.DeliveryAddress{})
-	repo.Save(order)
+	repo.Save(context.Background(), order)
 
-	// Act
 	err := uc.PayOrder(context.Background(), order.ID())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Assert
-	updatedOrder, _ := repo.FindByID(order.ID())
+	updatedOrder, _ := repo.FindByID(context.Background(), order.ID())
 	if updatedOrder.Status() != orders.StatusPaid {
 		t.Errorf("expected status paid, got %v", updatedOrder.Status())
 	}

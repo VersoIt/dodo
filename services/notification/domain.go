@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -65,5 +66,5 @@ func (n *Notification) Error() string { return n.error }
 // --- Repository ---
 
 type NotificationRepository interface {
-	Save(n *Notification) error
+	Save(ctx context.Context, n *Notification) error
 }
