@@ -48,7 +48,7 @@ func (uc *LogisticsUseCase) AssignCourierToDelivery(ctx context.Context, orderID
 		return fmt.Errorf("delivery assignment failed: %w", err)
 	}
 
-	// Атомарность здесь имитируется через сохранение обоих. 
+	// Атомарность здесь имитируется через сохранение обоих.
 	// В продакшене лучше использовать транзакции репозитория.
 	if err := uc.courierRepo.Save(ctx, courier); err != nil {
 		return fmt.Errorf("failed to update courier status: %w", err)

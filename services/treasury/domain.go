@@ -2,8 +2,8 @@ package treasury
 
 import (
 	"context"
-	"github.com/versoit/diploma/pkg/common"
 	"errors"
+	"github.com/versoit/diploma/pkg/common"
 	"time"
 
 	"github.com/google/uuid"

@@ -147,8 +147,6 @@ func (u *User) IsClient() bool { return u.isClient }
 
 func (u *User) BonusPoints() int { return u.bonusPoints }
 
-
-
 // --- Repository ---
 
 type UserRepository interface {

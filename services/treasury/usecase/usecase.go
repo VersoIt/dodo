@@ -30,11 +30,11 @@ func (uc *TreasuryUseCase) InitiatePayment(ctx context.Context, orderID string, 
 	}
 
 	payment := treasury.NewPayment(orderID, amount, method)
-	
+
 	if err := uc.repo.Save(ctx, payment); err != nil {
 		return nil, fmt.Errorf("failed to register payment attempt for order %s: %w", orderID, err)
 	}
-	
+
 	return payment, nil
 }
 

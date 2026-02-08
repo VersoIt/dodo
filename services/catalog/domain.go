@@ -2,8 +2,8 @@ package catalog
 
 import (
 	"context"
-	"github.com/versoit/diploma/pkg/common"
 	"errors"
+	"github.com/versoit/diploma/pkg/common"
 	"time"
 
 	"github.com/google/uuid"
@@ -115,13 +115,13 @@ func (p *Product) SetAvailability(available bool) {
 
 // --- Getters (Accessors) ---
 
-func (p *Product) ID() string               { return p.id }
-func (p *Product) Name() string             { return p.name }
-func (p *Product) Description() string      { return p.description }
-func (p *Product) Category() CategoryType   { return p.category }
-func (p *Product) BasePrice() common.Money  { return p.basePrice }
-func (p *Product) ImageURL() string         { return p.imageUrl }
-func (p *Product) IsAvailable() bool        { return p.isAvailable }
+func (p *Product) ID() string              { return p.id }
+func (p *Product) Name() string            { return p.name }
+func (p *Product) Description() string     { return p.description }
+func (p *Product) Category() CategoryType  { return p.category }
+func (p *Product) BasePrice() common.Money { return p.basePrice }
+func (p *Product) ImageURL() string        { return p.imageUrl }
+func (p *Product) IsAvailable() bool       { return p.isAvailable }
 
 // Ingredients возвращает КОПИЮ списка ингредиентов для защиты внутреннего состояния.
 func (p *Product) Ingredients() []IngredientRef {
@@ -137,4 +137,3 @@ type ProductRepository interface {
 	FindByID(ctx context.Context, id string) (*Product, error)
 	Save(ctx context.Context, p *Product) error
 }
-

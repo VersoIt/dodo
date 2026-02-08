@@ -67,7 +67,7 @@ type Delivery struct {
 	createdAt    time.Time
 	pickupTime   time.Time
 	deliveryTime time.Time
-	
+
 	currentLat float64
 	currentLng float64
 }
@@ -132,11 +132,11 @@ func (d *Delivery) Complete() error {
 // --- Errors ---
 
 var (
-	ErrDeliveryNotPending  = errors.New("delivery is not in pending state")
-	ErrCourierNotAssigned  = errors.New("courier is not assigned")
-	ErrInvalidStatus       = errors.New("invalid status for operation")
-	ErrCourierBusy         = errors.New("courier is busy")
-	ErrInvalidCoordinates  = errors.New("invalid coordinates")
+	ErrDeliveryNotPending = errors.New("delivery is not in pending state")
+	ErrCourierNotAssigned = errors.New("courier is not assigned")
+	ErrInvalidStatus      = errors.New("invalid status for operation")
+	ErrCourierBusy        = errors.New("courier is busy")
+	ErrInvalidCoordinates = errors.New("invalid coordinates")
 )
 
 // ...
@@ -192,17 +192,17 @@ func (c *Courier) CompleteOrder() {
 }
 
 // Getters
-func (d *Delivery) OrderID() string { return d.orderID }
-func (d *Delivery) CourierID() string { return d.courierID }
-func (d *Delivery) Status() DeliveryStatus { return d.status }
-func (d *Delivery) PickupTime() time.Time { return d.pickupTime }
-func (d *Delivery) DeliveryTime() time.Time { return d.deliveryTime }
+func (d *Delivery) OrderID() string              { return d.orderID }
+func (d *Delivery) CourierID() string            { return d.courierID }
+func (d *Delivery) Status() DeliveryStatus       { return d.status }
+func (d *Delivery) PickupTime() time.Time        { return d.pickupTime }
+func (d *Delivery) DeliveryTime() time.Time      { return d.deliveryTime }
 func (d *Delivery) Location() (lat, lng float64) { return d.currentLat, d.currentLng }
 
-func (c *Courier) ID() string { return c.id }
-func (c *Courier) Name() string { return c.name }
-func (c *Courier) Phone() string { return c.phone }
-func (c *Courier) Status() CourierStatus { return c.status }
+func (c *Courier) ID() string                   { return c.id }
+func (c *Courier) Name() string                 { return c.name }
+func (c *Courier) Phone() string                { return c.phone }
+func (c *Courier) Status() CourierStatus        { return c.status }
 func (c *Courier) Location() (lat, lng float64) { return c.currentLat, c.currentLng }
 
 // --- Repository ---

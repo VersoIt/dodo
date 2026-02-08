@@ -9,7 +9,7 @@ func TestOrder_AddItem_CalculatesPriceCorrectly(t *testing.T) {
 	// Arrange
 	addr := DeliveryAddress{City: "Test City", Street: "Main St"}
 	order := NewOrder("cust-123", addr)
-	
+
 	basePrice := common.Money(100.0)
 	sizeMult := 1.2 // +20%
 	qty := 2
@@ -54,7 +54,7 @@ func TestOrder_ApplyPromoCode(t *testing.T) {
 
 func TestOrder_StateTransitions(t *testing.T) {
 	order := NewOrder("c1", DeliveryAddress{})
-	
+
 	// Created -> Paid
 	if err := order.MarkPaid(); err != nil {
 		t.Errorf("failed to mark paid: %v", err)
@@ -67,7 +67,7 @@ func TestOrder_StateTransitions(t *testing.T) {
 	if err := order.SendToKitchen(); err != nil {
 		t.Errorf("failed to send to kitchen: %v", err)
 	}
-	
+
 	// Cooking -> Ready
 	if err := order.MarkReady(); err != nil {
 		t.Errorf("failed to mark ready: %v", err)

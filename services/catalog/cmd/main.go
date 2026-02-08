@@ -1,5 +1,12 @@
 package main
-import ("log/slog"; "os"; "os/signal"; "syscall")
+
+import (
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
 func main() {
 	slog.Info("catalog service started!")
 	sigChan := make(chan os.Signal, 1)

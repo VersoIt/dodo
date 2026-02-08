@@ -34,11 +34,11 @@ func TestKitchenUseCase_AcceptOrder(t *testing.T) {
 
 	items := []kitchen.KitchenItem{{Name: "Pizza", Quantity: 1}}
 	ticket, err := uc.AcceptOrder(context.Background(), "order-123", items)
-	
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	
+
 	if ticket.OrderID() != "order-123" {
 		t.Errorf("expected orderID order-123, got %s", ticket.OrderID())
 	}
@@ -47,7 +47,7 @@ func TestKitchenUseCase_AcceptOrder(t *testing.T) {
 func TestKitchenUseCase_CookingFlow(t *testing.T) {
 	repo := &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
 	uc := NewKitchenUseCase(repo)
-	
+
 	ticket, _ := uc.AcceptOrder(context.Background(), "ord-1", []kitchen.KitchenItem{{Name: "P"}})
 	id := ticket.ID()
 
@@ -55,7 +55,7 @@ func TestKitchenUseCase_CookingFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("start cooking failed: %v", err)
 	}
-	
+
 	saved, _ := repo.FindByID(context.Background(), id)
 	if saved.Status() != kitchen.TicketCooking {
 		t.Errorf("expected cooking status, got %v", saved.Status())

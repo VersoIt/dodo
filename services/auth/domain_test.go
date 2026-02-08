@@ -21,7 +21,7 @@ func TestNewUser(t *testing.T) {
 
 func TestUser_BonusSystem(t *testing.T) {
 	u, _ := NewUser("test@example.com", "password", RoleClient)
-	
+
 	u.AccrueBonuses(100)
 	if u.BonusPoints() != 100 {
 		t.Errorf("expected 100 bonuses, got %d", u.BonusPoints())

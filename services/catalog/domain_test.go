@@ -20,7 +20,7 @@ func TestNewProduct(t *testing.T) {
 
 func TestProduct_UpdatePrice(t *testing.T) {
 	p, _ := NewProduct("Pizza", "", CatClassic, 500)
-	
+
 	err := p.UpdatePrice(600)
 	if err != nil || p.BasePrice() != 600 {
 		t.Errorf("failed to update price")
@@ -34,7 +34,7 @@ func TestProduct_UpdatePrice(t *testing.T) {
 func TestProduct_AddIngredient(t *testing.T) {
 	p, _ := NewProduct("Pizza", "", CatClassic, 500)
 	err := p.AddIngredient("ing-1", 10.5, true)
-	
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

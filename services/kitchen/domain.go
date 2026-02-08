@@ -94,8 +94,8 @@ func (t *KitchenTicket) GetCookingDuration() time.Duration {
 }
 
 // Getters
-func (t *KitchenTicket) ID() string { return t.id }
-func (t *KitchenTicket) OrderID() string { return t.orderID }
+func (t *KitchenTicket) ID() string           { return t.id }
+func (t *KitchenTicket) OrderID() string      { return t.orderID }
 func (t *KitchenTicket) Status() TicketStatus { return t.status }
 func (t *KitchenTicket) Items() []KitchenItem { return t.items }
 func (t *KitchenTicket) CreatedAt() time.Time { return t.createdAt }
@@ -109,4 +109,3 @@ type TicketRepository interface {
 	FindPending(ctx context.Context) ([]*KitchenTicket, error)
 	FindByID(ctx context.Context, id string) (*KitchenTicket, error)
 }
-

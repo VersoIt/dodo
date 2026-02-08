@@ -20,7 +20,7 @@ func TestPayment_Confirm(t *testing.T) {
 
 func TestPayment_Refund(t *testing.T) {
 	p := NewPayment("order-1", 100, MethodOnline)
-	
+
 	// Cannot refund waiting payment
 	if err := p.Refund(); err != ErrInvalidRefund {
 		t.Errorf("expected ErrInvalidRefund")

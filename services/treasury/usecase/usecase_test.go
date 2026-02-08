@@ -11,8 +11,9 @@ import (
 type MockTreasuryRepo struct {
 	store map[string]*treasury.Payment
 }
+
 func (m *MockTreasuryRepo) Save(ctx context.Context, p *treasury.Payment) error {
-	m.store[p.OrderID()] = p 
+	m.store[p.OrderID()] = p
 	return nil
 }
 func (m *MockTreasuryRepo) FindByOrderID(ctx context.Context, id string) (*treasury.Payment, error) {

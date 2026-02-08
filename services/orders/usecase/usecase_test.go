@@ -63,7 +63,7 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 	if savedOrder == nil {
 		t.Error("order should be saved in repo")
 	}
-	
+
 	if savedOrder.FinalPrice() != 500 {
 		t.Errorf("expected price 500, got %v", savedOrder.FinalPrice())
 	}
