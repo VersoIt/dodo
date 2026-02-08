@@ -10,6 +10,19 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path: [
+          "pkg",
+          "services/analytics",
+          "services/auth",
+          "services/catalog",
+          "services/kitchen",
+          "services/logistics",
+          "services/notification",
+          "services/orders",
+          "services/treasury"
+        ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
@@ -20,7 +33,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
-          args: ./...
+          working-directory: ${{ matrix.path }}
 
   test:
     name: Test
@@ -32,7 +45,16 @@ jobs:
         with:
           go-version: '1.24'
       - name: Run Tests
-        run: go test -v ./...
+        run: |
+          go test -v ./pkg/...
+          go test -v ./services/analytics/...
+          go test -v ./services/auth/...
+          go test -v ./services/catalog/...
+          go test -v ./services/kitchen/...
+          go test -v ./services/logistics/...
+          go test -v ./services/notification/...
+          go test -v ./services/orders/...
+          go test -v ./services/treasury/...
 
   build:
     name: Build Docker Images
