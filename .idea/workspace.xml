@@ -6,41 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/common/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/common/types.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/internal/api/grpc/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/usecase/usecase.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/usecase/usecase_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/usecase/usecase_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/internal/api/grpc/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/usecase/usecase_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/usecase/usecase_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/kitchen/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/kitchen/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/kitchen/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/logistics/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/logistics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/logistics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/api/grpc/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/usecase/usecase_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/usecase/usecase_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/internal/api/grpc/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/usecase/usecase_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/usecase/usecase_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/common/types_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/common/types_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,18 +24,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "versoooit"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;versoooit&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/VersoIt/diploma.git",
-    "accountId": "e6c0894e-b341-473c-a8a8-1e2032bf1468"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/VersoIt/diploma.git&quot;,
+    &quot;accountId&quot;: &quot;e6c0894e-b341-473c-a8a8-1e2032bf1468&quot;
   }
-}]]></component>
+}</component>
   <component name="GoLinterSelectedExecutable" path="$PROJECT_DIR$/../../../../ProgramData/chocolatey/bin/golangci-lint.exe" />
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
@@ -83,29 +49,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "Go Build.go build github.com/versoit/diploma/services/analytics/cmd.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.GoLinterPluginOnboarding": "true",
-    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "master",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Ruslan/GolandProjects/diploma",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go Build.go build github.com/versoit/diploma/services/analytics/cmd.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Ruslan/GolandProjects/diploma&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Ruslan\GolandProjects\diploma" />
