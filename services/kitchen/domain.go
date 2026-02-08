@@ -91,6 +91,19 @@ func (t *KitchenTicket) CreatedAt() time.Time { return t.createdAt }
 func (t *KitchenTicket) StartTime() time.Time { return t.startCookingTime }
 func (t *KitchenTicket) ReadyTime() time.Time { return t.readyTime }
 
+// ReconstructTicket builds a KitchenTicket from storage.
+func ReconstructTicket(id, orderID string, status TicketStatus, createdAt, start, ready time.Time, items []KitchenItem) *KitchenTicket {
+	return &KitchenTicket{
+		id:               id,
+		orderID:          orderID,
+		status:           status,
+		createdAt:        createdAt,
+		startCookingTime: start,
+		readyTime:        ready,
+		items:            items,
+	}
+}
+
 type TicketRepository interface {
 	Save(ctx context.Context, t *KitchenTicket) error
 	FindPending(ctx context.Context) ([]*KitchenTicket, error)

@@ -262,6 +262,36 @@ func (o *Order) Discount() common.Money      { return o.discount }
 func (o *Order) PromoCode() string           { return o.promoCode }
 func (o *Order) FinalPrice() common.Money    { return o.finalPrice }
 
+// ReconstructOrder builds an Order aggregate from storage.
+func ReconstructOrder(id, number, custID string, status OrderStatus, createdAt time.Time, addr DeliveryAddress, delPrice, discount common.Money, promo string, final common.Money, items []*OrderItem) *Order {
+	return &Order{
+		id:            id,
+		orderNumber:   number,
+		customerID:    custID,
+		status:        status,
+		createdAt:     createdAt,
+		address:       addr,
+		items:         items,
+		deliveryPrice: delPrice,
+		discount:      discount,
+		promoCode:     promo,
+		finalPrice:    final,
+	}
+}
+
+// ReconstructOrderItem builds an OrderItem from storage.
+func ReconstructOrderItem(id, prodID, name string, qty int, base common.Money, size float64, toppings []Topping) *OrderItem {
+	return &OrderItem{
+		id:             id,
+		productID:      prodID,
+		productName:    name,
+		quantity:       qty,
+		basePrice:      base,
+		sizeMultiplier: size,
+		toppings:       toppings,
+	}
+}
+
 func generateOrderNumber() string {
 	id, _ := uuid.NewV7()
 	return fmt.Sprintf("PG-%s-%s", time.Now().Format("2006.01.02"), id.String()[:4])

@@ -119,6 +119,20 @@ func (p *Payment) Status() PaymentStatus { return p.status }
 func (p *Payment) TransactionID() string { return p.transactionID }
 func (p *Payment) CreatedAt() time.Time  { return p.createdAt }
 
+// ReconstructPayment builds a Payment from storage.
+func ReconstructPayment(id, orderID string, amount common.Money, method PaymentMethod, status PaymentStatus, txID string, createdAt time.Time) *Payment {
+	return &Payment{
+		id:            id,
+		orderID:       orderID,
+		amount:        amount,
+		method:        method,
+		status:        status,
+		transactionID: txID,
+		createdAt:     createdAt,
+		updatedAt:     time.Now(),
+	}
+}
+
 type PaymentRepository interface {
 	Save(ctx context.Context, p *Payment) error
 	FindByOrderID(ctx context.Context, orderID string) (*Payment, error)

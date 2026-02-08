@@ -57,6 +57,20 @@ func (n *Notification) SentAt() time.Time { return n.sentAt }
 func (n *Notification) IsSent() bool      { return n.isSent }
 func (n *Notification) Error() string     { return n.error }
 
+// ReconstructNotification builds a Notification from storage.
+func ReconstructNotification(id, userID string, ch Channel, title, msg string, sent bool, at time.Time, err string) *Notification {
+	return &Notification{
+		id:      id,
+		userID:  userID,
+		channel: ch,
+		title:   title,
+		message: msg,
+		isSent:  sent,
+		sentAt:  at,
+		error:   err,
+	}
+}
+
 type NotificationRepository interface {
 	Save(ctx context.Context, n *Notification) error
 }

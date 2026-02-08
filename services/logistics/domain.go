@@ -194,6 +194,32 @@ func (c *Courier) Phone() string        { return c.phone }
 func (c *Courier) Status() CourierStatus { return c.status }
 func (c *Courier) Location() (lat, lng float64) { return c.currentLat, c.currentLng }
 
+// ReconstructCourier builds a Courier from storage.
+func ReconstructCourier(id, name, phone string, status CourierStatus, lat, lng float64) *Courier {
+	return &Courier{
+		id:         id,
+		name:       name,
+		phone:      phone,
+		status:     status,
+		currentLat: lat,
+		currentLng: lng,
+	}
+}
+
+// ReconstructDelivery builds a Delivery from storage.
+func ReconstructDelivery(orderID, courierID string, status DeliveryStatus, createdAt, pickup, del time.Time, lat, lng float64) *Delivery {
+	return &Delivery{
+		orderID:      orderID,
+		courierID:    courierID,
+		status:       status,
+		createdAt:    createdAt,
+		pickupTime:   pickup,
+		deliveryTime: del,
+		currentLat:   lat,
+		currentLng:   lng,
+	}
+}
+
 type DeliveryRepository interface {
 	Save(ctx context.Context, d *Delivery) error
 	FindByOrderID(ctx context.Context, orderID string) (*Delivery, error)

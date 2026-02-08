@@ -81,7 +81,90 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 }
 
 func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, error) {
-	// Complex select with joins or multiple queries
-	// For now, minimal version
-	return nil, nil
+	// 1. Get Order basic info
+	sql, args, err := r.sb.Select("id", "order_number", "customer_id", "status", "created_at", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price").
+		From("orders").
+		Where(squirrel.Eq{"id": id}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		oid, number, cid, promo, city, street, house, apartment, floor, comment string
+		status                                                                  int
+		createdAt                                                               time.Time
+		delPrice, discount, finalPrice                                          orders.Money
+	)
+
+	err = r.pool.QueryRow(ctx, sql, args...).Scan(
+		&oid, &number, &cid, &status, &createdAt,
+		&city, &street, &house, &apartment, &floor, &comment,
+		&delPrice, &discount, &promo, &finalPrice,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, orders.ErrOrderNotFound
+		}
+		return nil, err
+	}
+
+	// 2. Get Items
+	sql, args, err = r.sb.Select("id", "product_id", "product_name", "quantity", "base_price", "size_multiplier").
+		From("order_items").
+		Where(squirrel.Eq{"order_id": id}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []*orders.OrderItem
+	for rows.Next() {
+		var (
+			iid, pid, name string
+			qty            int
+			base           orders.Money
+			size           float64
+		)
+		if err := rows.Scan(&iid, &pid, &name, &qty, &base, &size); err != nil {
+			return nil, err
+		}
+
+		// 3. Get Toppings for each item
+		tsql, targs, _ := r.sb.Select("name", "price").
+			From("order_item_toppings").
+			Where(squirrel.Eq{"order_item_id": iid}).
+			ToSql()
+		
+		trows, err := r.pool.Query(ctx, tsql, targs...)
+		if err != nil {
+			return nil, err
+		}
+		
+		var toppings []orders.Topping
+		for trows.Next() {
+			var tn string
+			var tp orders.Money
+			if err := trows.Scan(&tn, &tp); err != nil {
+				trows.Close()
+				return nil, err
+			}
+			toppings = append(toppings, orders.Topping{Name: tn, Price: tp})
+		}
+		trows.Close()
+
+		items = append(items, orders.ReconstructOrderItem(iid, pid, name, qty, base, size, toppings))
+	}
+
+	addr := orders.DeliveryAddress{
+		City: city, Street: street, House: house, Apartment: apartment, Floor: floor, Comment: comment,
+	}
+
+	return orders.ReconstructOrder(oid, number, cid, orders.OrderStatus(status), createdAt, addr, delPrice, discount, promo, finalPrice, items), nil
 }
