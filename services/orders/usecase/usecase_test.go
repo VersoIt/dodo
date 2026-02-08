@@ -59,7 +59,10 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 		t.Error("order ID should be generated")
 	}
 
-	savedOrder, _ := repo.FindByID(context.Background(), order.ID())
+	savedOrder, err := repo.FindByID(context.Background(), order.ID())
+	if err != nil {
+		t.Fatalf("failed to find saved order: %v", err)
+	}
 	if savedOrder == nil {
 		t.Error("order should be saved in repo")
 	}
@@ -74,14 +77,19 @@ func TestOrderUseCase_PayOrder(t *testing.T) {
 	uc := NewOrderUseCase(repo)
 
 	order := orders.NewOrder("cust1", orders.DeliveryAddress{})
-	repo.Save(context.Background(), order)
+	if err := repo.Save(context.Background(), order); err != nil {
+		t.Fatalf("failed to save order: %v", err)
+	}
 
 	err := uc.PayOrder(context.Background(), order.ID())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	updatedOrder, _ := repo.FindByID(context.Background(), order.ID())
+	updatedOrder, err := repo.FindByID(context.Background(), order.ID())
+	if err != nil {
+		t.Fatalf("failed to find updated order: %v", err)
+	}
 	if updatedOrder.Status() != orders.StatusPaid {
 		t.Errorf("expected status paid, got %v", updatedOrder.Status())
 	}

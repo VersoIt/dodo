@@ -44,7 +44,10 @@ func TestCatalogUseCase_CreateProduct(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	saved, _ := repo.FindByID(context.Background(), p.ID())
+	saved, err := repo.FindByID(context.Background(), p.ID())
+	if err != nil {
+		t.Fatalf("failed to find product: %v", err)
+	}
 	if saved == nil {
 		t.Error("product not saved")
 	}
@@ -53,14 +56,20 @@ func TestCatalogUseCase_CreateProduct(t *testing.T) {
 func TestCatalogUseCase_UpdatePrice(t *testing.T) {
 	repo := NewMockProductRepo()
 	uc := NewCatalogUseCase(repo)
-	p, _ := uc.CreateProduct(context.Background(), "Burger", "Desc", catalog.CatClassic, 100)
+	p, err := uc.CreateProduct(context.Background(), "Burger", "Desc", catalog.CatClassic, 100)
+	if err != nil {
+		t.Fatalf("setup failed: %v", err)
+	}
 
-	err := uc.UpdatePrice(context.Background(), p.ID(), 150)
+	err = uc.UpdatePrice(context.Background(), p.ID(), 150)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	updated, _ := repo.FindByID(context.Background(), p.ID())
+	updated, err := repo.FindByID(context.Background(), p.ID())
+	if err != nil {
+		t.Fatalf("failed to find updated product: %v", err)
+	}
 	if updated.BasePrice() != 150 {
 		t.Errorf("expected price 150, got %v", updated.BasePrice())
 	}

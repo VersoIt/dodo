@@ -51,14 +51,19 @@ func TestLogisticsUseCase_AssignCourier(t *testing.T) {
 
 	courier := logistics.NewCourier("Vasya", "123")
 	courier.GoOnline()
-	cRepo.Save(context.Background(), courier)
+	if err := cRepo.Save(context.Background(), courier); err != nil {
+		t.Fatalf("failed to save courier: %v", err)
+	}
 
 	err := uc.AssignCourierToDelivery(context.Background(), "order-1", courier.ID())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	d, _ := dRepo.FindByOrderID(context.Background(), "order-1")
+	d, err := dRepo.FindByOrderID(context.Background(), "order-1")
+	if err != nil {
+		t.Fatalf("failed to find delivery: %v", err)
+	}
 	if d.CourierID() != courier.ID() {
 		t.Error("courier not assigned")
 	}

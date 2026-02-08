@@ -48,15 +48,21 @@ func TestKitchenUseCase_CookingFlow(t *testing.T) {
 	repo := &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
 	uc := NewKitchenUseCase(repo)
 
-	ticket, _ := uc.AcceptOrder(context.Background(), "ord-1", []kitchen.KitchenItem{{Name: "P"}})
+	ticket, err := uc.AcceptOrder(context.Background(), "ord-1", []kitchen.KitchenItem{{Name: "P"}})
+	if err != nil {
+		t.Fatalf("setup failed: %v", err)
+	}
 	id := ticket.ID()
 
-	err := uc.StartCooking(context.Background(), id)
+	err = uc.StartCooking(context.Background(), id)
 	if err != nil {
 		t.Fatalf("start cooking failed: %v", err)
 	}
 
-	saved, _ := repo.FindByID(context.Background(), id)
+	saved, err := repo.FindByID(context.Background(), id)
+	if err != nil {
+		t.Fatalf("failed to find ticket: %v", err)
+	}
 	if saved.Status() != kitchen.TicketCooking {
 		t.Errorf("expected cooking status, got %v", saved.Status())
 	}

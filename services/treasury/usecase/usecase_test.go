@@ -37,7 +37,10 @@ func TestTreasuryUseCase_PaymentFlow(t *testing.T) {
 		t.Fatalf("confirm failed: %v", err)
 	}
 
-	saved, _ := repo.FindByOrderID(context.Background(), "ord-1")
+	saved, err := repo.FindByOrderID(context.Background(), "ord-1")
+	if err != nil {
+		t.Fatalf("failed to find payment: %v", err)
+	}
 	if saved.Status() != treasury.PayStatusSuccess {
 		t.Error("should be success")
 	}

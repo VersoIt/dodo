@@ -61,7 +61,9 @@ func TestAuthUseCase_Login(t *testing.T) {
 	repo := NewMockUserRepo()
 	uc := NewAuthUseCase(repo)
 
-	uc.Register(context.Background(), "user@example.com", "secret123", auth.RoleClient)
+	if _, err := uc.Register(context.Background(), "user@example.com", "secret123", auth.RoleClient); err != nil {
+		t.Fatalf("setup failed: failed to register user: %v", err)
+	}
 
 	user, err := uc.Login(context.Background(), "user@example.com", "secret123")
 	if err != nil {

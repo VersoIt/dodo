@@ -33,7 +33,10 @@ func TestAnalyticsUseCase_RecordSale(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	kpi, _ := repo.GetKPI(context.Background(), "man1")
+	kpi, err := repo.GetKPI(context.Background(), "man1")
+	if err != nil {
+		t.Fatalf("failed to get kpi: %v", err)
+	}
 	if kpi.Fact() != 5000 {
 		t.Errorf("expected 5000, got %v", kpi.Fact())
 	}
