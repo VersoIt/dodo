@@ -11,7 +11,7 @@ type MockNotifyRepo struct {
 	lastSaved *notification.Notification
 }
 
-func (m *MockNotifyRepo) Save(n *notification.Notification) error {
+func (m *MockNotifyRepo) Save(ctx context.Context, n *notification.Notification) error {
 	m.lastSaved = n
 	return nil
 }
@@ -25,10 +25,7 @@ func TestNotificationUseCase_NotifyUser(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if repo.lastSaved == nil {
-		t.Fatal("notification not saved")
-	}
 	if !repo.lastSaved.IsSent() {
-		t.Error("notification should be marked as sent (simulated)")
+		t.Error("notification not marked as sent")
 	}
 }

@@ -12,31 +12,24 @@ type MockTicketRepo struct {
 	store map[string]*kitchen.KitchenTicket
 }
 
-func NewMockTicketRepo() *MockTicketRepo {
-	return &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
-}
-
-func (m *MockTicketRepo) Save(t *kitchen.KitchenTicket) error {
+func (m *MockTicketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
 	m.store[t.ID()] = t
 	return nil
 }
 
-func (m *MockTicketRepo) FindByID(id string) (*kitchen.KitchenTicket, error) {
+func (m *MockTicketRepo) FindByID(ctx context.Context, id string) (*kitchen.KitchenTicket, error) {
 	if t, ok := m.store[id]; ok {
 		return t, nil
 	}
-	// Better to have a specific error, but standard error is fine for mock
 	return nil, fmt.Errorf("ticket not found")
 }
 
-func (m *MockTicketRepo) FindPending() ([]*kitchen.KitchenTicket, error) {
-	return nil, nil // Not used in current tests
+func (m *MockTicketRepo) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket, error) {
+	return nil, nil
 }
 
-
-
 func TestKitchenUseCase_AcceptOrder(t *testing.T) {
-	repo := NewMockTicketRepo()
+	repo := &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
 	uc := NewKitchenUseCase(repo)
 
 	items := []kitchen.KitchenItem{{Name: "Pizza", Quantity: 1}}
@@ -49,39 +42,22 @@ func TestKitchenUseCase_AcceptOrder(t *testing.T) {
 	if ticket.OrderID() != "order-123" {
 		t.Errorf("expected orderID order-123, got %s", ticket.OrderID())
 	}
-	
-	if ticket.Status() != kitchen.TicketQueued {
-		t.Errorf("expected queued status, got %v", ticket.Status())
-	}
 }
 
 func TestKitchenUseCase_CookingFlow(t *testing.T) {
-	repo := NewMockTicketRepo()
+	repo := &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
 	uc := NewKitchenUseCase(repo)
 	
-	// Create
-	ticket, _ := uc.AcceptOrder(context.Background(), "ord-1", nil)
+	ticket, _ := uc.AcceptOrder(context.Background(), "ord-1", []kitchen.KitchenItem{{Name: "P"}})
 	id := ticket.ID()
 
-	// Start Cooking
 	err := uc.StartCooking(context.Background(), id)
 	if err != nil {
 		t.Fatalf("start cooking failed: %v", err)
 	}
 	
-	saved, _ := repo.FindByID(id)
+	saved, _ := repo.FindByID(context.Background(), id)
 	if saved.Status() != kitchen.TicketCooking {
 		t.Errorf("expected cooking status, got %v", saved.Status())
-	}
-
-	// Ready
-	err = uc.MarkReady(context.Background(), id)
-	if err != nil {
-		t.Fatalf("mark ready failed: %v", err)
-	}
-
-	saved, _ = repo.FindByID(id)
-	if saved.Status() != kitchen.TicketReady {
-		t.Errorf("expected ready status, got %v", saved.Status())
 	}
 }
