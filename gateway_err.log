@@ -1,0 +1,63 @@
+[Fx] PROVIDE	fx.Lifecycle <= go.uber.org/fx.New.func1()
+[Fx] PROVIDE	fx.Shutdowner <= go.uber.org/fx.(*App).shutdowner-fm()
+[Fx] PROVIDE	fx.DotGraph <= go.uber.org/fx.(*App).dotGraph-fm()
+[Fx] PROVIDE	auth_pb.UserServiceClient <= github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewAuthClient()
+[Fx] PROVIDE	catalog_pb.ProductServiceClient <= github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewCatalogClient()
+[Fx] PROVIDE	orders_pb.OrderServiceClient <= github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewOrdersClient()
+[Fx] PROVIDE	kitchen_pb.TicketServiceClient <= github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewKitchenClient()
+[Fx] PROVIDE	logistics_pb.DeliveryServiceClient <= github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewLogisticsClient()
+[Fx] PROVIDE	*config.Config <= github.com/versoit/diploma/gateway/internal/config.NewConfig()
+[Fx] PROVIDE	*zap.Logger <= github.com/versoit/diploma/gateway/internal/app.newLogger()
+[Fx] PROVIDE	*fiber.App <= github.com/versoit/diploma/gateway/internal/app.newFiberApp()
+[Fx] PROVIDE	*handlers.HealthHandler <= github.com/versoit/diploma/gateway/internal/api/http/handlers.NewHealthHandler()
+[Fx] PROVIDE	*handlers.AuthHandler <= github.com/versoit/diploma/gateway/internal/api/http/handlers.NewAuthHandler()
+[Fx] PROVIDE	*handlers.CatalogHandler <= github.com/versoit/diploma/gateway/internal/api/http/handlers.NewCatalogHandler()
+[Fx] PROVIDE	*handlers.OrderHandler <= github.com/versoit/diploma/gateway/internal/api/http/handlers.NewOrderHandler()
+[Fx] PROVIDE	*handlers.KitchenHandler <= github.com/versoit/diploma/gateway/internal/api/http/handlers.NewKitchenHandler()
+[Fx] PROVIDE	*handlers.LogisticsHandler <= github.com/versoit/diploma/gateway/internal/api/http/handlers.NewLogisticsHandler()
+[Fx] INVOKE		github.com/versoit/diploma/gateway/internal/api/http/router.SetupRoutes()
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/app.newFiberApp()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/app.newFiberApp() in 523.2µs
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/config.NewConfig()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/config.NewConfig() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/app.newLogger()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/app.newLogger() in 523.2µs
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewHealthHandler()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewHealthHandler() in 0s
+[Fx] BEFORE RUN	provide: go.uber.org/fx.New.func1()
+[Fx] RUN	provide: go.uber.org/fx.New.func1() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewAuthClient()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewAuthClient() in 526.3µs
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewAuthHandler()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewAuthHandler() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewCatalogClient()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewCatalogClient() in 525.7µs
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewCatalogHandler()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewCatalogHandler() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewOrdersClient()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewOrdersClient() in 526.6µs
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewOrderHandler()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewOrderHandler() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewKitchenClient()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewKitchenClient() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewKitchenHandler()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewKitchenHandler() in 0s
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewLogisticsClient()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/infrastructure/grpc.NewLogisticsClient() in 527.7µs
+[Fx] BEFORE RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewLogisticsHandler()
+[Fx] RUN	provide: github.com/versoit/diploma/gateway/internal/api/http/handlers.NewLogisticsHandler() in 0s
+[Fx] INVOKE		github.com/versoit/diploma/gateway/internal/app.startServer()
+[Fx] HOOK OnStart		github.com/versoit/diploma/gateway/internal/app.startServer.func1() executing (caller: github.com/versoit/diploma/gateway/internal/app.startServer)
+{"level":"info","ts":1770673030.3318934,"caller":"app/module.go:49","msg":"Starting gateway server","port":"8080"}
+[Fx] HOOK OnStart		github.com/versoit/diploma/gateway/internal/app.startServer.func1() called by github.com/versoit/diploma/gateway/internal/app.startServer ran successfully in 524.8µs
+[Fx] RUNNING
+{"level":"info","ts":1770673070.1200445,"caller":"middleware/logger.go:17","msg":"HTTP Request","method":"GET","path":"/api/v1/health","status":200,"duration":0,"ip":"127.0.0.1"}
+{"level":"info","ts":1770673070.1738107,"caller":"handlers/auth.go:34","msg":"Registering new user via gRPC","email":"test@go.com"}
+{"level":"error","ts":1770673070.1738107,"caller":"handlers/auth.go:44","msg":"Auth service error","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp [::1]:50051: connectex: No connection could be made because the target machine actively refused it.\"","stacktrace":"github.com/versoit/diploma/gateway/internal/api/http/handlers.(*AuthHandler).Register\n\tC:/Users/Ruslan/GolandProjects/diploma/gateway/internal/api/http/handlers/auth.go:44\ngithub.com/gofiber/fiber/v2.(*App).next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:143\ngithub.com/gofiber/fiber/v2.(*Ctx).Next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/ctx.go:1042\ngithub.com/versoit/diploma/gateway/internal/api/http/router.SetupRoutes.NewLoggerMiddleware.func1\n\tC:/Users/Ruslan/GolandProjects/diploma/gateway/internal/api/http/middleware/logger.go:13\ngithub.com/gofiber/fiber/v2.(*App).next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:143\ngithub.com/gofiber/fiber/v2.(*App).handler\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:170\ngithub.com/valyala/fasthttp.(*Server).serveConn\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/server.go:2359\ngithub.com/valyala/fasthttp.(*workerPool).workerFunc\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/workerpool.go:224\ngithub.com/valyala/fasthttp.(*workerPool).getCh.func1\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/workerpool.go:196"}
+{"level":"info","ts":1770673070.1743596,"caller":"middleware/logger.go:17","msg":"HTTP Request","method":"POST","path":"/api/v1/auth/register","status":500,"duration":0.0005489,"ip":"127.0.0.1"}
+{"level":"info","ts":1770673070.1859922,"caller":"handlers/catalog.go:27","msg":"Fetching product catalog via gRPC"}
+{"level":"error","ts":1770673070.1859922,"caller":"handlers/catalog.go:31","msg":"Failed to fetch products from catalog service","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp [::1]:50052: connectex: No connection could be made because the target machine actively refused it.\"","stacktrace":"github.com/versoit/diploma/gateway/internal/api/http/handlers.(*CatalogHandler).ListProducts\n\tC:/Users/Ruslan/GolandProjects/diploma/gateway/internal/api/http/handlers/catalog.go:31\ngithub.com/gofiber/fiber/v2.(*App).next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:143\ngithub.com/gofiber/fiber/v2.(*Ctx).Next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/ctx.go:1042\ngithub.com/versoit/diploma/gateway/internal/api/http/router.SetupRoutes.NewLoggerMiddleware.func1\n\tC:/Users/Ruslan/GolandProjects/diploma/gateway/internal/api/http/middleware/logger.go:13\ngithub.com/gofiber/fiber/v2.(*App).next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:143\ngithub.com/gofiber/fiber/v2.(*App).handler\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:170\ngithub.com/valyala/fasthttp.(*Server).serveConn\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/server.go:2359\ngithub.com/valyala/fasthttp.(*workerPool).workerFunc\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/workerpool.go:224\ngithub.com/valyala/fasthttp.(*workerPool).getCh.func1\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/workerpool.go:196"}
+{"level":"info","ts":1770673070.1859922,"caller":"middleware/logger.go:17","msg":"HTTP Request","method":"GET","path":"/api/v1/catalog/products","status":503,"duration":0.0001085,"ip":"127.0.0.1"}
+{"level":"info","ts":1770673070.189163,"caller":"handlers/order.go:34","msg":"Creating new order via gRPC"}
+{"level":"error","ts":1770673070.189163,"caller":"handlers/order.go:46","msg":"Order service error","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp [::1]:50053: connectex: No connection could be made because the target machine actively refused it.\"","stacktrace":"github.com/versoit/diploma/gateway/internal/api/http/handlers.(*OrderHandler).CreateOrder\n\tC:/Users/Ruslan/GolandProjects/diploma/gateway/internal/api/http/handlers/order.go:46\ngithub.com/gofiber/fiber/v2.(*App).next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:143\ngithub.com/gofiber/fiber/v2.(*Ctx).Next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/ctx.go:1042\ngithub.com/versoit/diploma/gateway/internal/api/http/router.SetupRoutes.NewLoggerMiddleware.func1\n\tC:/Users/Ruslan/GolandProjects/diploma/gateway/internal/api/http/middleware/logger.go:13\ngithub.com/gofiber/fiber/v2.(*App).next\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:143\ngithub.com/gofiber/fiber/v2.(*App).handler\n\tC:/Users/Ruslan/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.11/router.go:170\ngithub.com/valyala/fasthttp.(*Server).serveConn\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/server.go:2359\ngithub.com/valyala/fasthttp.(*workerPool).workerFunc\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/workerpool.go:224\ngithub.com/valyala/fasthttp.(*workerPool).getCh.func1\n\tC:/Users/Ruslan/go/pkg/mod/github.com/valyala/fasthttp@v1.51.0/workerpool.go:196"}
+{"level":"info","ts":1770673070.189163,"caller":"middleware/logger.go:17","msg":"HTTP Request","method":"POST","path":"/api/v1/orders/","status":500,"duration":0,"ip":"127.0.0.1"}

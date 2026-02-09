@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/analytics"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -50,9 +52,9 @@ func (r *analyticsRepo) GetKPI(ctx context.Context, managerID string) (*analytic
 
 	var (
 		mid  string
-		date interface{} // time.Time
-		plan float64
-		fact float64
+		date time.Time
+		plan common.Money
+		fact common.Money
 	)
 
 	err = r.pool.QueryRow(ctx, sql, args...).Scan(&mid, &date, &plan, &fact)
@@ -63,5 +65,5 @@ func (r *analyticsRepo) GetKPI(ctx context.Context, managerID string) (*analytic
 		return nil, err
 	}
 
-	return analytics.ReconstructKPI(mid, plan, fact), nil
+	return analytics.ReconstructKPI(mid, plan.InexactFloat64(), fact.InexactFloat64()), nil
 }

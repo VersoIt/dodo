@@ -1,11 +1,14 @@
+package repository
+
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/versoit/diploma/services/kitchen"
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/Masterminds/squirrel"
+	"github.com/versoit/diploma/services/kitchen"
 )
 
 type ticketRepo struct {
@@ -49,7 +52,7 @@ func (r *ticketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
 			Values(t.ID(), item.ProductID, item.Name, item.Quantity, item.Comment).
 			Suffix("RETURNING id").
 			ToSql()
-		
+
 		var itemID int64
 		err = tx.QueryRow(ctx, sql, args...).Scan(&itemID)
 		if err != nil {
@@ -111,9 +114,10 @@ func (r *ticketRepo) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket,
 
 func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*kitchen.KitchenTicket, error) {
 	var (
-		id, oid      string
-		status       int
-		cat, st, rdy *time.Time
+		id, oid string
+		status  int
+		cat     time.Time
+		st, rdy *time.Time
 	)
 
 	if err := row.Scan(&id, &oid, &status, &cat, &st, &rdy); err != nil {
@@ -123,7 +127,67 @@ func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*kitchen.Kitc
 		return nil, err
 	}
 
-	// Fetch items...
-	// (Для краткости реализую только скелет, Senior понимает, что тут нужен Query для items)
-	return kitchen.ReconstructTicket(id, oid, kitchen.TicketStatus(status), *cat, *st, *rdy, nil), nil
+	// Fetch Items
+	itemSql, itemArgs, _ := r.sb.Select("id", "product_id", "name", "quantity", "comment").
+		From("kitchen_items").
+		Where(squirrel.Eq{"ticket_id": id}).
+		ToSql()
+
+	irows, err := r.pool.Query(ctx, itemSql, itemArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer irows.Close()
+
+	var items []kitchen.KitchenItem
+	for irows.Next() {
+		var (
+			itemID           int64
+			pid, name, comm string
+			qty              int
+		)
+		if err := irows.Scan(&itemID, &pid, &name, &qty, &comm); err != nil {
+			return nil, err
+		}
+
+		// Fetch Ingredients
+		ingSql, ingArgs, _ := r.sb.Select("ingredient_name").
+			From("kitchen_item_ingredients").
+			Where(squirrel.Eq{"kitchen_item_id": itemID}).
+			ToSql()
+
+		ingRows, err := r.pool.Query(ctx, ingSql, ingArgs...)
+		if err != nil {
+			return nil, err
+		}
+		
+		var ingredients []string
+		for ingRows.Next() {
+			var ingName string
+			if err := ingRows.Scan(&ingName); err != nil {
+				ingRows.Close()
+				return nil, err
+			}
+			ingredients = append(ingredients, ingName)
+		}
+		ingRows.Close()
+
+		items = append(items, kitchen.KitchenItem{
+			ProductID:   pid,
+			Name:        name,
+			Ingredients: ingredients,
+			Quantity:    qty,
+			Comment:     comm,
+		})
+	}
+
+	var stVal, rdyVal time.Time
+	if st != nil {
+		stVal = *st
+	}
+	if rdy != nil {
+		rdyVal = *rdy
+	}
+
+	return kitchen.ReconstructTicket(id, oid, kitchen.TicketStatus(status), cat, stVal, rdyVal, items), nil
 }

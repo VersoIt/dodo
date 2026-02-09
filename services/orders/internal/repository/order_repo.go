@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+	"time"
 
+	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/orders"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/Masterminds/squirrel"
 )
@@ -94,7 +97,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		oid, number, cid, promo, city, street, house, apartment, floor, comment string
 		status                                                                  int
 		createdAt                                                               time.Time
-		delPrice, discount, finalPrice                                          orders.Money
+		delPrice, discount, finalPrice                                          common.Money
 	)
 
 	err = r.pool.QueryRow(ctx, sql, args...).Scan(
@@ -129,7 +132,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		var (
 			iid, pid, name string
 			qty            int
-			base           orders.Money
+			base           common.Money
 			size           float64
 		)
 		if err := rows.Scan(&iid, &pid, &name, &qty, &base, &size); err != nil {
@@ -150,7 +153,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		var toppings []orders.Topping
 		for trows.Next() {
 			var tn string
-			var tp orders.Money
+			var tp common.Money
 			if err := trows.Scan(&tn, &tp); err != nil {
 				trows.Close()
 				return nil, err

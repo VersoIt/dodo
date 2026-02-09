@@ -113,7 +113,7 @@ func (p *Product) Ingredients() []IngredientRef {
 }
 
 // ReconstructProduct is used by repositories to rebuild a Product from storage.
-func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, isAvail bool) *Product {
+func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, isAvail bool, ingredients []IngredientRef) *Product {
 	return &Product{
 		id:          id,
 		name:        name,
@@ -121,6 +121,7 @@ func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, 
 		category:    cat,
 		basePrice:   common.NewMoney(price),
 		isAvailable: isAvail,
+		ingredients: ingredients,
 		createdAt:   time.Now(),
 	}
 }

@@ -5,39 +5,53 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/cmd/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/auth.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/catalog.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/common.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/health.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/kitchen.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/logistics.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/middleware/logger.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/app/module.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/config/config.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/internal/infrastructure/grpc/clients.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway_err.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway_out.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work" beforeDir="false" afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pkg/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pkg/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/analytics/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/domain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/analytics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/analytics/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/internal/app/module.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/analytics/internal/repository/analytics_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/internal/repository/analytics_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/domain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/internal/app/module.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/internal/repository/user_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/internal/repository/user_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/catalog/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/catalog/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/catalog/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/catalog/internal/repository/product_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/internal/repository/product_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/kitchen/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/internal/repository/ticket_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/internal/repository/ticket_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/logistics/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/internal/repository/logistics_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/internal/repository/logistics_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/notification/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/orders/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/treasury/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/domain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/treasury/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/internal/app/module.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/treasury/internal/repository/payment_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/internal/repository/payment_repo.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -102,6 +116,11 @@
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
+    ]
   }
 }</component>
   <component name="RecentsManager">

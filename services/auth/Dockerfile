@@ -17,6 +17,7 @@ COPY services/logistics/go.mod services/logistics/go.sum* ./services/logistics/
 COPY services/notification/go.mod services/notification/go.sum* ./services/notification/
 COPY services/orders/go.mod services/orders/go.sum* ./services/orders/
 COPY services/treasury/go.mod services/treasury/go.sum* ./services/treasury/
+COPY gateway/go.mod gateway/go.sum* ./gateway/
 
 RUN go work sync
 COPY . .

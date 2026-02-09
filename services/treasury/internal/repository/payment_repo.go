@@ -2,9 +2,11 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/treasury"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,7 +26,7 @@ func NewPaymentRepository(pool *pgxpool.Pool) treasury.PaymentRepository {
 }
 
 func (r *paymentRepo) Save(ctx context.Context, p *treasury.Payment) error {
-	sql, args, err := r.sb.Insert("payments").
+	sqlStr, args, err := r.sb.Insert("payments").
 		Columns("id", "order_id", "amount", "method", "status", "transaction_id").
 		Values(p.ID(), p.OrderID(), p.Amount(), p.Method(), p.Status(), p.TransactionID()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, transaction_id = EXCLUDED.transaction_id, updated_at = NOW()").
@@ -33,12 +35,12 @@ func (r *paymentRepo) Save(ctx context.Context, p *treasury.Payment) error {
 		return err
 	}
 
-	_, err = r.pool.Exec(ctx, sql, args...)
+	_, err = r.pool.Exec(ctx, sqlStr, args...)
 	return err
 }
 
 func (r *paymentRepo) FindByOrderID(ctx context.Context, orderID string) (*treasury.Payment, error) {
-	sql, args, err := r.sb.Select("id", "order_id", "amount", "method", "status", "transaction_id", "created_at").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "amount", "method", "status", "transaction_id", "created_at").
 		From("payments").
 		Where(squirrel.Eq{"order_id": orderID}).
 		ToSql()
@@ -47,14 +49,15 @@ func (r *paymentRepo) FindByOrderID(ctx context.Context, orderID string) (*treas
 	}
 
 	var (
-		id, oid, txid string
-		amount        treasury.Money
-		method        int
-		status        int
-		createdAt     time.Time
+		id, oid   string
+		txid      sql.NullString
+		amount    common.Money
+		method    int
+		status    int
+		createdAt time.Time
 	)
 
-	err = r.pool.QueryRow(ctx, sql, args...).Scan(&id, &oid, &amount, &method, &status, &txid, &createdAt)
+	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&id, &oid, &amount, &method, &status, &txid, &createdAt)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, fmt.Errorf("payment not found")
@@ -62,5 +65,5 @@ func (r *paymentRepo) FindByOrderID(ctx context.Context, orderID string) (*treas
 		return nil, err
 	}
 
-	return treasury.ReconstructPayment(id, oid, amount, treasury.PaymentMethod(method), treasury.PaymentStatus(status), txid, createdAt), nil
+	return treasury.ReconstructPayment(id, oid, amount, treasury.PaymentMethod(method), treasury.PaymentStatus(status), txid.String, createdAt), nil
 }

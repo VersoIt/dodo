@@ -46,9 +46,49 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 		if err := rows.Scan(&pid, &name, &desc, &cat, &price, &isAvail); err != nil {
 			return nil, err
 		}
-		products = append(products, catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, isAvail))
+
+		ingredients, err := r.fetchIngredients(ctx, pid)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, isAvail, ingredients))
 	}
 	return products, nil
+}
+
+func (r *productRepo) fetchIngredients(ctx context.Context, productID string) ([]catalog.IngredientRef, error) {
+	sql, args, err := r.sb.Select("ingredient_id", "quantity", "is_removable").
+		From("product_ingredients").
+		Where(squirrel.Eq{"product_id": productID}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ingredients []catalog.IngredientRef
+	for rows.Next() {
+		var (
+			id   string
+			qty  float64
+			rem  bool
+		)
+		if err := rows.Scan(&id, &qty, &rem); err != nil {
+			return nil, err
+		}
+		ingredients = append(ingredients, catalog.IngredientRef{
+			IngredientID: id,
+			Quantity:     qty,
+			IsRemovable:  rem,
+		})
+	}
+	return ingredients, nil
 }
 
 func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
@@ -120,7 +160,10 @@ func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product
 		return nil, err
 	}
 
-	// Fetch ingredients...
-	// For brevity I'll skip it now or implement a basic version
-	return catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, isAvail), nil
+	ingredients, err := r.fetchIngredients(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, isAvail, ingredients), nil
 }
