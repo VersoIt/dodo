@@ -96,7 +96,9 @@ func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	sql, args, err := r.sb.Insert("products").
 		Columns("id", "name", "description", "category", "base_price", "is_available").

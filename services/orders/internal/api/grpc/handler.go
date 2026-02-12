@@ -6,8 +6,9 @@ import (
 	"github.com/versoit/diploma/services/orders"
 	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
 	"github.com/versoit/diploma/services/orders/usecase"
-	"github.com/versoit/diploma/pkg/common"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type OrdersHandler struct {
@@ -28,10 +29,8 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 	for i, item := range req.Items {
 		items[i] = usecase.OrderItemInput{
 			ProductID: item.ProductId,
-			Name:      item.ProductName,
 			Quantity:  int(item.Quantity),
-			BasePrice: common.ZeroMoney(),
-			SizeMult:  1.0,
+			SizeMult:  1.0, // Default for now
 		}
 	}
 
@@ -44,7 +43,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 		Items: items,
 	})
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.Internal, "failed to create order: %v", err)
 	}
 
 	return &orders_pb.OrderResponse{
@@ -58,8 +57,22 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 func (h *OrdersHandler) PayOrder(ctx context.Context, req *orders_pb.PayOrderRequest) (*orders_pb.OrderResponse, error) {
 	err := h.uc.PayOrder(ctx, req.OrderId)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.Internal, "failed to pay order: %v", err)
 	}
 
 	return &orders_pb.OrderResponse{OrderId: req.OrderId, Status: "paid"}, nil
+}
+
+func (h *OrdersHandler) GetOrder(ctx context.Context, req *orders_pb.GetOrderRequest) (*orders_pb.OrderResponse, error) {
+	order, err := h.uc.GetOrder(ctx, req.OrderId)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "order not found: %v", err)
+	}
+
+	return &orders_pb.OrderResponse{
+		OrderId:     order.ID(),
+		Status:      order.Status().String(),
+		FinalPrice:  order.FinalPrice().InexactFloat64(),
+		OrderNumber: order.OrderNumber(),
+	}, nil
 }

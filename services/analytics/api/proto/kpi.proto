@@ -4,6 +4,16 @@ option go_package = "./pb;analytics_pb";
 
 service KpiService {
   rpc GetManagerKPI(KpiRequest) returns (KpiResponse);
+  rpc RecordSale(RecordSaleRequest) returns (RecordSaleResponse);
+}
+
+message RecordSaleRequest {
+  string manager_id = 1;
+  double amount = 2;
+}
+
+message RecordSaleResponse {
+  bool success = 1;
 }
 
 message KpiRequest {

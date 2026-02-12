@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/orders"
+	"go.uber.org/zap"
 )
 
 var (
@@ -21,19 +21,25 @@ type CreateOrderInput struct {
 
 type OrderItemInput struct {
 	ProductID string
-	Name      string
 	Quantity  int
-	BasePrice common.Money
 	SizeMult  float64
 	Toppings  []orders.Topping
 }
 
 type OrderUseCase struct {
-	repo orders.OrderRepository
+	repo      orders.OrderRepository
+	catalog   orders.CatalogService
+	analytics orders.AnalyticsService
+	log       *zap.Logger
 }
 
-func NewOrderUseCase(repo orders.OrderRepository) *OrderUseCase {
-	return &OrderUseCase{repo: repo}
+func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, analytics orders.AnalyticsService, log *zap.Logger) *OrderUseCase {
+	return &OrderUseCase{
+		repo:      repo,
+		catalog:   catalog,
+		analytics: analytics,
+		log:       log,
+	}
 }
 
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput) (*orders.Order, error) {
@@ -56,11 +62,17 @@ func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput)
 	order := orders.NewOrder(input.CustomerID, input.Address)
 
 	for _, item := range input.Items {
+		// Fetch actual product info from catalog
+		prod, err := uc.catalog.GetProduct(ctx, item.ProductID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch product %s from catalog: %w", item.ProductID, err)
+		}
+
 		if err := order.AddItem(
-			item.ProductID,
-			item.Name,
+			prod.ID,
+			prod.Name,
 			item.Quantity,
-			item.BasePrice,
+			prod.BasePrice,
 			item.SizeMult,
 			item.Toppings,
 		); err != nil {
@@ -93,5 +105,25 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 		return fmt.Errorf("failed to update order status after payment: %w", err)
 	}
 
+	// Report to analytics (Best effort or should it be transactional? 
+	// In a real senior scenario we'd use Outbox pattern, but here we'll do a direct call for now)
+	if err := uc.analytics.ReportSale(ctx, "019c53ee-74af-72b9-afe6-103c1466ae0e", order.FinalPrice().InexactFloat64()); err != nil {
+		// We log it but don't fail the payment as it's already saved in DB
+		uc.log.Error("failed to report sale to analytics", zap.Error(err), zap.String("order_id", orderID))
+	}
+
 	return nil
+}
+
+func (uc *OrderUseCase) GetOrder(ctx context.Context, id string) (*orders.Order, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
+	}
+
+	order, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find order %s: %w", id, err)
+	}
+
+	return order, nil
 }

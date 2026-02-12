@@ -26,7 +26,7 @@ func NewUserRepository(pool *pgxpool.Pool) auth.UserRepository {
 func (r *userRepo) Save(ctx context.Context, u *auth.User) error {
 	sqlStr, args, err := r.sb.Insert("users").
 		Columns("id", "email", "password_hash", "role", "is_client", "name", "phone", "bonus_points", "updated_at").
-		Values(u.ID(), u.Email(), u.HashedPassword(), u.Role(), u.IsClient(), u.Name(), u.Phone(), u.BonusPoints(), "NOW()").
+		Values(u.ID(), u.Email(), u.HashedPassword(), u.Role(), u.IsClient(), u.Name(), u.Phone(), u.BonusPoints(), squirrel.Expr("NOW()")).
 		Suffix("ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, name = EXCLUDED.name, phone = EXCLUDED.phone, bonus_points = EXCLUDED.bonus_points, updated_at = NOW()").
 		ToSql()
 	if err != nil {

@@ -3,6 +3,10 @@ module github.com/versoit/diploma/services/analytics
 go 1.24.0
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
+	github.com/jackc/pgx/v5 v5.8.0
+	github.com/shopspring/decimal v1.4.0
+	github.com/versoit/diploma/pkg v0.0.0-20260209221312-cf1acef61820
 	go.uber.org/fx v1.24.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.78.0
@@ -10,17 +14,15 @@ require (
 )
 
 require (
-	github.com/Masterminds/squirrel v1.5.4 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.8.0 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
-	github.com/shopspring/decimal v1.4.0 // indirect
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect

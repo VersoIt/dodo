@@ -28,7 +28,9 @@ func (r *ticketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	sql, args, err := r.sb.Insert("kitchen_tickets").
 		Columns("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").

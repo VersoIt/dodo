@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS manager_kpi (
+CREATE TABLE IF NOT EXISTS manager_kpis (
     manager_id UUID NOT NULL,
     shift_date DATE NOT NULL,
     plan_revenue DECIMAL(15,2) NOT NULL,

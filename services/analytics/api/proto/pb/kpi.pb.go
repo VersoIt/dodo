@@ -21,6 +21,102 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RecordSaleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ManagerId     string                 `protobuf:"bytes,1,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecordSaleRequest) Reset() {
+	*x = RecordSaleRequest{}
+	mi := &file_kpi_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordSaleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordSaleRequest) ProtoMessage() {}
+
+func (x *RecordSaleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_kpi_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecordSaleRequest.ProtoReflect.Descriptor instead.
+func (*RecordSaleRequest) Descriptor() ([]byte, []int) {
+	return file_kpi_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *RecordSaleRequest) GetManagerId() string {
+	if x != nil {
+		return x.ManagerId
+	}
+	return ""
+}
+
+func (x *RecordSaleRequest) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type RecordSaleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecordSaleResponse) Reset() {
+	*x = RecordSaleResponse{}
+	mi := &file_kpi_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordSaleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordSaleResponse) ProtoMessage() {}
+
+func (x *RecordSaleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_kpi_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecordSaleResponse.ProtoReflect.Descriptor instead.
+func (*RecordSaleResponse) Descriptor() ([]byte, []int) {
+	return file_kpi_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RecordSaleResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 type KpiRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ManagerId     string                 `protobuf:"bytes,1,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
@@ -30,7 +126,7 @@ type KpiRequest struct {
 
 func (x *KpiRequest) Reset() {
 	*x = KpiRequest{}
-	mi := &file_kpi_proto_msgTypes[0]
+	mi := &file_kpi_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +138,7 @@ func (x *KpiRequest) String() string {
 func (*KpiRequest) ProtoMessage() {}
 
 func (x *KpiRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_kpi_proto_msgTypes[0]
+	mi := &file_kpi_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +151,7 @@ func (x *KpiRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KpiRequest.ProtoReflect.Descriptor instead.
 func (*KpiRequest) Descriptor() ([]byte, []int) {
-	return file_kpi_proto_rawDescGZIP(), []int{0}
+	return file_kpi_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *KpiRequest) GetManagerId() string {
@@ -78,7 +174,7 @@ type KpiResponse struct {
 
 func (x *KpiResponse) Reset() {
 	*x = KpiResponse{}
-	mi := &file_kpi_proto_msgTypes[1]
+	mi := &file_kpi_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -90,7 +186,7 @@ func (x *KpiResponse) String() string {
 func (*KpiResponse) ProtoMessage() {}
 
 func (x *KpiResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_kpi_proto_msgTypes[1]
+	mi := &file_kpi_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -103,7 +199,7 @@ func (x *KpiResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KpiResponse.ProtoReflect.Descriptor instead.
 func (*KpiResponse) Descriptor() ([]byte, []int) {
-	return file_kpi_proto_rawDescGZIP(), []int{1}
+	return file_kpi_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *KpiResponse) GetManagerId() string {
@@ -153,7 +249,7 @@ type ManagerKPI struct {
 
 func (x *ManagerKPI) Reset() {
 	*x = ManagerKPI{}
-	mi := &file_kpi_proto_msgTypes[2]
+	mi := &file_kpi_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -165,7 +261,7 @@ func (x *ManagerKPI) String() string {
 func (*ManagerKPI) ProtoMessage() {}
 
 func (x *ManagerKPI) ProtoReflect() protoreflect.Message {
-	mi := &file_kpi_proto_msgTypes[2]
+	mi := &file_kpi_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -178,7 +274,7 @@ func (x *ManagerKPI) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ManagerKPI.ProtoReflect.Descriptor instead.
 func (*ManagerKPI) Descriptor() ([]byte, []int) {
-	return file_kpi_proto_rawDescGZIP(), []int{2}
+	return file_kpi_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ManagerKPI) GetManagerId() string {
@@ -213,7 +309,13 @@ var File_kpi_proto protoreflect.FileDescriptor
 
 const file_kpi_proto_rawDesc = "" +
 	"\n" +
-	"\tkpi.proto\x12\fanalytics.v1\"+\n" +
+	"\tkpi.proto\x12\fanalytics.v1\"J\n" +
+	"\x11RecordSaleRequest\x12\x1d\n" +
+	"\n" +
+	"manager_id\x18\x01 \x01(\tR\tmanagerId\x12\x16\n" +
+	"\x06amount\x18\x02 \x01(\x01R\x06amount\".\n" +
+	"\x12RecordSaleResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
 	"\n" +
 	"KpiRequest\x12\x1d\n" +
 	"\n" +
@@ -233,10 +335,12 @@ const file_kpi_proto_rawDesc = "" +
 	"\fplan_revenue\x18\x02 \x01(\x01R\vplanRevenue\x12!\n" +
 	"\ffact_revenue\x18\x03 \x01(\x01R\vfactRevenue\x12\x1f\n" +
 	"\vkpi_percent\x18\x04 \x01(\x01R\n" +
-	"kpiPercent2R\n" +
+	"kpiPercent2\xa3\x01\n" +
 	"\n" +
 	"KpiService\x12D\n" +
-	"\rGetManagerKPI\x12\x18.analytics.v1.KpiRequest\x1a\x19.analytics.v1.KpiResponseB\x13Z\x11./pb;analytics_pbb\x06proto3"
+	"\rGetManagerKPI\x12\x18.analytics.v1.KpiRequest\x1a\x19.analytics.v1.KpiResponse\x12O\n" +
+	"\n" +
+	"RecordSale\x12\x1f.analytics.v1.RecordSaleRequest\x1a .analytics.v1.RecordSaleResponseB\x13Z\x11./pb;analytics_pbb\x06proto3"
 
 var (
 	file_kpi_proto_rawDescOnce sync.Once
@@ -250,17 +354,21 @@ func file_kpi_proto_rawDescGZIP() []byte {
 	return file_kpi_proto_rawDescData
 }
 
-var file_kpi_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_kpi_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_kpi_proto_goTypes = []any{
-	(*KpiRequest)(nil),  // 0: analytics.v1.KpiRequest
-	(*KpiResponse)(nil), // 1: analytics.v1.KpiResponse
-	(*ManagerKPI)(nil),  // 2: analytics.v1.ManagerKPI
+	(*RecordSaleRequest)(nil),  // 0: analytics.v1.RecordSaleRequest
+	(*RecordSaleResponse)(nil), // 1: analytics.v1.RecordSaleResponse
+	(*KpiRequest)(nil),         // 2: analytics.v1.KpiRequest
+	(*KpiResponse)(nil),        // 3: analytics.v1.KpiResponse
+	(*ManagerKPI)(nil),         // 4: analytics.v1.ManagerKPI
 }
 var file_kpi_proto_depIdxs = []int32{
-	0, // 0: analytics.v1.KpiService.GetManagerKPI:input_type -> analytics.v1.KpiRequest
-	1, // 1: analytics.v1.KpiService.GetManagerKPI:output_type -> analytics.v1.KpiResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 0: analytics.v1.KpiService.GetManagerKPI:input_type -> analytics.v1.KpiRequest
+	0, // 1: analytics.v1.KpiService.RecordSale:input_type -> analytics.v1.RecordSaleRequest
+	3, // 2: analytics.v1.KpiService.GetManagerKPI:output_type -> analytics.v1.KpiResponse
+	1, // 3: analytics.v1.KpiService.RecordSale:output_type -> analytics.v1.RecordSaleResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -277,7 +385,7 @@ func file_kpi_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_kpi_proto_rawDesc), len(file_kpi_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

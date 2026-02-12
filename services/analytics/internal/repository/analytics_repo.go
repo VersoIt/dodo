@@ -2,14 +2,13 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/analytics"
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/Masterminds/squirrel"
+	"github.com/versoit/diploma/pkg/common"
+	"github.com/versoit/diploma/services/analytics"
 )
 
 type analyticsRepo struct {
@@ -60,7 +59,7 @@ func (r *analyticsRepo) GetKPI(ctx context.Context, managerID string) (*analytic
 	err = r.pool.QueryRow(ctx, sql, args...).Scan(&mid, &date, &plan, &fact)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, fmt.Errorf("kpi not found")
+			return nil, analytics.ErrKPINotFound
 		}
 		return nil, err
 	}

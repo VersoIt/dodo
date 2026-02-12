@@ -31,7 +31,11 @@ func (uc *AnalyticsUseCase) RecordSale(ctx context.Context, managerID string, am
 
 	kpi, err := uc.repo.GetKPI(ctx, managerID)
 	if err != nil {
-		kpi = analytics.NewManagerKPI(managerID, decimal.NewFromInt(100000))
+		if errors.Is(err, analytics.ErrKPINotFound) {
+			kpi = analytics.NewManagerKPI(managerID, decimal.NewFromInt(100000))
+		} else {
+			return fmt.Errorf("failed to retrieve kpi for manager %s: %w", managerID, err)
+		}
 	}
 
 	kpi.AddRevenue(amount)

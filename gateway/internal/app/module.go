@@ -23,6 +23,7 @@ var Module = fx.Options(
 		handlers.NewOrderHandler,
 		handlers.NewKitchenHandler,
 		handlers.NewLogisticsHandler,
+		handlers.NewAnalyticsHandler,
 	),
 	fx.Invoke(
 		router.SetupRoutes,

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // --- Value Objects & Enums ---
@@ -109,13 +110,18 @@ func (u *User) SetPassword(plainPassword string) error {
 	if len(plainPassword) < 6 {
 		return ErrWeakPassword
 	}
-	u.passwordHash = "hash_" + plainPassword
+	hash, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.passwordHash = string(hash)
 	u.updatedAt = time.Now()
 	return nil
 }
 
 func (u *User) CheckPassword(plainPassword string) bool {
-	return u.passwordHash == "hash_"+plainPassword
+	err := bcrypt.CompareHashAndPassword([]byte(u.passwordHash), []byte(plainPassword))
+	return err == nil
 }
 
 func (u *User) ChangeRole(newRole Role) {

@@ -27,7 +27,6 @@ func (uc *AuthUseCase) Register(ctx context.Context, email, password string, rol
 		return nil, fmt.Errorf("%w: email and password are required", ErrInvalidInput)
 	}
 
-	// Проверяем, существует ли пользователь
 	existing, err := uc.repo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, auth.ErrUserNotFound) {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
@@ -63,6 +62,22 @@ func (uc *AuthUseCase) Login(ctx context.Context, email, password string) (*auth
 
 	if !user.CheckPassword(password) {
 		return nil, ErrUnauthorized
+	}
+
+	return user, nil
+}
+
+func (uc *AuthUseCase) GetUser(ctx context.Context, id string) (*auth.User, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%w: user ID is required", ErrInvalidInput)
+	}
+
+	user, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, auth.ErrUserNotFound) {
+			return nil, auth.ErrUserNotFound
+		}
+		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 
 	return user, nil

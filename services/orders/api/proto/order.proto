@@ -5,6 +5,11 @@ option go_package = "./pb;orders_pb";
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
   rpc PayOrder(PayOrderRequest) returns (OrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+}
+
+message GetOrderRequest {
+  string order_id = 1;
 }
 
 message Address {

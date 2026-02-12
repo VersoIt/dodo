@@ -2,9 +2,14 @@ package analytics
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/shopspring/decimal"
+)
+
+var (
+	ErrKPINotFound = errors.New("kpi not found")
 )
 
 type SalesReport struct {

@@ -38,9 +38,55 @@ func (h *CatalogHandler) CreateProduct(ctx context.Context, req *catalog_pb.Crea
 }
 
 func (h *CatalogHandler) GetProduct(ctx context.Context, req *catalog_pb.GetProductRequest) (*catalog_pb.ProductResponse, error) {
-	return &catalog_pb.ProductResponse{Id: req.Id}, nil
+	p, err := h.uc.GetProduct(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &catalog_pb.ProductResponse{
+		Id:          p.ID(),
+		Name:        p.Name(),
+		Description: p.Description(),
+		Price:       p.BasePrice().InexactFloat64(),
+	}, nil
 }
 
 func (h *CatalogHandler) ListProducts(ctx context.Context, req *catalog_pb.ListProductsRequest) (*catalog_pb.ListProductsResponse, error) {
-	return &catalog_pb.ListProductsResponse{}, nil
+
+	products, err := h.uc.ListProducts(ctx)
+
+	if err != nil {
+
+		return nil, err
+
+	}
+
+
+
+	pbProducts := make([]*catalog_pb.ProductResponse, len(products))
+
+	for i, p := range products {
+
+		pbProducts[i] = &catalog_pb.ProductResponse{
+
+			Id:          p.ID(),
+
+			Name:        p.Name(),
+
+			Description: p.Description(),
+
+			Price:       p.BasePrice().InexactFloat64(),
+
+		}
+
+	}
+
+
+
+	return &catalog_pb.ListProductsResponse{
+
+		Products: pbProducts,
+
+	}, nil
+
 }

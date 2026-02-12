@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	KpiService_GetManagerKPI_FullMethodName = "/analytics.v1.KpiService/GetManagerKPI"
+	KpiService_RecordSale_FullMethodName    = "/analytics.v1.KpiService/RecordSale"
 )
 
 // KpiServiceClient is the client API for KpiService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KpiServiceClient interface {
 	GetManagerKPI(ctx context.Context, in *KpiRequest, opts ...grpc.CallOption) (*KpiResponse, error)
+	RecordSale(ctx context.Context, in *RecordSaleRequest, opts ...grpc.CallOption) (*RecordSaleResponse, error)
 }
 
 type kpiServiceClient struct {
@@ -47,11 +49,22 @@ func (c *kpiServiceClient) GetManagerKPI(ctx context.Context, in *KpiRequest, op
 	return out, nil
 }
 
+func (c *kpiServiceClient) RecordSale(ctx context.Context, in *RecordSaleRequest, opts ...grpc.CallOption) (*RecordSaleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RecordSaleResponse)
+	err := c.cc.Invoke(ctx, KpiService_RecordSale_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KpiServiceServer is the server API for KpiService service.
 // All implementations must embed UnimplementedKpiServiceServer
 // for forward compatibility.
 type KpiServiceServer interface {
 	GetManagerKPI(context.Context, *KpiRequest) (*KpiResponse, error)
+	RecordSale(context.Context, *RecordSaleRequest) (*RecordSaleResponse, error)
 	mustEmbedUnimplementedKpiServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedKpiServiceServer struct{}
 
 func (UnimplementedKpiServiceServer) GetManagerKPI(context.Context, *KpiRequest) (*KpiResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetManagerKPI not implemented")
+}
+func (UnimplementedKpiServiceServer) RecordSale(context.Context, *RecordSaleRequest) (*RecordSaleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RecordSale not implemented")
 }
 func (UnimplementedKpiServiceServer) mustEmbedUnimplementedKpiServiceServer() {}
 func (UnimplementedKpiServiceServer) testEmbeddedByValue()                    {}
@@ -104,6 +120,24 @@ func _KpiService_GetManagerKPI_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KpiService_RecordSale_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordSaleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KpiServiceServer).RecordSale(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KpiService_RecordSale_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KpiServiceServer).RecordSale(ctx, req.(*RecordSaleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KpiService_ServiceDesc is the grpc.ServiceDesc for KpiService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var KpiService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetManagerKPI",
 			Handler:    _KpiService_GetManagerKPI_Handler,
+		},
+		{
+			MethodName: "RecordSale",
+			Handler:    _KpiService_RecordSale_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

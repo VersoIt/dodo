@@ -77,3 +77,19 @@ func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, 
 
 	return product, nil
 }
+
+func (uc *CatalogUseCase) ListProducts(ctx context.Context) ([]*catalog.Product, error) {
+	products, err := uc.repo.FindAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch products: %w", err)
+	}
+	return products, nil
+}
+
+func (uc *CatalogUseCase) GetProduct(ctx context.Context, id string) (*catalog.Product, error) {
+	product, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find product %s: %w", id, err)
+	}
+	return product, nil
+}

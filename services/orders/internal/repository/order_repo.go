@@ -28,7 +28,9 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	addr := o.Address()
 	sql, args, err := r.sb.Insert("orders").

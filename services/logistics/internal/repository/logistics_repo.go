@@ -47,7 +47,8 @@ func (r *deliveryRepo) FindByOrderID(ctx context.Context, orderID string) (*logi
 	}
 
 	var (
-		oid, cid       string
+		oid            string
+		cid            *string
 		status         int
 		ca             time.Time
 		pt, dt         *time.Time
@@ -66,7 +67,10 @@ func (r *deliveryRepo) FindByOrderID(ctx context.Context, orderID string) (*logi
 	if pt != nil { p = *pt }
 	if dt != nil { d = *dt }
 
-	return logistics.ReconstructDelivery(oid, cid, logistics.DeliveryStatus(status), ca, p, d, lat, lng), nil
+	courierID := ""
+	if cid != nil { courierID = *cid }
+
+	return logistics.ReconstructDelivery(oid, courierID, logistics.DeliveryStatus(status), ca, p, d, lat, lng), nil
 }
 
 type courierRepo struct {
@@ -155,7 +159,7 @@ func (r *courierRepo) UpdateLocation(ctx context.Context, id string, lat, lng fl
 	sql, args, err := r.sb.Update("couriers").
 		Set("current_lat", lat).
 		Set("current_lng", lng).
-		Set("updated_at", "NOW()").
+		Set("updated_at", squirrel.Expr("NOW()")).
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
 	if err != nil {
@@ -164,4 +168,5 @@ func (r *courierRepo) UpdateLocation(ctx context.Context, id string, lat, lng fl
 	_, err = r.pool.Exec(ctx, sql, args...)
 	return err
 }
+
 

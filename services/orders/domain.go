@@ -294,10 +294,25 @@ func ReconstructOrderItem(id, prodID, name string, qty int, base common.Money, s
 
 func generateOrderNumber() string {
 	id, _ := uuid.NewV7()
-	return fmt.Sprintf("PG-%s-%s", time.Now().Format("2006.01.02"), id.String()[:4])
+	// Используем последние 8 символов UUID для большей уникальности
+	return fmt.Sprintf("PG-%s-%s", time.Now().Format("2006.01.02"), id.String()[24:])
 }
 
 type OrderRepository interface {
 	Save(ctx context.Context, o *Order) error
 	FindByID(ctx context.Context, id string) (*Order, error)
+}
+
+type ProductInfo struct {
+	ID        string
+	Name      string
+	BasePrice common.Money
+}
+
+type CatalogService interface {
+	GetProduct(ctx context.Context, id string) (*ProductInfo, error)
+}
+
+type AnalyticsService interface {
+	ReportSale(ctx context.Context, managerID string, amount float64) error
 }
