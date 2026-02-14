@@ -3,37 +3,41 @@ import { useCartStore } from '../store/cart'
 import { useRouter } from 'vue-router'
 import { Trash2, Minus, Plus, ShoppingBag } from 'lucide-vue-next'
 import axios from 'axios'
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 
 const cartStore = useCartStore()
 const router = useRouter()
 const isPlacingOrder = ref(false)
+const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const handleCheckout = async () => {
   if (cartStore.items.length === 0) return
   
   try {
     isPlacingOrder.value = true
-    // In a real app, we'd check if user is logged in
     const orderData = {
       items: cartStore.items.map(item => ({
-        productId: item.id,
+        product_id: item.id,
         quantity: item.quantity
       })),
       address: {
-        street: 'Sample Street 123',
-        city: 'Pizza City'
+        street: 'Main Street 1',
+        city: 'Pizza Town'
       }
     }
     
     const response = await axios.post('/api/v1/orders', orderData)
-    const orderId = response.data.id
-    
-    cartStore.clearCart()
-    router.push(`/order/${orderId}`)
-  } catch (error) {
+    if (response.data.success) {
+      const orderId = response.data.data.order_id
+      cartStore.clearCart()
+      addToast('Order placed successfully!', 'success')
+      router.push(`/order/${orderId}`)
+    } else {
+      addToast(response.data.error || 'Failed to place order', 'error')
+    }
+  } catch (error: any) {
     console.error('Checkout failed:', error)
-    alert('Failed to place order. Please try again.')
+    addToast(error.response?.data?.error || 'Failed to place order. Are you logged in?', 'error')
   } finally {
     isPlacingOrder.value = false
   }

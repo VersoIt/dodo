@@ -3,8 +3,10 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { Plus } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
+import { inject } from 'vue'
 
 const cartStore = useCartStore()
+const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 interface Product {
   id: string
@@ -117,7 +119,7 @@ onMounted(() => {
             <p class="text-sm text-base-content/70 line-clamp-2 mb-4">{{ product.description }}</p>
             <div class="card-actions justify-end mt-auto">
               <button 
-                @click="cartStore.addToCart(product)" 
+                @click="cartStore.addToCart(product); addToast(`${product.name} added to cart!`)" 
                 class="btn btn-primary btn-sm gap-2"
               >
                 <Plus class="w-4 h-4" />

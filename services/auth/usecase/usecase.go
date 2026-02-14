@@ -96,3 +96,23 @@ func (uc *AuthUseCase) GetUser(ctx context.Context, id string) (*auth.User, erro
 
 	return user, nil
 }
+
+func (uc *AuthUseCase) UpdateUser(ctx context.Context, id, name, phone string) (*auth.User, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%w: user ID is required", ErrInvalidInput)
+	}
+
+	user, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	user.UpdateProfile(name, phone)
+
+	if err := uc.repo.Save(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	uc.log.Info("user profile updated", slog.String("user_id", id))
+	return user, nil
+}

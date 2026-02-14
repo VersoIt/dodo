@@ -98,3 +98,30 @@ func (h *AuthHandler) GetMe(c *fiber.Ctx) error {
 
 	return SuccessResponse(c, resp)
 }
+
+func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	type Request struct {
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+	}
+
+	req := new(Request)
+	if err := c.BodyParser(req); err != nil {
+		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.UpdateUser(ctx, &auth_pb.UpdateUserRequest{
+		Id:    userID,
+		Name:  req.Name,
+		Phone: req.Phone,
+	})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to update profile")
+	}
+
+	return SuccessResponse(c, resp)
+}

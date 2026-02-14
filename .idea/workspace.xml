@@ -6,24 +6,17 @@
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/components/Navbar.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/components/Navbar.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/CartView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/CartView.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fe/src/views/HomeView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/HomeView.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/auth.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/api/proto/pb/user.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/pb/user.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/api/proto/pb/user_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/pb/user_grpc.pb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/api/proto/user.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/user.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/auth/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/domain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/internal/api/grpc/handler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/auth/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/usecase/usecase.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/order.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/order.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order_grpc.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/api/grpc/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/usecase/usecase.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

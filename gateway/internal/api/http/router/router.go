@@ -38,6 +38,7 @@ func SetupRoutes(
 	// Protected routes
 	protected := api.Group("/", middleware.NewAuthMiddleware())
 	protected.Get("/auth/me", authHandler.GetMe)
+	protected.Patch("/auth/me", authHandler.UpdateProfile)
 
 	// Orders (Client flow)
 	orders := protected.Group("/orders")

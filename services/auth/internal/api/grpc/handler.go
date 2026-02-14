@@ -88,5 +88,21 @@ func (h *AuthHandler) GetUser(ctx context.Context, req *auth_pb.GetUserRequest) 
 		Email: user.Email(),
 		Role:  user.Role().String(),
 		Name:  user.Name(),
+		Phone: user.Phone(),
+	}, nil
+}
+
+func (h *AuthHandler) UpdateUser(ctx context.Context, req *auth_pb.UpdateUserRequest) (*auth_pb.UserResponse, error) {
+	user, err := h.uc.UpdateUser(ctx, req.Id, req.Name, req.Phone)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update user: %v", err)
+	}
+
+	return &auth_pb.UserResponse{
+		Id:    user.ID(),
+		Email: user.Email(),
+		Role:  user.Role().String(),
+		Name:  user.Name(),
+		Phone: user.Phone(),
 	}, nil
 }

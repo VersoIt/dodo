@@ -1,13 +1,47 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import { useAuthStore } from '../store/auth'
-import { Mail, Shield, Calendar, User, Package } from 'lucide-vue-next'
+import { Mail, Shield, Calendar, User, Package, Save, X, Phone } from 'lucide-vue-next'
 import axios from 'axios'
 
 const authStore = useAuthStore()
+const addToast = inject('addToast') as (msg: string, type?: any) => void
+
 const activeTab = ref('profile')
+const isEditing = ref(false)
 const orders = ref<any[]>([])
 const loadingOrders = ref(false)
+
+// Edit Form
+const editName = ref('')
+const editPhone = ref('')
+const isSaving = ref(false)
+
+const startEditing = () => {
+  editName.value = authStore.user?.name || ''
+  editPhone.value = authStore.user?.phone || ''
+  isEditing.value = true
+}
+
+const saveProfile = async () => {
+  try {
+    isSaving.value = true
+    const response = await axios.patch('/api/v1/auth/me', {
+      name: editName.value,
+      phone: editPhone.value
+    })
+    if (response.data.success) {
+      authStore.user = response.data.data
+      isEditing.value = false
+      addToast('Profile updated!', 'success')
+    }
+  } catch (err) {
+    console.error('Failed to update profile:', err)
+    addToast('Failed to update profile', 'error')
+  } finally {
+    isSaving.value = false
+  }
+}
 
 const fetchOrders = async () => {
   try {
@@ -23,8 +57,8 @@ const fetchOrders = async () => {
   }
 }
 
-onMounted(() => {
-  authStore.fetchMe()
+onMounted(async () => {
+  await authStore.fetchMe()
 })
 </script>
 
@@ -60,46 +94,74 @@ onMounted(() => {
 
       <!-- Main Content -->
       <div class="flex-1">
-        <div v-if="activeTab === 'profile'" class="card bg-base-100 shadow-xl border border-base-200">
+        <div v-if="activeTab === 'profile'" class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden transition-all duration-300">
           <div class="card-body">
-            <div class="flex items-center gap-6 mb-8">
-              <div class="avatar placeholder">
-                <div class="bg-primary text-primary-content rounded-2xl w-20">
-                  <span class="text-3xl font-bold uppercase">{{ authStore.user?.name?.[0] || authStore.user?.email?.[0] || 'U' }}</span>
+            <div class="flex items-center justify-between mb-8">
+              <div class="flex items-center gap-6">
+                <div class="avatar placeholder">
+                  <div class="bg-primary text-primary-content rounded-2xl w-20 shadow-lg">
+                    <span class="text-3xl font-bold uppercase">{{ authStore.user?.name?.[0] || authStore.user?.email?.[0] || 'U' }}</span>
+                  </div>
+                </div>
+                <div>
+                  <h1 class="text-3xl font-bold tracking-tight">{{ authStore.user?.name || 'Pizza Lover' }}</h1>
+                  <p class="text-base-content/60">{{ authStore.user?.email }}</p>
                 </div>
               </div>
-              <div>
-                <h1 class="text-3xl font-bold">{{ authStore.user?.name || 'Pizza Lover' }}</h1>
-                <p class="text-base-content/60">{{ authStore.user?.email }}</p>
+              <button v-if="!isEditing" @click="startEditing" class="btn btn-outline btn-sm rounded-lg">Edit Profile</button>
+            </div>
+
+            <div v-if="!isEditing" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
+                <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
+                  <User class="w-3 h-3" /> Full Name
+                </p>
+                <p class="font-bold text-lg">{{ authStore.user?.name || 'Not set' }}</p>
+              </div>
+              <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
+                <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
+                  <Phone class="w-3 h-3" /> Phone Number
+                </p>
+                <p class="font-bold text-lg">{{ authStore.user?.phone || 'Not set' }}</p>
+              </div>
+              <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
+                <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
+                  <Mail class="w-3 h-3" /> Email
+                </p>
+                <p class="font-bold text-lg">{{ authStore.user?.email }}</p>
+              </div>
+              <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
+                <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
+                  <Shield class="w-3 h-3" /> Role
+                </p>
+                <div class="badge badge-secondary font-bold uppercase text-[10px]">{{ authStore.user?.role || 'client' }}</div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="p-4 bg-base-200 rounded-2xl space-y-1">
-                <p class="text-xs font-bold uppercase text-base-content/40">Full Name</p>
-                <p class="font-semibold">{{ authStore.user?.name || 'Not set' }}</p>
+            <!-- Edit Mode -->
+            <div v-else class="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div class="form-control w-full">
+                <label class="label"><span class="label-text font-bold">Full Name</span></label>
+                <input v-model="editName" type="text" class="input input-bordered w-full rounded-xl" placeholder="John Doe" />
               </div>
-              <div class="p-4 bg-base-200 rounded-2xl space-y-1">
-                <p class="text-xs font-bold uppercase text-base-content/40">Email</p>
-                <p class="font-semibold">{{ authStore.user?.email }}</p>
+              <div class="form-control w-full">
+                <label class="label"><span class="label-text font-bold">Phone Number</span></label>
+                <input v-model="editPhone" type="text" class="input input-bordered w-full rounded-xl" placeholder="+1 234 567 890" />
               </div>
-              <div class="p-4 bg-base-200 rounded-2xl space-y-1">
-                <p class="text-xs font-bold uppercase text-base-content/40">Role</p>
-                <div class="badge badge-secondary">{{ authStore.user?.role || 'client' }}</div>
+              <div class="flex gap-2 justify-end mt-6">
+                <button @click="isEditing = false" class="btn btn-ghost rounded-lg gap-2">
+                  <X class="w-4 h-4" /> Cancel
+                </button>
+                <button @click="saveProfile" class="btn btn-primary rounded-lg gap-2" :disabled="isSaving">
+                  <span v-if="isSaving" class="loading loading-spinner"></span>
+                  <Save class="w-4 h-4" /> Save Changes
+                </button>
               </div>
-              <div class="p-4 bg-base-200 rounded-2xl space-y-1">
-                <p class="text-xs font-bold uppercase text-base-content/40">Member Since</p>
-                <p class="font-semibold">Feb 2026</p>
-              </div>
-            </div>
-
-            <div class="card-actions mt-8 justify-end">
-              <button class="btn btn-primary">Edit Profile</button>
             </div>
           </div>
         </div>
 
-        <div v-if="activeTab === 'orders'" class="space-y-4">
+        <div v-if="activeTab === 'orders'" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
           <h2 class="text-2xl font-bold mb-4">Order History</h2>
           
           <div v-if="loadingOrders" class="flex justify-center py-12">
@@ -115,24 +177,24 @@ onMounted(() => {
             </div>
           </div>
 
-          <div v-else v-for="order in orders" :key="order.order_id" class="card bg-base-100 shadow-md border border-base-200 hover:border-primary/30 transition-colors">
+          <div v-else v-for="order in orders" :key="order.order_id" class="card bg-base-100 shadow-md border border-base-200 hover:border-primary/30 transition-all hover:shadow-lg">
             <div class="card-body p-6 flex flex-row justify-between items-center">
               <div>
                 <div class="flex items-center gap-3 mb-1">
-                  <span class="font-mono font-bold text-lg">#{{ order.order_number }}</span>
-                  <div class="badge badge-outline uppercase text-[10px] font-bold" 
+                  <span class="font-mono font-bold text-lg tracking-tight">#{{ order.order_number }}</span>
+                  <div class="badge badge-outline uppercase text-[10px] font-black tracking-widest" 
                     :class="{ 
-                      'badge-success': order.status === 'paid',
-                      'badge-warning': order.status === 'pending'
+                      'badge-success border-green-500 text-green-500': order.status === 'paid',
+                      'badge-warning border-yellow-500 text-yellow-500': order.status === 'pending'
                     }">
                     {{ order.status }}
                   </div>
                 </div>
-                <p class="text-sm text-base-content/60">Feb 14, 2026</p>
+                <p class="text-[10px] uppercase font-bold text-base-content/40">Feb 14, 2026</p>
               </div>
               <div class="text-right">
-                <p class="text-xl font-black text-primary">${{ order.final_price?.toFixed(2) }}</p>
-                <router-link :to="'/order/' + order.order_id" class="btn btn-ghost btn-xs text-primary">Details</router-link>
+                <p class="text-2xl font-black text-primary">${{ order.final_price?.toFixed(2) }}</p>
+                <router-link :to="'/order/' + order.order_id" class="btn btn-link btn-xs text-primary no-underline hover:underline p-0 h-auto min-h-0">View Details</router-link>
               </div>
             </div>
           </div>
