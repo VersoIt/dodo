@@ -42,6 +42,7 @@ func SetupRoutes(
 	// Orders (Client flow)
 	orders := protected.Group("/orders")
 	orders.Post("/", orderHandler.CreateOrder)
+	orders.Get("/my", orderHandler.ListOrders)
 	orders.Get("/:id", orderHandler.GetOrderStatus)
 	orders.Post("/:id/pay", orderHandler.PayOrder)
 

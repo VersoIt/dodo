@@ -36,7 +36,7 @@ func (h *AuthHandler) Register(server *grpc.Server) {
 func (h *AuthHandler) CreateUser(ctx context.Context, req *auth_pb.CreateUserRequest) (*auth_pb.UserResponse, error) {
 	h.log.Info("Creating user", slog.String("email", req.Email))
 	
-	user, err := h.uc.Register(ctx, req.Email, req.Password, auth.RoleClient)
+	user, err := h.uc.Register(ctx, req.Email, req.Password, req.Name, auth.RoleClient)
 	if err != nil {
 		h.log.Error("Failed to register user", slog.String("email", req.Email), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)
@@ -46,6 +46,7 @@ func (h *AuthHandler) CreateUser(ctx context.Context, req *auth_pb.CreateUserReq
 		Id:    user.ID(),
 		Email: user.Email(),
 		Role:  user.Role().String(),
+		Name:  user.Name(),
 	}, nil
 }
 
@@ -86,5 +87,6 @@ func (h *AuthHandler) GetUser(ctx context.Context, req *auth_pb.GetUserRequest) 
 		Id:    user.ID(),
 		Email: user.Email(),
 		Role:  user.Role().String(),
+		Name:  user.Name(),
 	}, nil
 }

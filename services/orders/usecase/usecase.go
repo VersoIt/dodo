@@ -127,3 +127,11 @@ func (uc *OrderUseCase) GetOrder(ctx context.Context, id string) (*orders.Order,
 
 	return order, nil
 }
+
+func (uc *OrderUseCase) ListOrders(ctx context.Context, customerID string) ([]*orders.Order, error) {
+	if customerID == "" {
+		return nil, fmt.Errorf("%w: customer ID is required", ErrInvalidInput)
+	}
+
+	return uc.repo.FindByCustomerID(ctx, customerID)
+}

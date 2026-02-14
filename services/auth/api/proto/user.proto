@@ -11,6 +11,7 @@ service UserService {
 message CreateUserRequest {
   string email = 1;
   string password = 2;
+  string name = 3;
 }
 
 message GetUserRequest {
@@ -31,4 +32,5 @@ message UserResponse {
   string id = 1;
   string email = 2;
   string role = 3;
+  string name = 4;
 }

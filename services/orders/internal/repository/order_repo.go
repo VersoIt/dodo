@@ -175,3 +175,36 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 
 	return orders.ReconstructOrder(oid, number, cid, orders.OrderStatus(status), createdAt, addr, delPrice, discount, promo, finalPrice, items), nil
 }
+
+func (r *orderRepo) FindByCustomerID(ctx context.Context, customerID string) ([]*orders.Order, error) {
+	sqlStr, args, err := r.sb.Select("id").
+		From("orders").
+		Where(squirrel.Eq{"customer_id": customerID}).
+		OrderBy("created_at DESC").
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*orders.Order
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		
+		order, err := r.FindByID(ctx, id)
+		if err != nil {
+			continue
+		}
+		result = append(result, order)
+	}
+	
+	return result, nil
+}

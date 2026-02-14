@@ -99,3 +99,20 @@ func (h *OrderHandler) GetOrderStatus(c *fiber.Ctx) error {
 
 	return SuccessResponse(c, resp)
 }
+
+func (h *OrderHandler) ListOrders(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	h.log.Info("Listing orders for user", slog.String("user_id", userID))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.ListOrders(ctx, &orders_pb.ListOrdersRequest{
+		CustomerId: userID,
+	})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to list orders")
+	}
+
+	return SuccessResponse(c, resp.Orders)
+}

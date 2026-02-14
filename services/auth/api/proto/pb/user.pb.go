@@ -25,6 +25,7 @@ type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -69,6 +70,13 @@ func (x *CreateUserRequest) GetEmail() string {
 func (x *CreateUserRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
+	}
+	return ""
+}
+
+func (x *CreateUserRequest) GetName() string {
+	if x != nil {
+		return x.Name
 	}
 	return ""
 }
@@ -226,6 +234,7 @@ type UserResponse struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -281,15 +290,23 @@ func (x *UserResponse) GetRole() string {
 	return ""
 }
 
+func (x *UserResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x12\aauth.v1\"E\n" +
+	"user.proto\x12\aauth.v1\"Y\n" +
 	"\x11CreateUserRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\" \n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\" \n" +
 	"\x0eGetUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
@@ -297,11 +314,12 @@ const file_user_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\">\n" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"H\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\\\n" +
 	"\fUserResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role2\xc1\x01\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name2\xc1\x01\n" +
 	"\vUserService\x12?\n" +
 	"\n" +
 	"CreateUser\x12\x1a.auth.v1.CreateUserRequest\x1a\x15.auth.v1.UserResponse\x129\n" +

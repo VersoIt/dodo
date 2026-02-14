@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ShoppingCart, User, Menu, X, Pizza, LogOut, Settings, ClipboardList } from 'lucide-vue-next'
+import { ShoppingCart, User, Menu, X, Pizza, LogOut, Package, UserCircle } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
 import { useAuthStore } from '../store/auth'
 
@@ -27,49 +27,62 @@ const toggleMenu = () => {
 
 <template>
   <div class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
-    <div class="container mx-auto">
+    <div class="container mx-auto px-4">
       <div class="flex-1">
-        <router-link to="/" class="btn btn-ghost normal-case text-xl flex items-center gap-2">
+        <router-link to="/" class="btn btn-ghost normal-case text-xl flex items-center gap-2 p-0 hover:bg-transparent">
           <Pizza class="w-8 h-8" />
-          <span class="font-bold tracking-tight">PIZZA GOOD</span>
+          <span class="font-bold tracking-tighter">PIZZA GOOD</span>
         </router-link>
       </div>
       
       <!-- Desktop Menu -->
-      <div class="hidden md:flex items-center gap-4 px-4">
-        <router-link v-for="link in navLinks" :key="link.path" :to="link.path" class="btn btn-ghost">
+      <div class="hidden md:flex items-center gap-2 px-4">
+        <router-link v-for="link in navLinks" :key="link.path" :to="link.path" class="btn btn-ghost btn-sm rounded-lg">
           {{ link.name }}
         </router-link>
       </div>
 
-      <div class="flex-none flex items-center gap-2">
-        <router-link to="/cart" class="btn btn-ghost btn-circle">
+      <div class="flex-none flex items-center gap-3">
+        <!-- User Name (Desktop) -->
+        <span v-if="authStore.isAuthenticated" class="hidden md:block text-xs font-bold uppercase tracking-widest opacity-80">
+          Hi, {{ authStore.user?.name || 'Friend' }}
+        </span>
+
+        <router-link to="/cart" class="btn btn-ghost btn-circle btn-sm">
           <div class="indicator">
             <ShoppingCart class="h-5 w-5" />
-            <span v-if="cartStore.totalItems > 0" class="badge badge-sm indicator-item badge-secondary">{{ cartStore.totalItems }}</span>
+            <span v-if="cartStore.totalItems > 0" class="badge badge-sm indicator-item badge-secondary font-bold">{{ cartStore.totalItems }}</span>
           </div>
         </router-link>
         
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-            <User class="h-5 w-5" />
+          <label tabindex="0" class="btn btn-ghost btn-circle btn-sm">
+            <User v-if="!authStore.isAuthenticated" class="h-5 w-5" />
+            <div v-else class="avatar placeholder">
+              <div class="bg-primary-focus text-primary-content rounded-full w-8">
+                <span class="text-xs font-bold uppercase">{{ authStore.user?.name?.[0] || 'U' }}</span>
+              </div>
+            </div>
           </label>
-          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 text-base-content rounded-box w-52">
+          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 text-base-content rounded-2xl w-56 border border-base-200">
             <template v-if="!authStore.isAuthenticated">
+              <li class="menu-title px-4 py-2 font-bold text-primary">Guest</li>
               <li><router-link to="/login">Login</router-link></li>
               <li><router-link to="/register">Register</router-link></li>
             </template>
             <template v-else>
-              <li class="menu-title px-4 py-2 font-bold text-primary">User Menu</li>
-              <li><router-link to="/profile"><Settings class="w-4 h-4" /> Profile</router-link></li>
-              <li><a><ClipboardList class="w-4 h-4" /> My Orders</a></li>
-              <div class="divider my-0"></div>
-              <li><a @click="handleLogout" class="text-error font-bold"><LogOut class="w-4 h-4" /> Logout</a></li>
+              <li class="menu-title px-4 py-2 font-bold text-primary truncate max-w-full">
+                {{ authStore.user?.name || 'My Account' }}
+              </li>
+              <li><router-link to="/profile" class="py-3"><UserCircle class="w-4 h-4" /> Profile Info</router-link></li>
+              <li><router-link to="/profile" class="py-3"><Package class="w-4 h-4" /> My Orders</router-link></li>
+              <div class="divider my-0 opacity-50"></div>
+              <li><a @click="handleLogout" class="text-error font-bold py-3"><LogOut class="w-4 h-4" /> Logout</a></li>
             </template>
           </ul>
         </div>
 
-        <button class="btn btn-ghost btn-circle md:hidden" @click="toggleMenu">
+        <button class="btn btn-ghost btn-circle btn-sm md:hidden" @click="toggleMenu">
           <Menu v-if="!isMenuOpen" class="h-5 w-5" />
           <X v-else class="h-5 w-5" />
         </button>
@@ -78,10 +91,10 @@ const toggleMenu = () => {
   </div>
 
   <!-- Mobile Menu Drawer -->
-  <div v-if="isMenuOpen" class="md:hidden bg-base-200 p-4 border-b border-base-300">
+  <div v-if="isMenuOpen" class="md:hidden bg-base-100 p-4 border-b border-base-200 shadow-xl">
     <ul class="menu w-full gap-2">
       <li v-for="link in navLinks" :key="link.path">
-        <router-link :to="link.path" @click="isMenuOpen = false">{{ link.name }}</router-link>
+        <router-link :to="link.path" @click="isMenuOpen = false" class="py-3 font-semibold">{{ link.name }}</router-link>
       </li>
     </ul>
   </div>

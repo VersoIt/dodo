@@ -301,6 +301,7 @@ func generateOrderNumber() string {
 type OrderRepository interface {
 	Save(ctx context.Context, o *Order) error
 	FindByID(ctx context.Context, id string) (*Order, error)
+	FindByCustomerID(ctx context.Context, customerID string) ([]*Order, error)
 }
 
 type ProductInfo struct {

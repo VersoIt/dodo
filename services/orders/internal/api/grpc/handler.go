@@ -87,3 +87,22 @@ func (h *OrdersHandler) GetOrder(ctx context.Context, req *orders_pb.GetOrderReq
 		OrderNumber: order.OrderNumber(),
 	}, nil
 }
+
+func (h *OrdersHandler) ListOrders(ctx context.Context, req *orders_pb.ListOrdersRequest) (*orders_pb.ListOrdersResponse, error) {
+	orderList, err := h.uc.ListOrders(ctx, req.CustomerId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list orders: %v", err)
+	}
+
+	pbOrders := make([]*orders_pb.OrderResponse, len(orderList))
+	for i, o := range orderList {
+		pbOrders[i] = &orders_pb.OrderResponse{
+			OrderId:     o.ID(),
+			Status:      o.Status().String(),
+			FinalPrice:  o.FinalPrice().InexactFloat64(),
+			OrderNumber: o.OrderNumber(),
+		}
+	}
+
+	return &orders_pb.ListOrdersResponse{Orders: pbOrders}, nil
+}

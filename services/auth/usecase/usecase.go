@@ -27,12 +27,12 @@ func NewAuthUseCase(repo auth.UserRepository, log *slog.Logger) *AuthUseCase {
 	}
 }
 
-func (uc *AuthUseCase) Register(ctx context.Context, email, password string, role auth.Role) (*auth.User, error) {
+func (uc *AuthUseCase) Register(ctx context.Context, email, password, name string, role auth.Role) (*auth.User, error) {
 	if email == "" || password == "" {
 		return nil, fmt.Errorf("%w: email and password are required", ErrInvalidInput)
 	}
 
-	uc.log.Info("registering user", slog.String("email", email), slog.String("role", role.String()))
+	uc.log.Info("registering user", slog.String("email", email), slog.String("name", name), slog.String("role", role.String()))
 
 	existing, err := uc.repo.FindByEmail(ctx, email)
 	if err != nil && !errors.Is(err, auth.ErrUserNotFound) {
@@ -43,7 +43,7 @@ func (uc *AuthUseCase) Register(ctx context.Context, email, password string, rol
 		return nil, ErrUserExists
 	}
 
-	user, err := auth.NewUser(email, password, role)
+	user, err := auth.NewUser(email, password, name, role)
 	if err != nil {
 		return nil, fmt.Errorf("domain validation failed: %w", err)
 	}

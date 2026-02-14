@@ -66,7 +66,7 @@ type User struct {
 
 // --- Factory ---
 
-func NewUser(email, password string, role Role) (*User, error) {
+func NewUser(email, password, name string, role Role) (*User, error) {
 	if email == "" || !strings.Contains(email, "@") {
 		return nil, ErrInvalidEmail
 	}
@@ -78,6 +78,7 @@ func NewUser(email, password string, role Role) (*User, error) {
 	u := &User{
 		id:        id.String(),
 		email:     email,
+		name:      name,
 		role:      role,
 		createdAt: time.Now(),
 		updatedAt: time.Now(),

@@ -6,10 +6,19 @@ service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
   rpc PayOrder(PayOrderRequest) returns (OrderResponse);
   rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
 }
 
 message GetOrderRequest {
   string order_id = 1;
+}
+
+message ListOrdersRequest {
+  string customer_id = 1;
+}
+
+message ListOrdersResponse {
+  repeated OrderResponse orders = 1;
 }
 
 message Address {
