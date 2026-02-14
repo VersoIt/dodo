@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/catalog"
 	"github.com/jackc/pgx/v5"
@@ -12,24 +13,26 @@ import (
 type productRepo struct {
 	pool *pgxpool.Pool
 	sb   squirrel.StatementBuilderType
+	log  *slog.Logger
 }
 
-func NewProductRepository(pool *pgxpool.Pool) catalog.ProductRepository {
+func NewProductRepository(pool *pgxpool.Pool, log *slog.Logger) catalog.ProductRepository {
 	return &productRepo{
 		pool: pool,
 		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:  log,
 	}
 }
 
 func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
-	sql, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "is_available").
+	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "is_available").
 		From("products").
 		ToSql()
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.pool.Query(ctx, sql, args...)
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +61,7 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 }
 
 func (r *productRepo) fetchIngredients(ctx context.Context, productID string) ([]catalog.IngredientRef, error) {
-	sql, args, err := r.sb.Select("ingredient_id", "quantity", "is_removable").
+	sqlStr, args, err := r.sb.Select("ingredient_id", "quantity", "is_removable").
 		From("product_ingredients").
 		Where(squirrel.Eq{"product_id": productID}).
 		ToSql()
@@ -66,7 +69,7 @@ func (r *productRepo) fetchIngredients(ctx context.Context, productID string) ([
 		return nil, err
 	}
 
-	rows, err := r.pool.Query(ctx, sql, args...)
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +103,7 @@ func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
 		_ = tx.Rollback(ctx)
 	}()
 
-	sql, args, err := r.sb.Insert("products").
+	sqlStr, args, err := r.sb.Insert("products").
 		Columns("id", "name", "description", "category", "base_price", "is_available").
 		Values(p.ID(), p.Name(), p.Description(), p.Category(), p.BasePrice(), p.IsAvailable()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, category = EXCLUDED.category, base_price = EXCLUDED.base_price, is_available = EXCLUDED.is_available").
@@ -109,26 +112,28 @@ func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
 		return err
 	}
 
-	_, err = tx.Exec(ctx, sql, args...)
+	r.log.Debug("saving product", slog.String("product_id", p.ID()), slog.String("name", p.Name()))
+
+	_, err = tx.Exec(ctx, sqlStr, args...)
 	if err != nil {
+		r.log.Error("failed to save product", slog.Any("error", err), slog.String("product_id", p.ID()))
 		return err
 	}
 
-	// Simple way: delete and insert ingredients
 	_, err = tx.Exec(ctx, "DELETE FROM product_ingredients WHERE product_id = $1", p.ID())
 	if err != nil {
 		return err
 	}
 
 	for _, ing := range p.Ingredients() {
-		sql, args, err := r.sb.Insert("product_ingredients").
+		sqlStr, args, err := r.sb.Insert("product_ingredients").
 			Columns("product_id", "ingredient_id", "quantity", "is_removable").
 			Values(p.ID(), ing.IngredientID, ing.Quantity, ing.IsRemovable).
 			ToSql()
 		if err != nil {
 			return err
 		}
-		_, err = tx.Exec(ctx, sql, args...)
+		_, err = tx.Exec(ctx, sqlStr, args...)
 		if err != nil {
 			return err
 		}
@@ -138,7 +143,7 @@ func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
 }
 
 func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product, error) {
-	sql, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "is_available").
+	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "is_available").
 		From("products").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
@@ -149,12 +154,11 @@ func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product
 	var (
 		pid, name, desc string
 		cat             int
-		price           float64 // Need to handle Money
+		price           float64 
 		isAvail         bool
 	)
 
-	// Note: Money scanning might need a custom scanner if not using float64 or string
-	err = r.pool.QueryRow(ctx, sql, args...).Scan(&pid, &name, &desc, &cat, &price, &isAvail)
+	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&pid, &name, &desc, &cat, &price, &isAvail)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, catalog.ErrProductNotFound

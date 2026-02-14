@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/treasury"
@@ -15,10 +16,14 @@ var (
 
 type TreasuryUseCase struct {
 	repo treasury.PaymentRepository
+	log  *slog.Logger
 }
 
-func NewTreasuryUseCase(repo treasury.PaymentRepository) *TreasuryUseCase {
-	return &TreasuryUseCase{repo: repo}
+func NewTreasuryUseCase(repo treasury.PaymentRepository, log *slog.Logger) *TreasuryUseCase {
+	return &TreasuryUseCase{
+		repo: repo,
+		log:  log,
+	}
 }
 
 func (uc *TreasuryUseCase) InitiatePayment(ctx context.Context, orderID string, amount common.Money, method treasury.PaymentMethod) (*treasury.Payment, error) {
@@ -28,6 +33,8 @@ func (uc *TreasuryUseCase) InitiatePayment(ctx context.Context, orderID string, 
 	if !amount.IsPositive() {
 		return nil, fmt.Errorf("%w: payment amount must be positive", ErrInvalidInput)
 	}
+
+	uc.log.Info("initiating payment", slog.String("order_id", orderID), slog.Float64("amount", amount.InexactFloat64()))
 
 	payment := treasury.NewPayment(orderID, amount, method)
 
@@ -42,6 +49,8 @@ func (uc *TreasuryUseCase) ConfirmPayment(ctx context.Context, orderID string, t
 	if orderID == "" || transactionID == "" {
 		return fmt.Errorf("%w: order ID and transaction ID are required", ErrInvalidInput)
 	}
+
+	uc.log.Info("confirming payment", slog.String("order_id", orderID), slog.String("transaction_id", transactionID))
 
 	payment, err := uc.repo.FindByOrderID(ctx, orderID)
 	if err != nil {

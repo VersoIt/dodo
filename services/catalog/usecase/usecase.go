@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/catalog"
@@ -15,10 +16,14 @@ var (
 
 type CatalogUseCase struct {
 	repo catalog.ProductRepository
+	log  *slog.Logger
 }
 
-func NewCatalogUseCase(repo catalog.ProductRepository) *CatalogUseCase {
-	return &CatalogUseCase{repo: repo}
+func NewCatalogUseCase(repo catalog.ProductRepository, log *slog.Logger) *CatalogUseCase {
+	return &CatalogUseCase{
+		repo: repo,
+		log:  log,
+	}
 }
 
 func (uc *CatalogUseCase) UpdatePrice(ctx context.Context, productID string, newPrice common.Money) error {
@@ -39,6 +44,7 @@ func (uc *CatalogUseCase) UpdatePrice(ctx context.Context, productID string, new
 		return fmt.Errorf("failed to persist price update: %w", err)
 	}
 
+	uc.log.Info("product price updated", slog.String("product_id", productID), slog.Float64("new_price", newPrice.InexactFloat64()))
 	return nil
 }
 
@@ -58,6 +64,7 @@ func (uc *CatalogUseCase) SetAvailability(ctx context.Context, productID string,
 		return fmt.Errorf("failed to persist availability update: %w", err)
 	}
 
+	uc.log.Info("product availability updated", slog.String("product_id", productID), slog.Bool("available", available))
 	return nil
 }
 
@@ -75,6 +82,7 @@ func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, 
 		return nil, fmt.Errorf("failed to save new product: %w", err)
 	}
 
+	uc.log.Info("new product created", slog.String("product_id", product.ID()), slog.String("name", name))
 	return product, nil
 }
 

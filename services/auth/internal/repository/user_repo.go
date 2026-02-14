@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/auth"
 	"github.com/jackc/pgx/v5"
@@ -14,12 +15,14 @@ import (
 type userRepo struct {
 	pool *pgxpool.Pool
 	sb   squirrel.StatementBuilderType
+	log  *slog.Logger
 }
 
-func NewUserRepository(pool *pgxpool.Pool) auth.UserRepository {
+func NewUserRepository(pool *pgxpool.Pool, log *slog.Logger) auth.UserRepository {
 	return &userRepo{
 		pool: pool,
 		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:  log,
 	}
 }
 
@@ -33,8 +36,11 @@ func (r *userRepo) Save(ctx context.Context, u *auth.User) error {
 		return fmt.Errorf("failed to build query: %w", err)
 	}
 
+	r.log.Debug("saving user to db", slog.String("user_id", u.ID()), slog.String("email", u.Email()))
+
 	_, err = r.pool.Exec(ctx, sqlStr, args...)
 	if err != nil {
+		r.log.Error("db error saving user", slog.Any("error", err), slog.String("user_id", u.ID()))
 		return fmt.Errorf("failed to execute query: %w", err)
 	}
 

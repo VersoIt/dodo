@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/logistics"
 )
@@ -15,12 +16,14 @@ var (
 type LogisticsUseCase struct {
 	deliveryRepo logistics.DeliveryRepository
 	courierRepo  logistics.CourierRepository
+	log          *slog.Logger
 }
 
-func NewLogisticsUseCase(dr logistics.DeliveryRepository, cr logistics.CourierRepository) *LogisticsUseCase {
+func NewLogisticsUseCase(dr logistics.DeliveryRepository, cr logistics.CourierRepository, log *slog.Logger) *LogisticsUseCase {
 	return &LogisticsUseCase{
 		deliveryRepo: dr,
 		courierRepo:  cr,
+		log:          log,
 	}
 }
 
@@ -29,9 +32,10 @@ func (uc *LogisticsUseCase) AssignCourierToDelivery(ctx context.Context, orderID
 		return fmt.Errorf("%w: order ID and courier ID are required", ErrInvalidInput)
 	}
 
+	uc.log.Info("assigning courier", slog.String("order_id", orderID), slog.String("courier_id", courierID))
+
 	delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
 	if err != nil {
-		// Если доставка еще не зарегистрирована, создаем новый процесс
 		delivery = logistics.NewDelivery(orderID)
 	}
 
@@ -48,8 +52,6 @@ func (uc *LogisticsUseCase) AssignCourierToDelivery(ctx context.Context, orderID
 		return fmt.Errorf("delivery assignment failed: %w", err)
 	}
 
-	// Атомарность здесь имитируется через сохранение обоих.
-	// В продакшене лучше использовать транзакции репозитория.
 	if err := uc.courierRepo.Save(ctx, courier); err != nil {
 		return fmt.Errorf("failed to update courier status: %w", err)
 	}

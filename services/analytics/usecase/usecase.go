@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/shopspring/decimal"
 	"github.com/versoit/diploma/services/analytics"
@@ -15,10 +16,14 @@ var (
 
 type AnalyticsUseCase struct {
 	repo analytics.AnalyticsRepository
+	log  *slog.Logger
 }
 
-func NewAnalyticsUseCase(repo analytics.AnalyticsRepository) *AnalyticsUseCase {
-	return &AnalyticsUseCase{repo: repo}
+func NewAnalyticsUseCase(repo analytics.AnalyticsRepository, log *slog.Logger) *AnalyticsUseCase {
+	return &AnalyticsUseCase{
+		repo: repo,
+		log:  log,
+	}
 }
 
 func (uc *AnalyticsUseCase) RecordSale(ctx context.Context, managerID string, amount decimal.Decimal) error {
@@ -29,9 +34,12 @@ func (uc *AnalyticsUseCase) RecordSale(ctx context.Context, managerID string, am
 		return fmt.Errorf("%w: sale amount must be positive", ErrInvalidInput)
 	}
 
+	uc.log.Info("recording sale", slog.String("manager_id", managerID), slog.String("amount", amount.String()))
+
 	kpi, err := uc.repo.GetKPI(ctx, managerID)
 	if err != nil {
 		if errors.Is(err, analytics.ErrKPINotFound) {
+			uc.log.Info("creating new kpi for manager", slog.String("manager_id", managerID))
 			kpi = analytics.NewManagerKPI(managerID, decimal.NewFromInt(100000))
 		} else {
 			return fmt.Errorf("failed to retrieve kpi for manager %s: %w", managerID, err)

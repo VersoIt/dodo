@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+	"log/slog"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/treasury"
@@ -16,12 +17,14 @@ import (
 type paymentRepo struct {
 	pool *pgxpool.Pool
 	sb   squirrel.StatementBuilderType
+	log  *slog.Logger
 }
 
-func NewPaymentRepository(pool *pgxpool.Pool) treasury.PaymentRepository {
+func NewPaymentRepository(pool *pgxpool.Pool, log *slog.Logger) treasury.PaymentRepository {
 	return &paymentRepo{
 		pool: pool,
 		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:  log,
 	}
 }
 
@@ -35,7 +38,12 @@ func (r *paymentRepo) Save(ctx context.Context, p *treasury.Payment) error {
 		return err
 	}
 
+	r.log.Debug("saving payment", slog.String("payment_id", p.ID()), slog.String("order_id", p.OrderID()), slog.Int("status", int(p.Status())))
+
 	_, err = r.pool.Exec(ctx, sqlStr, args...)
+	if err != nil {
+		r.log.Error("failed to save payment", slog.Any("error", err), slog.String("payment_id", p.ID()))
+	}
 	return err
 }
 

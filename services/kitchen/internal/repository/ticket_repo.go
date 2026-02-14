@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"log/slog"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
@@ -14,12 +15,14 @@ import (
 type ticketRepo struct {
 	pool *pgxpool.Pool
 	sb   squirrel.StatementBuilderType
+	log  *slog.Logger
 }
 
-func NewTicketRepository(pool *pgxpool.Pool) kitchen.TicketRepository {
+func NewTicketRepository(pool *pgxpool.Pool, log *slog.Logger) kitchen.TicketRepository {
 	return &ticketRepo{
 		pool: pool,
 		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:  log,
 	}
 }
 
@@ -32,7 +35,7 @@ func (r *ticketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
 		_ = tx.Rollback(ctx)
 	}()
 
-	sql, args, err := r.sb.Insert("kitchen_tickets").
+	sqlStr, args, err := r.sb.Insert("kitchen_tickets").
 		Columns("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
 		Values(t.ID(), t.OrderID(), t.Status(), t.CreatedAt(), t.StartTime(), t.ReadyTime()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, start_cooking_time = EXCLUDED.start_cooking_time, ready_time = EXCLUDED.ready_time").
@@ -41,32 +44,34 @@ func (r *ticketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
 		return err
 	}
 
-	_, err = tx.Exec(ctx, sql, args...)
+	r.log.Debug("saving kitchen ticket", slog.String("ticket_id", t.ID()), slog.Int("status", int(t.Status())))
+
+	_, err = tx.Exec(ctx, sqlStr, args...)
 	if err != nil {
+		r.log.Error("failed to save kitchen ticket", slog.Any("error", err), slog.String("ticket_id", t.ID()))
 		return err
 	}
 
-	// Recreate items
 	_, _ = tx.Exec(ctx, "DELETE FROM kitchen_items WHERE ticket_id = $1", t.ID())
 	for _, item := range t.Items() {
-		sql, args, _ = r.sb.Insert("kitchen_items").
+		sqlStr, args, _ = r.sb.Insert("kitchen_items").
 			Columns("ticket_id", "product_id", "name", "quantity", "comment").
 			Values(t.ID(), item.ProductID, item.Name, item.Quantity, item.Comment).
 			Suffix("RETURNING id").
 			ToSql()
 
 		var itemID int64
-		err = tx.QueryRow(ctx, sql, args...).Scan(&itemID)
+		err = tx.QueryRow(ctx, sqlStr, args...).Scan(&itemID)
 		if err != nil {
 			return err
 		}
 
 		for _, ing := range item.Ingredients {
-			sql, args, _ = r.sb.Insert("kitchen_item_ingredients").
+			sqlStr, args, _ = r.sb.Insert("kitchen_item_ingredients").
 				Columns("kitchen_item_id", "ingredient_name").
 				Values(itemID, ing).
 				ToSql()
-			_, err = tx.Exec(ctx, sql, args...)
+			_, err = tx.Exec(ctx, sqlStr, args...)
 			if err != nil {
 				return err
 			}
@@ -77,7 +82,7 @@ func (r *ticketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
 }
 
 func (r *ticketRepo) FindByID(ctx context.Context, id string) (*kitchen.KitchenTicket, error) {
-	sql, args, err := r.sb.Select("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
 		From("kitchen_tickets").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
@@ -85,11 +90,11 @@ func (r *ticketRepo) FindByID(ctx context.Context, id string) (*kitchen.KitchenT
 		return nil, err
 	}
 
-	return r.scanTicket(ctx, r.pool.QueryRow(ctx, sql, args...))
+	return r.scanTicket(ctx, r.pool.QueryRow(ctx, sqlStr, args...))
 }
 
 func (r *ticketRepo) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket, error) {
-	sql, args, err := r.sb.Select("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
 		From("kitchen_tickets").
 		Where(squirrel.NotEq{"status": kitchen.TicketReady}).
 		ToSql()
@@ -97,7 +102,7 @@ func (r *ticketRepo) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket,
 		return nil, err
 	}
 
-	rows, err := r.pool.Query(ctx, sql, args...)
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +134,6 @@ func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*kitchen.Kitc
 		return nil, err
 	}
 
-	// Fetch Items
 	itemSql, itemArgs, _ := r.sb.Select("id", "product_id", "name", "quantity", "comment").
 		From("kitchen_items").
 		Where(squirrel.Eq{"ticket_id": id}).
@@ -152,7 +156,6 @@ func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*kitchen.Kitc
 			return nil, err
 		}
 
-		// Fetch Ingredients
 		ingSql, ingArgs, _ := r.sb.Select("ingredient_name").
 			From("kitchen_item_ingredients").
 			Where(squirrel.Eq{"kitchen_item_id": itemID}).

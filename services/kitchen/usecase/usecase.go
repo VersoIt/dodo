@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/kitchen"
 )
@@ -14,10 +15,14 @@ var (
 
 type KitchenUseCase struct {
 	repo kitchen.TicketRepository
+	log  *slog.Logger
 }
 
-func NewKitchenUseCase(repo kitchen.TicketRepository) *KitchenUseCase {
-	return &KitchenUseCase{repo: repo}
+func NewKitchenUseCase(repo kitchen.TicketRepository, log *slog.Logger) *KitchenUseCase {
+	return &KitchenUseCase{
+		repo: repo,
+		log:  log,
+	}
 }
 
 func (uc *KitchenUseCase) AcceptOrder(ctx context.Context, orderID string, items []kitchen.KitchenItem) (*kitchen.KitchenTicket, error) {
@@ -29,6 +34,8 @@ func (uc *KitchenUseCase) AcceptOrder(ctx context.Context, orderID string, items
 	}
 
 	ticket := kitchen.NewTicket(orderID, items)
+
+	uc.log.Info("accepting order in kitchen", slog.String("order_id", orderID), slog.String("ticket_id", ticket.ID()))
 
 	if err := uc.repo.Save(ctx, ticket); err != nil {
 		return nil, fmt.Errorf("failed to create kitchen ticket: %w", err)
@@ -55,6 +62,7 @@ func (uc *KitchenUseCase) StartCooking(ctx context.Context, ticketID string) err
 		return fmt.Errorf("failed to update ticket status to cooking: %w", err)
 	}
 
+	uc.log.Info("started cooking", slog.String("ticket_id", ticketID), slog.String("order_id", ticket.OrderID()))
 	return nil
 }
 
@@ -76,5 +84,6 @@ func (uc *KitchenUseCase) MarkReady(ctx context.Context, ticketID string) error 
 		return fmt.Errorf("failed to update ticket status to ready: %w", err)
 	}
 
+	uc.log.Info("ticket ready", slog.String("ticket_id", ticketID), slog.String("order_id", ticket.OrderID()))
 	return nil
 }

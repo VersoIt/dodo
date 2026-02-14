@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"time"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/notification"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,29 +13,37 @@ import (
 type notificationRepo struct {
 	pool *pgxpool.Pool
 	sb   squirrel.StatementBuilderType
+	log  *slog.Logger
 }
 
-func NewNotificationRepository(pool *pgxpool.Pool) notification.NotificationRepository {
+func NewNotificationRepository(pool *pgxpool.Pool, log *slog.Logger) notification.NotificationRepository {
 	return &notificationRepo{
 		pool: pool,
 		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:  log,
 	}
 }
 
 func (r *notificationRepo) Save(ctx context.Context, n *notification.Notification) error {
-	sql, args, err := r.sb.Insert("notifications").
+	sqlStr, args, err := r.sb.Insert("notifications").
 		Columns("id", "user_id", "channel", "title", "message", "status", "sent_at", "error_msg").
 		Values(n.ID(), n.UserID(), string(n.Channel()), n.Title(), n.Message(), n.Status(), n.SentAt(), n.Error()).
 		ToSql()
 	if err != nil {
 		return err
 	}
-	_, err = r.pool.Exec(ctx, sql, args...)
+	
+	r.log.Debug("saving notification", slog.String("id", n.ID()), slog.String("user_id", n.UserID()))
+	
+	_, err = r.pool.Exec(ctx, sqlStr, args...)
+	if err != nil {
+		r.log.Error("failed to save notification", slog.Any("error", err), slog.String("id", n.ID()))
+	}
 	return err
 }
 
 func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*notification.Notification, error) {
-	sql, args, err := r.sb.Select("id", "user_id", "channel", "title", "message", "status", "sent_at", "error_msg").
+	sqlStr, args, err := r.sb.Select("id", "user_id", "channel", "title", "message", "status", "sent_at", "error_msg").
 		From("notifications").
 		Where(squirrel.Eq{"user_id": userID}).
 		OrderBy("sent_at DESC").
@@ -43,7 +52,7 @@ func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*
 		return nil, err
 	}
 
-	rows, err := r.pool.Query(ctx, sql, args...)
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}

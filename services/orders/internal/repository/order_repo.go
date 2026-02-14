@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"time"
+	"log/slog"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/orders"
@@ -14,12 +15,14 @@ import (
 type orderRepo struct {
 	pool *pgxpool.Pool
 	sb   squirrel.StatementBuilderType
+	log  *slog.Logger
 }
 
-func NewOrderRepository(pool *pgxpool.Pool) orders.OrderRepository {
+func NewOrderRepository(pool *pgxpool.Pool, log *slog.Logger) orders.OrderRepository {
 	return &orderRepo{
 		pool: pool,
 		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:  log,
 	}
 }
 
@@ -33,7 +36,7 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 	}()
 
 	addr := o.Address()
-	sql, args, err := r.sb.Insert("orders").
+	sqlStr, args, err := r.sb.Insert("orders").
 		Columns("id", "order_number", "customer_id", "status", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price").
 		Values(o.ID(), o.OrderNumber(), o.CustomerID(), o.Status(), addr.City, addr.Street, addr.House, addr.Apartment, addr.Floor, addr.Comment, o.DeliveryPrice(), o.Discount(), o.PromoCode(), o.FinalPrice()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, delivery_price = EXCLUDED.delivery_price, discount = EXCLUDED.discount, final_price = EXCLUDED.final_price").
@@ -42,40 +45,42 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 		return err
 	}
 
-	_, err = tx.Exec(ctx, sql, args...)
+	r.log.Debug("saving order", slog.String("order_id", o.ID()), slog.String("number", o.OrderNumber()))
+
+	_, err = tx.Exec(ctx, sqlStr, args...)
 	if err != nil {
+		r.log.Error("failed to save order", slog.Any("error", err), slog.String("order_id", o.ID()))
 		return err
 	}
 
-	// For simplicity, we recreate items on Save
 	_, err = tx.Exec(ctx, "DELETE FROM order_items WHERE order_id = $1", o.ID())
 	if err != nil {
 		return err
 	}
 
 	for _, item := range o.Items() {
-		itemID := item.ID() // Need to ensure item has ID or generate one
-		sql, args, err := r.sb.Insert("order_items").
+		itemID := item.ID()
+		sqlStr, args, err := r.sb.Insert("order_items").
 			Columns("id", "order_id", "product_id", "product_name", "quantity", "base_price", "size_multiplier").
 			Values(itemID, o.ID(), item.ProductID(), item.ProductName(), item.Quantity(), item.BasePrice(), item.Size()).
 			ToSql()
 		if err != nil {
 			return err
 		}
-		_, err = tx.Exec(ctx, sql, args...)
+		_, err = tx.Exec(ctx, sqlStr, args...)
 		if err != nil {
 			return err
 		}
 
 		for _, t := range item.Toppings() {
-			sql, args, err := r.sb.Insert("order_item_toppings").
+			sqlStr, args, err := r.sb.Insert("order_item_toppings").
 				Columns("order_item_id", "name", "price").
 				Values(itemID, t.Name, t.Price).
 				ToSql()
 			if err != nil {
 				return err
 			}
-			_, err = tx.Exec(ctx, sql, args...)
+			_, err = tx.Exec(ctx, sqlStr, args...)
 			if err != nil {
 				return err
 			}
@@ -86,8 +91,7 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 }
 
 func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, error) {
-	// 1. Get Order basic info
-	sql, args, err := r.sb.Select("id", "order_number", "customer_id", "status", "created_at", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price").
+	sqlStr, args, err := r.sb.Select("id", "order_number", "customer_id", "status", "created_at", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price").
 		From("orders").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
@@ -102,7 +106,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		delPrice, discount, finalPrice                                          common.Money
 	)
 
-	err = r.pool.QueryRow(ctx, sql, args...).Scan(
+	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(
 		&oid, &number, &cid, &status, &createdAt,
 		&city, &street, &house, &apartment, &floor, &comment,
 		&delPrice, &discount, &promo, &finalPrice,
@@ -114,8 +118,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		return nil, err
 	}
 
-	// 2. Get Items
-	sql, args, err = r.sb.Select("id", "product_id", "product_name", "quantity", "base_price", "size_multiplier").
+	sqlStr, args, err = r.sb.Select("id", "product_id", "product_name", "quantity", "base_price", "size_multiplier").
 		From("order_items").
 		Where(squirrel.Eq{"order_id": id}).
 		ToSql()
@@ -123,7 +126,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		return nil, err
 	}
 
-	rows, err := r.pool.Query(ctx, sql, args...)
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +144,6 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 			return nil, err
 		}
 
-		// 3. Get Toppings for each item
 		tsql, targs, _ := r.sb.Select("name", "price").
 			From("order_item_toppings").
 			Where(squirrel.Eq{"order_item_id": iid}).
