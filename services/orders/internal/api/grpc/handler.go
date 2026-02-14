@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/orders"
 	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
@@ -13,11 +14,15 @@ import (
 
 type OrdersHandler struct {
 	orders_pb.UnimplementedOrderServiceServer
-	uc *usecase.OrderUseCase
+	uc  *usecase.OrderUseCase
+	log *slog.Logger
 }
 
-func NewOrdersHandler(uc *usecase.OrderUseCase) *OrdersHandler {
-	return &OrdersHandler{uc: uc}
+func NewOrdersHandler(uc *usecase.OrderUseCase, log *slog.Logger) *OrdersHandler {
+	return &OrdersHandler{
+		uc:  uc,
+		log: log,
+	}
 }
 
 func (h *OrdersHandler) Register(server *grpc.Server) {
@@ -25,6 +30,8 @@ func (h *OrdersHandler) Register(server *grpc.Server) {
 }
 
 func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOrderRequest) (*orders_pb.OrderResponse, error) {
+	h.log.Info("Creating order", slog.String("customer_id", req.CustomerId))
+	
 	items := make([]usecase.OrderItemInput, len(req.Items))
 	for i, item := range req.Items {
 		items[i] = usecase.OrderItemInput{
@@ -43,6 +50,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 		Items: items,
 	})
 	if err != nil {
+		h.log.Error("Failed to create order", slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to create order: %v", err)
 	}
 
@@ -55,8 +63,11 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 }
 
 func (h *OrdersHandler) PayOrder(ctx context.Context, req *orders_pb.PayOrderRequest) (*orders_pb.OrderResponse, error) {
+	h.log.Info("Processing payment", slog.String("order_id", req.OrderId))
+	
 	err := h.uc.PayOrder(ctx, req.OrderId)
 	if err != nil {
+		h.log.Error("Failed to pay order", slog.String("order_id", req.OrderId), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to pay order: %v", err)
 	}
 

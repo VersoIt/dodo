@@ -3,17 +3,18 @@ package handlers
 import (
 	"context"
 	"time"
+
 	"github.com/gofiber/fiber/v2"
 	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 type OrderHandler struct {
-	log    *zap.Logger
+	log    *slog.Logger
 	client orders_pb.OrderServiceClient
 }
 
-func NewOrderHandler(log *zap.Logger, client orders_pb.OrderServiceClient) *OrderHandler {
+func NewOrderHandler(log *slog.Logger, client orders_pb.OrderServiceClient) *OrderHandler {
 	return &OrderHandler{
 		log:    log,
 		client: client,
@@ -21,16 +22,15 @@ func NewOrderHandler(log *zap.Logger, client orders_pb.OrderServiceClient) *Orde
 }
 
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
-	type OrderItem struct {
-		ProductID string `json:"product_id"`
-		Quantity  int    `json:"quantity"`
-	}
-
 	type Request struct {
-		CustomerID string      `json:"customer_id"`
-		City       string      `json:"city"`
-		Street     string      `json:"street"`
-		Items      []OrderItem `json:"items"`
+		Items []struct {
+			ProductID string `json:"product_id"`
+			Quantity  int32  `json:"quantity"`
+		} `json:"items"`
+		Address struct {
+			City   string `json:"city"`
+			Street string `json:"street"`
+		} `json:"address"`
 	}
 
 	req := new(Request)
@@ -38,28 +38,27 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request")
 	}
 
-	h.log.Info("Creating new order via gRPC")
+	userID := c.Locals("user_id").(string)
+
+	items := make([]*orders_pb.OrderItem, len(req.Items))
+	for i, item := range req.Items {
+		items[i] = &orders_pb.OrderItem{
+			ProductId: item.ProductID,
+			Quantity:  item.Quantity,
+		}
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	pbItems := make([]*orders_pb.OrderItem, len(req.Items))
-	for i, item := range req.Items {
-		pbItems[i] = &orders_pb.OrderItem{
-			ProductId: item.ProductID,
-			Quantity:  int32(item.Quantity),
-		}
-	}
-
 	resp, err := h.client.CreateOrder(ctx, &orders_pb.CreateOrderRequest{
-		CustomerId: req.CustomerID,
+		CustomerId: userID,
+		Items:      items,
 		Address: &orders_pb.Address{
-			City:   req.City,
-			Street: req.Street,
+			City:   req.Address.City,
+			Street: req.Address.Street,
 		},
-		Items: pbItems,
 	})
-
 	if err != nil {
 		return HandleGrpcError(c, h.log, err, "failed to create order")
 	}
@@ -69,7 +68,7 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 
 func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
-	h.log.Info("Paying for order", zap.String("order_id", id))
+	h.log.Info("Paying for order", slog.String("order_id", id))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -78,7 +77,7 @@ func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 		OrderId: id,
 	})
 	if err != nil {
-		return HandleGrpcError(c, h.log, err, "failed to pay for order")
+		return HandleGrpcError(c, h.log, err, "payment failed")
 	}
 
 	return SuccessResponse(c, resp)
@@ -86,7 +85,7 @@ func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 
 func (h *OrderHandler) GetOrderStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
-	h.log.Info("Checking order status", zap.String("order_id", id))
+	h.log.Info("Checking order status", slog.String("order_id", id))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

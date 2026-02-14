@@ -15,12 +15,17 @@ const handleRegister = async () => {
   try {
     loading.value = true
     error.value = ''
-    await axios.post('/api/v1/auth/register', {
+    const response = await axios.post('/api/v1/auth/register', {
       name: name.value,
       email: email.value,
       password: password.value
     })
-    router.push('/login')
+    
+    if (response.data.success) {
+      router.push('/login')
+    } else {
+      error.value = response.data.error || 'Failed to create account'
+    }
   } catch (err: any) {
     console.error('Registration failed:', err)
     error.value = 'Failed to create account. Please try again.'

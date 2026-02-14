@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/versoit/diploma/services/orders"
-	"go.uber.org/zap"
 )
 
 var (
@@ -30,10 +30,10 @@ type OrderUseCase struct {
 	repo      orders.OrderRepository
 	catalog   orders.CatalogService
 	analytics orders.AnalyticsService
-	log       *zap.Logger
+	log       *slog.Logger
 }
 
-func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, analytics orders.AnalyticsService, log *zap.Logger) *OrderUseCase {
+func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, analytics orders.AnalyticsService, log *slog.Logger) *OrderUseCase {
 	return &OrderUseCase{
 		repo:      repo,
 		catalog:   catalog,
@@ -109,7 +109,7 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 	// In a real senior scenario we'd use Outbox pattern, but here we'll do a direct call for now)
 	if err := uc.analytics.ReportSale(ctx, "019c53ee-74af-72b9-afe6-103c1466ae0e", order.FinalPrice().InexactFloat64()); err != nil {
 		// We log it but don't fail the payment as it's already saved in DB
-		uc.log.Error("failed to report sale to analytics", zap.Error(err), zap.String("order_id", orderID))
+		uc.log.Error("failed to report sale to analytics", slog.Any("error", err), slog.String("order_id", orderID))
 	}
 
 	return nil

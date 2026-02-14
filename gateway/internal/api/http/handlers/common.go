@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 func SuccessResponse(c *fiber.Ctx, data interface{}) error {
@@ -21,16 +21,16 @@ func ErrorResponse(c *fiber.Ctx, status int, message string) error {
 	})
 }
 
-func HandleGrpcError(c *fiber.Ctx, log *zap.Logger, err error, defaultMsg string) error {
+func HandleGrpcError(c *fiber.Ctx, log *slog.Logger, err error, defaultMsg string) error {
 	st, ok := status.FromError(err)
 	if !ok {
 		return ErrorResponse(c, fiber.StatusInternalServerError, defaultMsg)
 	}
 
 	log.Error("gRPC Error",
-		zap.String("code", st.Code().String()),
-		zap.String("msg", st.Message()),
-		zap.String("request_id", c.Get("X-Request-ID")))
+		"code", st.Code().String(),
+		"msg", st.Message(),
+		"request_id", c.Get("X-Request-ID"))
 
 	switch st.Code() {
 	case codes.NotFound:

@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { LogIn, Mail, Lock } from 'lucide-vue-next'
 import axios from 'axios'
+import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -14,11 +16,19 @@ const handleLogin = async () => {
   try {
     loading.value = true
     error.value = ''
-    await axios.post('/api/v1/auth/login', {
+    const response = await axios.post('/api/v1/auth/login', {
       email: email.value,
       password: password.value
     })
-    router.push('/')
+    
+    // Backend returns { success: true, data: { token: "..." } }
+    const result = response.data
+    if (result.success && result.data?.token) {
+      authStore.setToken(result.data.token)
+      router.push('/')
+    } else {
+      error.value = result.error || 'Invalid response from server'
+    }
   } catch (err: any) {
     console.error('Login failed:', err)
     error.value = 'Invalid email or password'

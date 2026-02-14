@@ -11,7 +11,7 @@ import (
 	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
 	analytics_pb "github.com/versoit/diploma/services/analytics/api/proto/pb"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
+	"log/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -25,7 +25,7 @@ var Module = fx.Provide(
 	NewAnalyticsClient,
 )
 
-func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (auth_pb.UserServiceClient, error) {
+func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (auth_pb.UserServiceClient, error) {
 	conn, err := dial(lc, cfg.AuthService)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (auth_p
 	return auth_pb.NewUserServiceClient(conn), nil
 }
 
-func NewCatalogClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (catalog_pb.ProductServiceClient, error) {
+func NewCatalogClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (catalog_pb.ProductServiceClient, error) {
 	conn, err := dial(lc, cfg.CatalogService)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func NewCatalogClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (cat
 	return catalog_pb.NewProductServiceClient(conn), nil
 }
 
-func NewOrdersClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (orders_pb.OrderServiceClient, error) {
+func NewOrdersClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (orders_pb.OrderServiceClient, error) {
 	conn, err := dial(lc, cfg.OrdersService)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func NewOrdersClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (orde
 	return orders_pb.NewOrderServiceClient(conn), nil
 }
 
-func NewKitchenClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (kitchen_pb.TicketServiceClient, error) {
+func NewKitchenClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (kitchen_pb.TicketServiceClient, error) {
 	conn, err := dial(lc, cfg.KitchenService)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func NewKitchenClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (kit
 	return kitchen_pb.NewTicketServiceClient(conn), nil
 }
 
-func NewLogisticsClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (logistics_pb.DeliveryServiceClient, error) {
+func NewLogisticsClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (logistics_pb.DeliveryServiceClient, error) {
 	conn, err := dial(lc, cfg.LogisticsService)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func NewLogisticsClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (l
 	return logistics_pb.NewDeliveryServiceClient(conn), nil
 }
 
-func NewAnalyticsClient(lc fx.Lifecycle, cfg *config.Config, log *zap.Logger) (analytics_pb.KpiServiceClient, error) {
+func NewAnalyticsClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (analytics_pb.KpiServiceClient, error) {
 	conn, err := dial(lc, cfg.AnalyticsService)
 	if err != nil {
 		return nil, err

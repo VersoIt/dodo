@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"time"
+	"log/slog"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/versoit/diploma/services/auth"
@@ -17,11 +18,15 @@ var jwtKey = []byte("super-secret-key")
 
 type AuthHandler struct {
 	auth_pb.UnimplementedUserServiceServer
-	uc *usecase.AuthUseCase
+	uc  *usecase.AuthUseCase
+	log *slog.Logger
 }
 
-func NewAuthHandler(uc *usecase.AuthUseCase) *AuthHandler {
-	return &AuthHandler{uc: uc}
+func NewAuthHandler(uc *usecase.AuthUseCase, log *slog.Logger) *AuthHandler {
+	return &AuthHandler{
+		uc:  uc,
+		log: log,
+	}
 }
 
 func (h *AuthHandler) Register(server *grpc.Server) {
@@ -29,8 +34,11 @@ func (h *AuthHandler) Register(server *grpc.Server) {
 }
 
 func (h *AuthHandler) CreateUser(ctx context.Context, req *auth_pb.CreateUserRequest) (*auth_pb.UserResponse, error) {
+	h.log.Info("Creating user", slog.String("email", req.Email))
+	
 	user, err := h.uc.Register(ctx, req.Email, req.Password, auth.RoleClient)
 	if err != nil {
+		h.log.Error("Failed to register user", slog.String("email", req.Email), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)
 	}
 
@@ -42,8 +50,11 @@ func (h *AuthHandler) CreateUser(ctx context.Context, req *auth_pb.CreateUserReq
 }
 
 func (h *AuthHandler) Login(ctx context.Context, req *auth_pb.LoginRequest) (*auth_pb.LoginResponse, error) {
+	h.log.Info("User login", slog.String("email", req.Email))
+	
 	user, err := h.uc.Login(ctx, req.Email, req.Password)
 	if err != nil {
+		h.log.Warn("Login failed", slog.String("email", req.Email), slog.Any("error", err))
 		return nil, status.Errorf(codes.Unauthenticated, "login failed: %v", err)
 	}
 
@@ -55,6 +66,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *auth_pb.LoginRequest) (*au
 
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
+		h.log.Error("Token generation failed", slog.String("user_id", user.ID()), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to generate token: %v", err)
 	}
 

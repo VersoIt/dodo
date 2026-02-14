@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { Plus } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
@@ -18,6 +18,19 @@ interface Product {
 const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+const selectedCategory = ref('All')
+const menuSection = ref<HTMLElement | null>(null)
+
+const categories = ['All', 'Classic', 'Premium', 'Veggie']
+
+const filteredProducts = computed(() => {
+  if (selectedCategory.value === 'All') return products.value
+  return products.value.filter(p => p.category === selectedCategory.value)
+})
+
+const scrollToMenu = () => {
+  menuSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
 
 const fetchProducts = async () => {
   try {
@@ -53,20 +66,25 @@ onMounted(() => {
         <div class="max-w-md">
           <h1 class="mb-5 text-5xl font-extrabold uppercase tracking-tighter">Hot & Fresh</h1>
           <p class="mb-5 text-lg">Experience the best pizza in town, delivered straight to your door. Hand-crafted with love and the finest ingredients.</p>
-          <button class="btn btn-primary btn-lg">Order Now</button>
+          <button @click="scrollToMenu" class="btn btn-primary btn-lg">Order Now</button>
         </div>
       </div>
     </section>
 
     <!-- Menu Section -->
-    <section>
-      <div class="flex justify-between items-center mb-8">
+    <section ref="menuSection">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h2 class="text-3xl font-bold">Our Menu</h2>
         <div class="tabs tabs-boxed">
-          <a class="tab tab-active">All</a>
-          <a class="tab">Classic</a>
-          <a class="tab">Premium</a>
-          <a class="tab">Veggie</a>
+          <a 
+            v-for="cat in categories" 
+            :key="cat"
+            class="tab"
+            :class="{ 'tab-active': selectedCategory === cat }"
+            @click="selectedCategory = cat"
+          >
+            {{ cat }}
+          </a>
         </div>
       </div>
 
@@ -79,7 +97,7 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div v-for="product in products" :key="product.id" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 group">
+        <div v-for="product in filteredProducts" :key="product.id" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 group">
           <figure class="relative h-48 overflow-hidden">
             <img :src="product.imageUrl" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
             <div class="absolute top-2 right-2">

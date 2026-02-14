@@ -11,7 +11,6 @@ require (
 	github.com/versoit/diploma/services/analytics v0.0.0-20260209221312-cf1acef61820
 	github.com/versoit/diploma/services/catalog v0.0.0-20260209221312-cf1acef61820
 	go.uber.org/fx v1.24.0
-	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
@@ -24,6 +23,7 @@ require (
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect

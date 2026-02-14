@@ -6,15 +6,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	analytics_pb "github.com/versoit/diploma/services/analytics/api/proto/pb"
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 type AnalyticsHandler struct {
-	log    *zap.Logger
+	log    *slog.Logger
 	client analytics_pb.KpiServiceClient
 }
 
-func NewAnalyticsHandler(log *zap.Logger, client analytics_pb.KpiServiceClient) *AnalyticsHandler {
+func NewAnalyticsHandler(log *slog.Logger, client analytics_pb.KpiServiceClient) *AnalyticsHandler {
 	return &AnalyticsHandler{
 		log:    log,
 		client: client,
@@ -23,7 +23,7 @@ func NewAnalyticsHandler(log *zap.Logger, client analytics_pb.KpiServiceClient) 
 
 func (h *AnalyticsHandler) GetManagerKPI(c *fiber.Ctx) error {
 	id := c.Params("id")
-	h.log.Info("Checking manager KPI", zap.String("manager_id", id))
+	h.log.Info("Checking manager KPI", slog.String("manager_id", id))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -32,8 +32,8 @@ func (h *AnalyticsHandler) GetManagerKPI(c *fiber.Ctx) error {
 		ManagerId: id,
 	})
 	if err != nil {
-		h.log.Error("Analytics service error", zap.Error(err))
-		return ErrorResponse(c, fiber.StatusNotFound, "manager KPI not found")
+		h.log.Error("Analytics service error", slog.Any("error", err))
+		return HandleGrpcError(c, h.log, err, "failed to get analytics")
 	}
 
 	return SuccessResponse(c, resp)

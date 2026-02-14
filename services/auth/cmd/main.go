@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"net"
+	"log/slog"
 
+	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/auth/internal/api/grpc"
 	"github.com/versoit/diploma/services/auth/internal/app"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 	stdgrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -15,29 +16,30 @@ import (
 func main() {
 	fx.New(
 		fx.Provide(
-			zap.NewDevelopment,
+			func() *slog.Logger {
+				return common.NewLogger("auth-service")
+			},
 		),
 		app.Module,
 		fx.Invoke(RunServer),
 	).Run()
 }
 
-func RunServer(lc fx.Lifecycle, handler *grpc.AuthHandler, logger *zap.Logger) {
+func RunServer(lc fx.Lifecycle, handler *grpc.AuthHandler, logger *slog.Logger) {
 	server := stdgrpc.NewServer()
 	handler.Register(server)
 	reflection.Register(server)
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			// #nosec G102
 			lis, err := net.Listen("tcp", ":8080")
 			if err != nil {
 				return err
 			}
-			logger.Info("Starting gRPC server", zap.String("port", "8080"))
+			logger.Info("Starting gRPC server", slog.String("port", "8080"))
 			go func() {
 				if err := server.Serve(lis); err != nil {
-					logger.Error("gRPC server failed", zap.Error(err))
+					logger.Error("gRPC server failed", slog.Any("error", err))
 				}
 			}()
 			return nil

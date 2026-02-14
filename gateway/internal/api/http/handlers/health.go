@@ -2,21 +2,19 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 type HealthHandler struct {
-	log *zap.Logger
+	log *slog.Logger
 }
 
-func NewHealthHandler(log *zap.Logger) *HealthHandler {
+func NewHealthHandler(log *slog.Logger) *HealthHandler {
 	return &HealthHandler{log: log}
 }
 
 func (h *HealthHandler) Check(c *fiber.Ctx) error {
-	h.log.Debug("Health check requested")
 	return c.JSON(fiber.Map{
 		"status": "ok",
-		"service": "gateway",
 	})
 }

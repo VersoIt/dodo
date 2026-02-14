@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ShoppingCart, User, Menu, X, Pizza } from 'lucide-vue-next'
+import { ShoppingCart, User, Menu, X, Pizza, LogOut, Settings, ClipboardList } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
+import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
 const isMenuOpen = ref(false)
 const cartStore = useCartStore()
+const authStore = useAuthStore()
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
 
 const navLinks = [
   { name: 'Menu', path: '/' },
@@ -48,12 +55,17 @@ const toggleMenu = () => {
             <User class="h-5 w-5" />
           </label>
           <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 text-base-content rounded-box w-52">
-            <li><router-link to="/login">Login</router-link></li>
-            <li><router-link to="/register">Register</router-link></li>
-            <li><a>Profile</a></li>
-            <li><a>My Orders</a></li>
-            <div class="divider my-0"></div>
-            <li><a>Logout</a></li>
+            <template v-if="!authStore.isAuthenticated">
+              <li><router-link to="/login">Login</router-link></li>
+              <li><router-link to="/register">Register</router-link></li>
+            </template>
+            <template v-else>
+              <li class="menu-title px-4 py-2 font-bold text-primary">User Menu</li>
+              <li><router-link to="/profile"><Settings class="w-4 h-4" /> Profile</router-link></li>
+              <li><a><ClipboardList class="w-4 h-4" /> My Orders</a></li>
+              <div class="divider my-0"></div>
+              <li><a @click="handleLogout" class="text-error font-bold"><LogOut class="w-4 h-4" /> Logout</a></li>
+            </template>
           </ul>
         </div>
 

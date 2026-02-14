@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/catalog"
@@ -12,11 +13,15 @@ import (
 
 type CatalogHandler struct {
 	catalog_pb.UnimplementedProductServiceServer
-	uc *usecase.CatalogUseCase
+	uc  *usecase.CatalogUseCase
+	log *slog.Logger
 }
 
-func NewCatalogHandler(uc *usecase.CatalogUseCase) *CatalogHandler {
-	return &CatalogHandler{uc: uc}
+func NewCatalogHandler(uc *usecase.CatalogUseCase, log *slog.Logger) *CatalogHandler {
+	return &CatalogHandler{
+		uc:  uc,
+		log: log,
+	}
 }
 
 func (h *CatalogHandler) Register(server *grpc.Server) {
@@ -24,8 +29,11 @@ func (h *CatalogHandler) Register(server *grpc.Server) {
 }
 
 func (h *CatalogHandler) CreateProduct(ctx context.Context, req *catalog_pb.CreateProductRequest) (*catalog_pb.ProductResponse, error) {
+	h.log.Info("Creating product", slog.String("name", req.Name))
+	
 	p, err := h.uc.CreateProduct(ctx, req.Name, req.Description, catalog.CategoryType(req.CategoryId), common.NewMoney(req.Price))
 	if err != nil {
+		h.log.Error("Failed to create product", slog.String("name", req.Name), slog.Any("error", err))
 		return nil, err
 	}
 
@@ -52,41 +60,22 @@ func (h *CatalogHandler) GetProduct(ctx context.Context, req *catalog_pb.GetProd
 }
 
 func (h *CatalogHandler) ListProducts(ctx context.Context, req *catalog_pb.ListProductsRequest) (*catalog_pb.ListProductsResponse, error) {
-
 	products, err := h.uc.ListProducts(ctx)
-
 	if err != nil {
-
 		return nil, err
-
 	}
-
-
 
 	pbProducts := make([]*catalog_pb.ProductResponse, len(products))
-
 	for i, p := range products {
-
 		pbProducts[i] = &catalog_pb.ProductResponse{
-
 			Id:          p.ID(),
-
 			Name:        p.Name(),
-
 			Description: p.Description(),
-
 			Price:       p.BasePrice().InexactFloat64(),
-
 		}
-
 	}
 
-
-
 	return &catalog_pb.ListProductsResponse{
-
 		Products: pbProducts,
-
 	}, nil
-
 }
