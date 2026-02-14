@@ -1,0 +1,26 @@
+import{c,d as C,p as q,q as I,a as r,b as e,t as n,e as x,f as O,g as v,F as f,r as _,s as V,i as k,j as g,o,x as j,y as z,z as M,h as F}from"./index--h0NOUJp.js";import{_ as N}from"./_plugin-vue_export-helper-DlAUqK2U.js";/**
+ * @license lucide-vue-next v0.564.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const w=c("circle-check",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["path",{d:"m9 12 2 2 4-4",key:"dzmm74"}]]);/**
+ * @license lucide-vue-next v0.564.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const B=c("clock",[["path",{d:"M12 6v6l4 2",key:"mmk7yg"}],["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}]]);/**
+ * @license lucide-vue-next v0.564.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const R=c("credit-card",[["rect",{width:"20",height:"14",x:"2",y:"5",rx:"2",key:"ynyp8z"}],["line",{x1:"2",x2:"22",y1:"10",y2:"10",key:"1b3vmo"}]]);/**
+ * @license lucide-vue-next v0.564.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const S=c("package-check",[["path",{d:"m16 16 2 2 4-4",key:"gfu2re"}],["path",{d:"M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14",key:"e7tb2h"}],["path",{d:"m7.5 4.27 9 5.15",key:"1c824w"}],["polyline",{points:"3.29 7 12 12 20.71 7",key:"ousv84"}],["line",{x1:"12",x2:"12",y1:"22",y2:"12",key:"a4e8g8"}]]);/**
+ * @license lucide-vue-next v0.564.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const T=c("truck",[["path",{d:"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2",key:"wrbu53"}],["path",{d:"M15 18H9",key:"1lyqi6"}],["path",{d:"M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14",key:"lysw3i"}],["circle",{cx:"17",cy:"18",r:"2",key:"332jqn"}],["circle",{cx:"7",cy:"18",r:"2",key:"19iecd"}]]),$={class:"max-w-3xl mx-auto py-8"},D={key:0,class:"flex justify-center py-20"},H={key:1,class:"space-y-8"},A={class:"flex justify-between items-center"},E={class:"text-3xl font-bold"},L={class:"badge badge-lg badge-primary font-bold"},K={key:0,class:"card bg-secondary text-secondary-content shadow-xl"},U={class:"card-body flex-row items-center gap-6"},G={class:"card bg-base-100 shadow-xl border border-base-200"},J={class:"card-body"},Q={class:"steps steps-vertical md:steps-horizontal w-full"},W={class:"flex flex-col items-center gap-1"},X={class:"text-xs font-semibold"},Y={class:"card bg-base-100 shadow-xl border border-base-200"},Z={class:"card-body"},ee={class:"divide-y divide-base-200"},te={class:"font-bold"},se={class:"font-semibold"},ae={class:"pt-4 mt-4 flex justify-between text-xl font-bold"},oe=C({__name:"OrderView",setup(le){const i=V().params.id,s=k(null),u=k(!0);let d=null;const y=async()=>{try{const l=await g.get(`/api/orders/${i}`);s.value=l.data}catch(l){console.error("Failed to fetch order:",l),s.value||(s.value={id:i,status:0,totalPrice:25.98,items:[{name:"Pepperoni",quantity:1,price:14.99},{name:"Margherita",quantity:1,price:12.99}]})}finally{u.value=!1}},p=l=>l,m=[{label:"Order Received",icon:S},{label:"In the Kitchen",icon:B},{label:"Ready for Pickup",icon:w},{label:"Out for Delivery",icon:T},{label:"Enjoy your Pizza!",icon:w}],P=async()=>{try{await g.post(`/api/orders/${i}/pay`),y()}catch{alert("Payment failed")}};return q(()=>{y(),d=setInterval(y,5e3)}),I(()=>{d&&clearInterval(d)}),(l,t)=>{var h;return o(),r("div",$,[u.value?(o(),r("div",D,[...t[0]||(t[0]=[e("span",{class:"loading loading-spinner loading-lg text-primary"},null,-1)])])):s.value?(o(),r("div",H,[e("div",A,[e("div",null,[e("h1",E,"Order #"+n(x(i).slice(0,8)),1),t[1]||(t[1]=e("p",{class:"text-base-content/60"},"Thank you for your order!",-1))]),e("div",L,n(((h=m[p(s.value.status)])==null?void 0:h.label)||"Processing"),1)]),s.value.status===0?(o(),r("div",K,[e("div",U,[O(x(R),{class:"w-12 h-12"}),t[2]||(t[2]=e("div",{class:"flex-grow"},[e("h2",{class:"card-title text-2xl"},"Payment Required"),e("p",null,"Please complete your payment to start the preparation.")],-1)),e("button",{onClick:P,class:"btn btn-neutral btn-lg"},"Pay Now")])])):v("",!0),e("div",G,[e("div",J,[t[3]||(t[3]=e("h2",{class:"card-title mb-6 text-xl"},"Order Status",-1)),e("ul",Q,[(o(),r(f,null,_(m,(a,b)=>e("li",{key:b,class:j(["step",{"step-primary":b<=p(s.value.status)}])},[e("div",W,[(o(),z(M(a.icon),{class:"w-6 h-6 mb-1"})),e("span",X,n(a.label),1)])],2)),64))])])]),e("div",Y,[e("div",Z,[t[5]||(t[5]=e("h2",{class:"card-title mb-4"},"Order Summary",-1)),e("div",ee,[(o(!0),r(f,null,_(s.value.items,a=>(o(),r("div",{key:a.name,class:"py-3 flex justify-between"},[e("div",null,[e("span",te,n(a.quantity)+"x",1),F(" "+n(a.name),1)]),e("span",se,"$"+n((a.price*a.quantity).toFixed(2)),1)]))),128)),e("div",ae,[t[4]||(t[4]=e("span",null,"Total",-1)),e("span",null,"$"+n(s.value.totalPrice.toFixed(2)),1)])])])])])):v("",!0)])}}}),ie=N(oe,[["__scopeId","data-v-9ff15a7d"]]);export{ie as default};

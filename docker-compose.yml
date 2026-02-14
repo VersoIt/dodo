@@ -228,6 +228,19 @@ services:
       - pizza-network
     restart: always
 
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile
+    container_name: pizza-frontend
+    depends_on:
+      - gateway
+    ports:
+      - "3000:80"
+    networks:
+      - pizza-network
+    restart: always
+
 networks:
   pizza-network:
     driver: bridge
