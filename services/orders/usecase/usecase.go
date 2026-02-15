@@ -165,7 +165,7 @@ func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, status
 	case orders.StatusCompleted:
 		err = order.CompleteDelivery()
 	default:
-		return nil, fmt.Errorf("%w: direct transition to %s not allowed", ErrInvalidTransition, statusStr)
+		return nil, fmt.Errorf("%w: direct transition to %s not allowed", orders.ErrInvalidTransition, statusStr)
 	}
 
 	if err != nil {

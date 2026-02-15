@@ -38,26 +38,29 @@ const toggleMenu = () => {
   <div class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
     <div class="container mx-auto px-4">
       <div class="flex-1">
-        <router-link to="/" class="btn btn-ghost normal-case text-xl flex items-center gap-2 p-0 hover:bg-transparent">
+        <router-link :to="authStore.user?.role === 'chef' ? '/kitchen' : (authStore.user?.role === 'courier' ? '/logistics' : '/')" class="btn btn-ghost normal-case text-xl flex items-center gap-2 p-0 hover:bg-transparent">
           <Pizza class="w-8 h-8" />
           <span class="font-bold tracking-tighter">PIZZA GOOD</span>
         </router-link>
       </div>
       
       <!-- Desktop Menu -->
-      <div class="hidden md:flex items-center gap-2 px-4">
+      <div v-if="authStore.user?.role === 'client' || !authStore.isAuthenticated" class="hidden md:flex items-center gap-2 px-4">
         <router-link v-for="link in navLinks" :key="link.path" :to="link.path" class="btn btn-ghost btn-sm rounded-lg">
           {{ link.name }}
         </router-link>
-        
-        <!-- Role specific links -->
-        <template v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'admin'">
-          <router-link to="/kitchen" class="btn btn-ghost btn-sm rounded-lg text-secondary font-bold">Kitchen</router-link>
-        </template>
-        <template v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'admin'">
-          <router-link to="/logistics" class="btn btn-ghost btn-sm rounded-lg text-accent font-bold">Logistics</router-link>
-        </template>
       </div>
+
+      <div class="flex-none flex items-center gap-3">
+        <!-- Dashboard links for Admin/Manager always visible, for others only if they are that role -->
+        <div class="hidden md:flex items-center gap-2">
+          <template v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'admin'">
+            <router-link to="/kitchen" class="btn btn-ghost btn-sm rounded-lg text-secondary font-bold">Kitchen</router-link>
+          </template>
+          <template v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'admin'">
+            <router-link to="/logistics" class="btn btn-ghost btn-sm rounded-lg text-accent font-bold">Logistics</router-link>
+          </template>
+        </div>
 
       <div class="flex-none flex items-center gap-3">
         <!-- User Name (Desktop) -->
@@ -110,9 +113,11 @@ const toggleMenu = () => {
   <!-- Mobile Menu Drawer -->
   <div v-if="isMenuOpen" class="md:hidden bg-base-100 p-4 border-b border-base-200 shadow-xl">
     <ul class="menu w-full gap-2">
-      <li v-for="link in navLinks" :key="link.path">
-        <router-link :to="link.path" @click="isMenuOpen = false" class="py-3 font-semibold">{{ link.name }}</router-link>
-      </li>
+      <template v-if="authStore.user?.role === 'client' || !authStore.isAuthenticated">
+        <li v-for="link in navLinks" :key="link.path">
+          <router-link :to="link.path" @click="isMenuOpen = false" class="py-3 font-semibold">{{ link.name }}</router-link>
+        </li>
+      </template>
       <li v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'admin'">
         <router-link to="/kitchen" @click="isMenuOpen = false" class="py-3 font-bold text-secondary">Kitchen Dashboard</router-link>
       </li>

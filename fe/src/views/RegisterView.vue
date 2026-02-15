@@ -4,7 +4,10 @@ import { useRouter } from 'vue-router'
 import { UserPlus, Mail, Lock, User } from 'lucide-vue-next'
 import axios from 'axios'
 
+import { useAuthStore } from '../store/auth'
+
 const router = useRouter()
+const authStore = useAuthStore()
 const name = ref('')
 const email = ref('')
 const password = ref('')
@@ -16,17 +19,33 @@ const handleRegister = async () => {
   try {
     loading.value = true
     error.value = ''
-    const response = await axios.post('/api/v1/auth/register', {
+    
+    // 1. Register the user
+    const regResp = await axios.post('/api/v1/auth/register', {
       name: name.value,
       email: email.value,
       password: password.value,
       role: role.value
     })
     
-    if (response.data.success) {
-      router.push('/login')
+    if (regResp.data.success) {
+      // 2. Automatically login after successful registration
+      const loginSuccess = await authStore.login(email.value, password.value)
+      
+      if (loginSuccess) {
+        // 3. Redirect based on role
+        if (role.value === 'chef') {
+          router.push('/kitchen')
+        } else if (role.value === 'courier') {
+          router.push('/logistics')
+        } else {
+          router.push('/')
+        }
+      } else {
+        router.push('/login')
+      }
     } else {
-      error.value = response.data.error || 'Failed to create account'
+      error.value = regResp.data.error || 'Failed to create account'
     }
   } catch (err: any) {
     console.error('Registration failed:', err)
