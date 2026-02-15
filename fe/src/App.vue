@@ -52,20 +52,35 @@ onMounted(() => {
 
     <!-- Toast Container -->
     <div class="toast toast-top toast-center z-[100]">
-      <div v-for="toast in toasts" :key="toast.id" 
-        class="alert shadow-lg border-none animate-bounce"
-        :class="{
-          'alert-success bg-green-500 text-white': toast.type === 'success',
-          'alert-error bg-red-500 text-white': toast.type === 'error',
-          'alert-info bg-blue-500 text-white': toast.type === 'info'
-        }"
-      >
-        <span>{{ toast.message }}</span>
-      </div>
+      <TransitionGroup name="toast">
+        <div v-for="toast in toasts" :key="toast.id" 
+          class="alert shadow-lg border-none"
+          :class="{
+            'alert-success bg-green-500 text-white': toast.type === 'success',
+            'alert-error bg-red-500 text-white': toast.type === 'error',
+            'alert-info bg-blue-500 text-white': toast.type === 'info'
+          }"
+        >
+          <span>{{ toast.message }}</span>
+        </div>
+      </TransitionGroup>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Scoped styles if needed */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
 </style>
