@@ -99,6 +99,22 @@ func (p *Product) SetAvailability(available bool) {
 	p.isAvailable = available
 }
 
+func (p *Product) Update(name, desc string, cat CategoryType, price common.Money, img string, isAvail bool) error {
+	if name == "" {
+		return ErrInvalidDetails
+	}
+	if price.IsNegative() {
+		return ErrNegativePrice
+	}
+	p.name = name
+	p.description = desc
+	p.category = cat
+	p.basePrice = price
+	p.imageUrl = img
+	p.isAvailable = isAvail
+	return nil
+}
+
 func (p *Product) ID() string               { return p.id }
 func (p *Product) Name() string             { return p.name }
 func (p *Product) Description() string      { return p.description }

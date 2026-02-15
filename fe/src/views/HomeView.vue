@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { Plus, PackagePlus, Image as ImageIcon, Tag, DollarSign, FileText, X } from 'lucide-vue-next'
+import { Plus, PackagePlus, Image as ImageIcon, Tag, DollarSign, FileText, X, Check } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
 import { useAuthStore } from '../store/auth'
 import { inject } from 'vue'
@@ -20,6 +20,7 @@ interface Product {
   imageUrl: string
   category: string
   categoryId: number
+  isAvailable: boolean
 }
 
 const products = ref<Product[]>([])
@@ -29,6 +30,8 @@ const selectedCategory = ref('All')
 const menuSection = ref<HTMLElement | null>(null)
 const showAddModal = ref(false)
 const isSubmitting = ref(false)
+const isEditing = ref(false)
+const editingId = ref<string | null>(null)
 
 const categories = ['All', 'Classic', 'Premium', 'Veggie', 'Spicy', 'Drinks', 'Desserts']
 const categoryMap: Record<string, number> = {
@@ -41,12 +44,13 @@ const categoryMap: Record<string, number> = {
 }
 
 // Form data for new product
-const newProduct = ref({
+const productForm = ref({
   name: '',
   description: '',
   price: 0,
   imageUrl: '',
-  categoryId: 0
+  categoryId: 0,
+  isAvailable: true
 })
 
 const filteredProducts = computed(() => {
@@ -62,54 +66,80 @@ const fetchProducts = async () => {
   try {
     loading.value = true
     const response = await axios.get('/api/v1/catalog/products')
-    const responseData = response.data.data
-    const productsData = responseData.products || []
+    // gRPC products use snake_case: category_id, image_url, is_available
+    const productsData = response.data.data.products || []
     
     products.value = productsData.map((p: any) => ({
       id: p.id,
       name: p.name,
       description: p.description,
       price: p.price,
-      imageUrl: p.imageUrl || `https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=500&auto=format&fit=crop&sig=${p.id}`,
-      categoryId: p.categoryId,
-      category: categories[p.categoryId + 1] || 'Classic'
+      imageUrl: p.image_url || `https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=500&auto=format&fit=crop&sig=${p.id}`,
+      categoryId: p.category_id,
+      category: categories[p.category_id + 1] || 'Classic',
+      isAvailable: p.is_available ?? true
     }))
   } catch (err: any) {
     console.error('Error fetching products:', err)
-    error.value = 'Failed to load products. Please try again later.'
+    error.value = 'Failed to load products.'
   } finally {
     loading.value = false
   }
 }
 
-const handleAddProduct = async () => {
+const openAddModal = () => {
+  isEditing.value = false
+  editingId.value = null
+  productForm.value = { name: '', description: '', price: 0, imageUrl: '', categoryId: 0, isAvailable: true }
+  showAddModal.value = true
+}
+
+const openEditModal = (product: Product) => {
+  isEditing.value = true
+  editingId.value = product.id
+  productForm.value = {
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    imageUrl: product.imageUrl,
+    categoryId: product.categoryId,
+    isAvailable: product.isAvailable
+  }
+  showAddModal.value = true
+}
+
+const handleSubmit = async () => {
   try {
     isSubmitting.value = true
-    const response = await axios.post('/api/v1/catalog/products', {
-      name: newProduct.value.name,
-      description: newProduct.value.description,
-      price: parseFloat(newProduct.value.price.toString()),
-      category_id: newProduct.value.categoryId,
-      image_url: newProduct.value.imageUrl
-    })
+    const payload = {
+      name: productForm.value.name,
+      description: productForm.value.description,
+      price: parseFloat(productForm.value.price.toString()),
+      category_id: productForm.value.categoryId,
+      image_url: productForm.value.imageUrl,
+      is_available: productForm.value.isAvailable
+    }
+
+    let response
+    if (isEditing.value && editingId.value) {
+      response = await axios.put(`/api/v1/catalog/products/${editingId.value}`, payload)
+    } else {
+      response = await axios.post('/api/v1/catalog/products', payload)
+    }
 
     if (response.data.success) {
-      addToast('Product added successfully!', 'success')
+      addToast(isEditing.value ? 'Product updated!' : 'Product added!', 'success')
       showAddModal.value = false
-      // Reset form
-      newProduct.value = { name: '', description: '', price: 0, imageUrl: '', categoryId: 0 }
       await fetchProducts()
     }
   } catch (err: any) {
-    addToast(err.response?.data?.error || 'Failed to add product', 'error')
+    addToast(err.response?.data?.error || 'Operation failed', 'error')
   } finally {
     isSubmitting.value = false
   }
 }
 
-onMounted(() => {
-  fetchProducts()
-})
+onMounted(fetchProducts)
 </script>
 
 <template>
@@ -128,7 +158,7 @@ onMounted(() => {
                : 'Experience the best pizza in town, delivered straight to your door.' }}
           </p>
           <button v-if="authStore.user?.role !== 'manager'" @click="scrollToMenu" class="btn btn-primary btn-lg">Order Now</button>
-          <button v-else @click="showAddModal = true" class="btn btn-secondary btn-lg gap-2">
+          <button v-else @click="openAddModal" class="btn btn-secondary btn-lg gap-2">
             <Plus class="w-6 h-6" /> Add New Product
           </button>
         </div>
@@ -174,29 +204,30 @@ onMounted(() => {
             <div class="absolute top-2 right-2">
               <span class="badge badge-secondary font-semibold">${{ product.price?.toFixed(2) }}</span>
             </div>
-            <div class="absolute top-2 left-2">
+            <div class="absolute top-2 left-2 flex flex-col gap-1">
               <span class="badge badge-ghost bg-black/40 text-white text-[10px] uppercase border-none">{{ product.category }}</span>
+              <span v-if="!product.isAvailable" class="badge badge-error text-[10px] uppercase font-bold">Out of stock</span>
             </div>
           </figure>
           <div class="card-body p-6">
             <h3 class="card-title text-xl font-bold">{{ product.name }}</h3>
             <p class="text-sm text-base-content/70 line-clamp-2 mb-4">{{ product.description }}</p>
             <div class="card-actions justify-end mt-auto">
-              <!-- ONLY CLIENTS CAN SEE ADD TO CART -->
               <button 
                 v-if="authStore.user?.role !== 'manager'"
                 @click="cartStore.addToCart(product); addToast(`${product.name} added to cart!`)" 
                 class="btn btn-primary btn-sm gap-2"
+                :disabled="!product.isAvailable"
               >
                 <Plus class="w-4 h-4" />
                 Add to Cart
               </button>
-              <!-- MANAGERS SEE EDIT BUTTON (UI PLACEHOLDER) -->
               <button 
                 v-else
-                class="btn btn-outline btn-sm btn-secondary"
+                @click="openEditModal(product)"
+                class="btn btn-outline btn-sm btn-secondary gap-2"
               >
-                Edit Product
+                <FileText class="w-4 h-4" /> Edit
               </button>
             </div>
           </div>
@@ -204,25 +235,25 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- ADD PRODUCT MODAL -->
+    <!-- FORM MODAL -->
     <dialog :class="{ 'modal-open': showAddModal }" class="modal modal-bottom sm:modal-middle transition-all">
       <div class="modal-box bg-base-100 max-w-2xl border border-base-300 shadow-2xl">
         <div class="flex justify-between items-center mb-6">
           <div class="flex items-center gap-3 text-secondary">
             <PackagePlus class="w-8 h-8" />
-            <h3 class="font-bold text-2xl">Create New Item</h3>
+            <h3 class="font-bold text-2xl">{{ isEditing ? 'Edit Product' : 'Create New Item' }}</h3>
           </div>
           <button @click="showAddModal = false" class="btn btn-ghost btn-sm btn-circle"><X /></button>
         </div>
         
-        <form @submit.prevent="handleAddProduct" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form @submit.prevent="handleSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Left Col -->
           <div class="space-y-4">
             <div class="form-control">
               <label class="label"><span class="label-text font-bold">Product Name</span></label>
               <div class="relative">
                 <Tag class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <input v-model="newProduct.name" type="text" placeholder="e.g. Pepperoni Extreme" class="input input-bordered w-full pl-10" required />
+                <input v-model="productForm.name" type="text" placeholder="e.g. Pepperoni Extreme" class="input input-bordered w-full pl-10" required />
               </div>
             </div>
 
@@ -230,15 +261,22 @@ onMounted(() => {
               <label class="label"><span class="label-text font-bold">Price ($)</span></label>
               <div class="relative">
                 <DollarSign class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <input v-model="newProduct.price" type="number" step="0.01" placeholder="15.99" class="input input-bordered w-full pl-10" required />
+                <input v-model="productForm.price" type="number" step="0.01" placeholder="15.99" class="input input-bordered w-full pl-10" required />
               </div>
             </div>
 
             <div class="form-control">
               <label class="label"><span class="label-text font-bold">Category</span></label>
-              <select v-model="newProduct.categoryId" class="select select-bordered w-full">
+              <select v-model="productForm.categoryId" class="select select-bordered w-full">
                 <option v-for="(val, key) in categoryMap" :key="key" :value="val">{{ key }}</option>
               </select>
+            </div>
+
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-4">
+                <input v-model="productForm.isAvailable" type="checkbox" class="checkbox checkbox-secondary" />
+                <span class="label-text font-bold">Available for order</span>
+              </label>
             </div>
           </div>
 
@@ -248,7 +286,7 @@ onMounted(() => {
               <label class="label"><span class="label-text font-bold">Image URL</span></label>
               <div class="relative">
                 <ImageIcon class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <input v-model="newProduct.imageUrl" type="text" placeholder="https://images.unsplash.com/..." class="input input-bordered w-full pl-10" />
+                <input v-model="productForm.imageUrl" type="text" placeholder="https://images.unsplash.com/..." class="input input-bordered w-full pl-10" />
               </div>
             </div>
 
@@ -256,7 +294,7 @@ onMounted(() => {
               <label class="label"><span class="label-text font-bold">Description</span></label>
               <div class="relative">
                 <FileText class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <textarea v-model="newProduct.description" class="textarea textarea-bordered w-full pl-10 h-32" placeholder="Tell us about this delicious pizza..."></textarea>
+                <textarea v-model="productForm.description" class="textarea textarea-bordered w-full pl-10 h-32" placeholder="Tell us about this delicious pizza..."></textarea>
               </div>
             </div>
           </div>
@@ -264,7 +302,7 @@ onMounted(() => {
           <div class="col-span-full mt-4 flex gap-3">
             <button type="submit" class="btn btn-secondary flex-1" :disabled="isSubmitting">
               <span v-if="isSubmitting" class="loading loading-spinner"></span>
-              Publish to Menu
+              {{ isEditing ? 'Save Changes' : 'Publish to Menu' }}
             </button>
             <button type="button" @click="showAddModal = false" class="btn btn-ghost">Cancel</button>
           </div>

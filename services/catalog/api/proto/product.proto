@@ -6,6 +6,7 @@ service ProductService {
   rpc CreateProduct(CreateProductRequest) returns (ProductResponse);
   rpc GetProduct(GetProductRequest) returns (ProductResponse);
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (ProductResponse);
 }
 
 message CreateProductRequest {
@@ -14,6 +15,16 @@ message CreateProductRequest {
   int32 category_id = 3;
   double price = 4;
   string image_url = 5;
+}
+
+message UpdateProductRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 category_id = 4;
+  double price = 5;
+  string image_url = 6;
+  bool is_available = 7;
 }
 
 message GetProductRequest {

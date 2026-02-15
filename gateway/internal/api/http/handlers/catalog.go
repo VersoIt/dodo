@@ -79,3 +79,38 @@ func (h *CatalogHandler) CreateProduct(c *fiber.Ctx) error {
 
 	return SuccessResponse(c, resp)
 }
+
+func (h *CatalogHandler) UpdateProduct(c *fiber.Ctx) error {
+	id := c.Params("id")
+	type Request struct {
+		Name        string  `json:"name"`
+		Description string  `json:"description"`
+		CategoryID  int32   `json:"category_id"`
+		Price       float64 `json:"price"`
+		ImageURL    string  `json:"image_url"`
+		IsAvailable bool    `json:"is_available"`
+	}
+
+	req := new(Request)
+	if err := c.BodyParser(req); err != nil {
+		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request body")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.UpdateProduct(ctx, &catalog_pb.UpdateProductRequest{
+		Id:          id,
+		Name:        req.Name,
+		Description: req.Description,
+		CategoryId:  req.CategoryID,
+		Price:       req.Price,
+		ImageUrl:    req.ImageURL,
+		IsAvailable: req.IsAvailable,
+	})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to update product")
+	}
+
+	return SuccessResponse(c, resp)
+}

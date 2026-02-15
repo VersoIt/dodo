@@ -40,6 +40,26 @@ func (h *CatalogHandler) CreateProduct(ctx context.Context, req *catalog_pb.Crea
 	return h.mapProduct(p), nil
 }
 
+func (h *CatalogHandler) UpdateProduct(ctx context.Context, req *catalog_pb.UpdateProductRequest) (*catalog_pb.ProductResponse, error) {
+	h.log.Info("Updating product", slog.String("id", req.Id))
+
+	p, err := h.uc.UpdateProduct(
+		ctx,
+		req.Id,
+		req.Name,
+		req.Description,
+		catalog.CategoryType(req.CategoryId),
+		common.NewMoney(req.Price),
+		req.ImageUrl,
+		req.IsAvailable,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return h.mapProduct(p), nil
+}
+
 func (h *CatalogHandler) GetProduct(ctx context.Context, req *catalog_pb.GetProductRequest) (*catalog_pb.ProductResponse, error) {
 	p, err := h.uc.GetProduct(ctx, req.Id)
 	if err != nil {

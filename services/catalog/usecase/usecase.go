@@ -86,6 +86,23 @@ func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, 
 	return product, nil
 }
 
+func (uc *CatalogUseCase) UpdateProduct(ctx context.Context, id, name, desc string, cat catalog.CategoryType, price common.Money, imageUrl string, isAvailable bool) (*catalog.Product, error) {
+	product, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := product.Update(name, desc, cat, price, imageUrl, isAvailable); err != nil {
+		return nil, err
+	}
+
+	if err := uc.repo.Save(ctx, product); err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
 func (uc *CatalogUseCase) ListProducts(ctx context.Context) ([]*catalog.Product, error) {
 	products, err := uc.repo.FindAll(ctx)
 	if err != nil {

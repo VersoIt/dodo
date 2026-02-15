@@ -35,6 +35,7 @@ func SetupRoutes(
 	catalog.Get("/products", catalogHandler.ListProducts)
 	catalog.Get("/products/:id", catalogHandler.GetProduct)
 	catalog.Post("/products", middleware.NewAuthMiddleware(), middleware.RequireRole("manager"), catalogHandler.CreateProduct)
+	catalog.Put("/products/:id", middleware.NewAuthMiddleware(), middleware.RequireRole("manager"), catalogHandler.UpdateProduct)
 
 	// Protected routes
 	protected := api.Group("/", middleware.NewAuthMiddleware())

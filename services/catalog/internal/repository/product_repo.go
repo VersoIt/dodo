@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"log/slog"
 
 	"github.com/versoit/diploma/services/catalog"
@@ -41,10 +42,11 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 	var products []*catalog.Product
 	for rows.Next() {
 		var (
-			pid, name, desc, img string
-			cat                  int
-			price                float64
-			isAvail              bool
+			pid, name string
+			desc, img sql.NullString
+			cat       int
+			price     float64
+			isAvail   bool
 		)
 		if err := rows.Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail); err != nil {
 			return nil, err
@@ -55,7 +57,7 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 			return nil, err
 		}
 
-		products = append(products, catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, img, isAvail, ingredients))
+		products = append(products, catalog.ReconstructProduct(pid, name, desc.String, catalog.CategoryType(cat), price, img.String, isAvail, ingredients))
 	}
 	return products, nil
 }
@@ -152,10 +154,11 @@ func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product
 	}
 
 	var (
-		pid, name, desc, img string
-		cat                  int
-		price                float64 
-		isAvail              bool
+		pid, name string
+		desc, img sql.NullString
+		cat       int
+		price     float64 
+		isAvail   bool
 	)
 
 	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail)
@@ -171,5 +174,5 @@ func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product
 		return nil, err
 	}
 
-	return catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, img, isAvail, ingredients), nil
+	return catalog.ReconstructProduct(pid, name, desc.String, catalog.CategoryType(cat), price, img.String, isAvail, ingredients), nil
 }
