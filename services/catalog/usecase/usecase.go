@@ -68,12 +68,12 @@ func (uc *CatalogUseCase) SetAvailability(ctx context.Context, productID string,
 	return nil
 }
 
-func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, cat catalog.CategoryType, price common.Money) (*catalog.Product, error) {
+func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, cat catalog.CategoryType, price common.Money, imageUrl string) (*catalog.Product, error) {
 	if name == "" {
 		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
 	}
 
-	product, err := catalog.NewProduct(name, desc, cat, price)
+	product, err := catalog.NewProduct(name, desc, cat, price, imageUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize product: %w", err)
 	}

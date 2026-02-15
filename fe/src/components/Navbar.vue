@@ -67,7 +67,7 @@ const toggleMenu = () => {
           Hi, {{ authStore.user?.name || 'Friend' }}
         </span>
 
-        <router-link to="/cart" class="btn btn-ghost btn-circle btn-sm">
+        <router-link v-if="authStore.user?.role !== 'manager'" to="/cart" class="btn btn-ghost btn-circle btn-sm">
           <div class="indicator">
             <ShoppingCart class="h-5 w-5" />
             <span v-if="cartStore.totalItems > 0" class="badge badge-sm indicator-item badge-secondary font-bold">{{ cartStore.totalItems }}</span>

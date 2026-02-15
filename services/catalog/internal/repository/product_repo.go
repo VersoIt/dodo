@@ -25,7 +25,7 @@ func NewProductRepository(pool *pgxpool.Pool, log *slog.Logger) catalog.ProductR
 }
 
 func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
-	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "is_available").
+	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "image_url", "is_available").
 		From("products").
 		ToSql()
 	if err != nil {
@@ -41,12 +41,12 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 	var products []*catalog.Product
 	for rows.Next() {
 		var (
-			pid, name, desc string
-			cat             int
-			price           float64
-			isAvail         bool
+			pid, name, desc, img string
+			cat                  int
+			price                float64
+			isAvail              bool
 		)
-		if err := rows.Scan(&pid, &name, &desc, &cat, &price, &isAvail); err != nil {
+		if err := rows.Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail); err != nil {
 			return nil, err
 		}
 
@@ -55,7 +55,7 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 			return nil, err
 		}
 
-		products = append(products, catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, isAvail, ingredients))
+		products = append(products, catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, img, isAvail, ingredients))
 	}
 	return products, nil
 }
@@ -104,9 +104,9 @@ func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
 	}()
 
 	sqlStr, args, err := r.sb.Insert("products").
-		Columns("id", "name", "description", "category", "base_price", "is_available").
-		Values(p.ID(), p.Name(), p.Description(), p.Category(), p.BasePrice(), p.IsAvailable()).
-		Suffix("ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, category = EXCLUDED.category, base_price = EXCLUDED.base_price, is_available = EXCLUDED.is_available").
+		Columns("id", "name", "description", "category", "base_price", "image_url", "is_available").
+		Values(p.ID(), p.Name(), p.Description(), p.Category(), p.BasePrice().InexactFloat64(), p.ImageURL(), p.IsAvailable()).
+		Suffix("ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, category = EXCLUDED.category, base_price = EXCLUDED.base_price, image_url = EXCLUDED.image_url, is_available = EXCLUDED.is_available").
 		ToSql()
 	if err != nil {
 		return err
@@ -143,7 +143,7 @@ func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
 }
 
 func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product, error) {
-	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "is_available").
+	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "image_url", "is_available").
 		From("products").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
@@ -152,13 +152,13 @@ func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product
 	}
 
 	var (
-		pid, name, desc string
-		cat             int
-		price           float64 
-		isAvail         bool
+		pid, name, desc, img string
+		cat                  int
+		price                float64 
+		isAvail              bool
 	)
 
-	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&pid, &name, &desc, &cat, &price, &isAvail)
+	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, catalog.ErrProductNotFound
@@ -171,5 +171,5 @@ func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product
 		return nil, err
 	}
 
-	return catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, isAvail, ingredients), nil
+	return catalog.ReconstructProduct(pid, name, desc, catalog.CategoryType(cat), price, img, isAvail, ingredients), nil
 }

@@ -53,7 +53,7 @@ var (
 	ErrProductNotFound = errors.New("product not found")
 )
 
-func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*Product, error) {
+func NewProduct(name, desc string, cat CategoryType, basePrice common.Money, imageUrl string) (*Product, error) {
 	if name == "" {
 		return nil, ErrInvalidDetails
 	}
@@ -68,6 +68,7 @@ func NewProduct(name, desc string, cat CategoryType, basePrice common.Money) (*P
 		description: desc,
 		category:    cat,
 		basePrice:   basePrice,
+		imageUrl:    imageUrl,
 		ingredients: make([]IngredientRef, 0),
 		isAvailable: true,
 		createdAt:   time.Now(),
@@ -113,13 +114,14 @@ func (p *Product) Ingredients() []IngredientRef {
 }
 
 // ReconstructProduct is used by repositories to rebuild a Product from storage.
-func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, isAvail bool, ingredients []IngredientRef) *Product {
+func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, img string, isAvail bool, ingredients []IngredientRef) *Product {
 	return &Product{
 		id:          id,
 		name:        name,
 		description: desc,
 		category:    cat,
 		basePrice:   common.NewMoney(price),
+		imageUrl:    img,
 		isAvailable: isAvail,
 		ingredients: ingredients,
 		createdAt:   time.Now(),

@@ -13,6 +13,7 @@ message CreateProductRequest {
   string description = 2;
   int32 category_id = 3;
   double price = 4;
+  string image_url = 5;
 }
 
 message GetProductRequest {
@@ -26,6 +27,9 @@ message ProductResponse {
   string name = 2;
   string description = 3;
   double price = 4;
+  string image_url = 5;
+  int32 category_id = 6;
+  bool is_available = 7;
 }
 
 message ListProductsResponse {
