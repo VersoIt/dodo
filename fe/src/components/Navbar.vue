@@ -94,7 +94,7 @@ const toggleMenu = () => {
                 {{ authStore.user?.name || 'My Account' }}
               </li>
               <li><router-link to="/profile" class="py-3"><UserCircle class="w-4 h-4" /> Profile Info</router-link></li>
-              <li><router-link to="/profile" class="py-3"><Package class="w-4 h-4" /> My Orders</router-link></li>
+              <li v-if="authStore.user?.role === 'client'"><router-link to="/profile" class="py-3"><Package class="w-4 h-4" /> My Orders</router-link></li>
               <div class="divider my-0 opacity-50"></div>
               <li><a @click="handleLogout" class="text-error font-bold py-3"><LogOut class="w-4 h-4" /> Logout</a></li>
             </template>

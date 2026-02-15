@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="" />
+    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/fe/src/components/Navbar.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/components/Navbar.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

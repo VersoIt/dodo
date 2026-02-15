@@ -76,6 +76,7 @@ onMounted(async () => {
           Profile Info
         </button>
         <button 
+          v-if="authStore.user?.role === 'client'"
           @click="activeTab = 'orders'; fetchOrders()"
           class="btn btn-ghost w-full justify-start gap-3"
           :class="{ 'btn-active bg-primary/10 text-primary': activeTab === 'orders' }"
