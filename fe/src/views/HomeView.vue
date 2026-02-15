@@ -12,6 +12,8 @@ const cartStore = useCartStore()
 const authStore = useAuthStore()
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
+const HERO_IMAGE = "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop"
+
 interface Product {
   id: string
   name: string
@@ -62,6 +64,11 @@ const scrollToMenu = () => {
   menuSection.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = HERO_IMAGE
+}
+
 const fetchProducts = async () => {
   try {
     loading.value = true
@@ -73,7 +80,7 @@ const fetchProducts = async () => {
       name: p.name,
       description: p.description,
       price: p.price,
-      imageUrl: p.image_url || `https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=500&auto=format&fit=crop&sig=${p.id}`,
+      imageUrl: p.image_url || HERO_IMAGE,
       categoryId: p.category_id,
       category: categories[p.category_id + 1] || 'Классика',
       isAvailable: p.is_available ?? true
@@ -153,7 +160,7 @@ onMounted(fetchProducts)
 <template>
   <div class="space-y-8 pb-20">
     <!-- Hero Section -->
-    <section class="hero min-h-[40vh] rounded-3xl overflow-hidden shadow-2xl" style="background-image: url(https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop);">
+    <section class="hero min-h-[40vh] rounded-3xl overflow-hidden shadow-2xl" :style="`background-image: url(${HERO_IMAGE});` ">
       <div class="hero-overlay bg-black bg-opacity-60"></div>
       <div class="hero-content text-center text-neutral-content">
         <div class="max-w-md">
@@ -208,7 +215,12 @@ onMounted(fetchProducts)
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div v-for="product in filteredProducts" :key="product.id" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 group">
           <figure class="relative h-48 overflow-hidden">
-            <img :src="product.imageUrl" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <img 
+              :src="product.imageUrl" 
+              :alt="product.name" 
+              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+              @error="handleImageError"
+            />
             <div class="absolute top-2 right-2">
               <span class="badge badge-secondary font-semibold">{{ product.price?.toLocaleString() }} ₽</span>
             </div>
@@ -243,7 +255,7 @@ onMounted(fetchProducts)
       </div>
     </section>
 
-    <!-- UNIFIED MODAL COMPONENT (RUSSIAN) -->
+    <!-- UNIFIED MODAL COMPONENT -->
     <Transition name="modal-fade">
       <div v-if="showAuthModal || showAddModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div 
@@ -335,8 +347,12 @@ onMounted(fetchProducts)
                 </div>
                 <div class="col-span-full mt-6 flex gap-3">
                   <button type="submit" class="btn btn-secondary flex-1 btn-lg rounded-2xl shadow-lg shadow-secondary/20 font-black uppercase" :disabled="isSubmitting">
-                    <span v-if="isSubmitting" class="loading loading-spinner"></span>
-                    {{ isEditing ? 'Сохранить изменения' : 'Опубликовать в меню' }}
+                    <template v-if="isSubmitting">
+                      <span class="loading loading-spinner"></span>
+                    </template>
+                    <template v-else>
+                      {{ isEditing ? 'Сохранить изменения' : 'Опубликовать в меню' }}
+                    </template>
                   </button>
                   <button type="button" @click="showAddModal = false" class="btn btn-ghost btn-lg rounded-2xl">Отмена</button>
                 </div>

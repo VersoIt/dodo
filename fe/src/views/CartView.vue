@@ -13,6 +13,13 @@ const showPaymentModal = ref(false)
 const createdOrderId = ref<string | null>(null)
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
+const HERO_IMAGE = "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop"
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = HERO_IMAGE
+}
+
 // Address state
 const address = ref({
   street: '',
@@ -37,7 +44,7 @@ const handleCheckout = async () => {
         quantity: item.quantity
       })),
       address: {
-        city: 'Пицца-Сити', // Default for now
+        city: 'Пицца-Сити',
         street: address.value.street,
         house: address.value.house,
         apartment: address.value.apartment,
@@ -106,7 +113,12 @@ const confirmPayment = async () => {
         <div class="space-y-4">
           <div v-for="item in cartStore.items" :key="item.id" class="card card-side bg-base-100 shadow-sm border border-base-200 p-4 transition-all hover:shadow-md">
             <figure class="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 shadow-inner">
-              <img :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover" />
+              <img 
+                :src="item.imageUrl" 
+                :alt="item.name" 
+                class="w-full h-full object-cover" 
+                @error="handleImageError"
+              />
             </figure>
             <div class="card-body py-0 px-4 justify-between">
               <div class="flex justify-between items-start">
@@ -218,8 +230,12 @@ const confirmPayment = async () => {
                 class="btn btn-primary btn-block btn-lg rounded-2xl shadow-lg shadow-primary/30 gap-3 h-16 font-black uppercase"
                 :disabled="isPlacingOrder || !isAddressValid"
               >
-                <span v-if="isPlacingOrder" class="loading loading-spinner"></span>
-                Оформить заказ
+                <template v-if="isPlacingOrder">
+                  <span class="loading loading-spinner"></span>
+                </template>
+                <template v-else>
+                  Оформить заказ
+                </template>
               </button>
               <p v-if="!isAddressValid && cartStore.totalItems > 0" class="text-[10px] text-error font-bold uppercase text-center w-full mt-2">
                 Введите улицу и номер дома
@@ -233,7 +249,11 @@ const confirmPayment = async () => {
     <!-- PAYMENT MODAL -->
     <Transition name="modal-fade">
       <div v-if="showPaymentModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/80" @click="!isPaying && (showPaymentModal = false)"></div>
+        <div 
+          class="fixed inset-0 bg-black/80" 
+          @click="!isPaying && (showPaymentModal = false)"
+        ></div>
+        
         <Transition name="modal-zoom" appear>
           <div class="relative bg-base-100 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
             <button v-if="!isPaying" @click="showPaymentModal = false" class="absolute top-6 right-6 btn btn-ghost btn-circle btn-sm bg-base-200/50"><X class="w-4 h-4" /></button>
