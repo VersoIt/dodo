@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '../store/cart'
 import { useRouter } from 'vue-router'
-import { Trash2, Minus, Plus, ShoppingBag, CreditCard, QrCode, ShieldCheck, X, Check, MapPin, Building2, Hash, MessageSquare } from 'lucide-vue-next'
+import { Trash2, Minus, Plus, ShoppingBag, CreditCard, QrCode, ShieldCheck, X, Check, MapPin, Building2, Hash, MessageSquare, Tag } from 'lucide-vue-next'
 import { inject, ref, computed } from 'vue'
 import { ordersApi } from '../api'
 import { formatPrice, handleImageError } from '../utils/format'
@@ -16,10 +16,23 @@ const isPlacingOrder = ref(false)
 const isPaying = ref(false)
 const showPaymentModal = ref(false)
 const createdOrderId = ref<string | null>(null)
+const promoCode = ref('')
+const promoApplied = ref(false)
 
 const address = ref({ street: '', house: '', apartment: '', floor: '', comment: '' })
 
 const isAddressValid = computed(() => address.value.street.length > 3 && address.value.house.length > 0)
+
+const applyPromo = () => {
+  if (!promoCode.value) return
+  // Mock logic
+  if (promoCode.value.toUpperCase() === 'WELCOME2026') {
+    promoApplied.value = true
+    addToast('Промокод применен! Скидка 15%', 'success')
+  } else {
+    addToast('Неверный промокод', 'error')
+  }
+}
 
 const handleCheckout = async () => {
   if (cartStore.items.length === 0 || !isAddressValid.value) return
@@ -146,20 +159,38 @@ const confirmPayment = async () => {
       </div>
 
       <!-- Summary Card -->
-      <div class="lg:col-span-4">
+      <div class="lg:col-span-4 space-y-6">
         <div class="card bg-base-100 shadow-2xl border border-primary/10 sticky top-24 overflow-hidden rounded-[2.5rem]">
           <div class="bg-primary/5 px-8 py-5 border-b border-primary/10 flex items-center gap-3">
             <CreditCard class="w-6 h-6 text-primary" /><h2 class="font-black uppercase text-[10px] tracking-widest italic">Итого к оплате</h2>
           </div>
           <div class="card-body p-8">
+            <!-- Promo Code Input -->
+            <div class="form-control mb-6">
+              <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Промокод</span></label>
+              <div class="relative">
+                <Tag class="absolute left-4 top-3.5 w-5 h-5 opacity-20" />
+                <input v-model="promoCode" type="text" placeholder="CODE" class="input input-bordered w-full pl-12 pr-20 rounded-2xl h-12 font-black uppercase tracking-widest" :disabled="promoApplied" />
+                <button 
+                  @click="applyPromo" 
+                  class="btn btn-sm btn-ghost absolute right-2 top-2 rounded-xl font-bold uppercase text-[10px] tracking-widest"
+                  :class="promoApplied ? 'text-success' : 'text-primary'"
+                  :disabled="promoApplied || !promoCode"
+                >
+                  {{ promoApplied ? 'OK' : 'Применить' }}
+                </button>
+              </div>
+            </div>
+
             <div class="space-y-4">
               <div class="flex justify-between items-center text-sm font-bold uppercase tracking-tighter opacity-40"><span>Сумма товаров</span><span>{{ formatPrice(cartStore.totalPrice) }}</span></div>
               <div class="flex justify-between items-center text-sm font-bold uppercase tracking-tighter opacity-40"><span>Доставка</span><span class="text-success">Бесплатно</span></div>
+              <div v-if="promoApplied" class="flex justify-between items-center text-sm font-bold uppercase tracking-tighter text-secondary"><span>Скидка</span><span>-15%</span></div>
               <div class="divider my-2 opacity-20"></div>
               <div class="flex justify-between items-end pt-2">
                 <span class="font-black text-2xl uppercase tracking-tighter italic">Всего</span>
                 <div class="text-right">
-                  <p class="text-4xl font-black text-primary leading-none tracking-tighter">{{ formatPrice(cartStore.totalPrice) }}</p>
+                  <p class="text-4xl font-black text-primary leading-none tracking-tighter">{{ formatPrice(promoApplied ? cartStore.totalPrice * 0.85 : cartStore.totalPrice) }}</p>
                   <p class="text-[8px] uppercase font-black opacity-30 mt-2 tracking-widest">VAT Included</p>
                 </div>
               </div>
@@ -181,10 +212,10 @@ const confirmPayment = async () => {
       <div class="p-12 flex flex-col items-center">
         <div class="bg-primary/10 p-6 rounded-[2rem] mb-8"><QrCode class="w-14 h-14 text-primary" /></div>
         <h3 class="font-black text-4xl mb-2 text-center tracking-tighter uppercase italic">Оплата</h3>
-        <p class="text-base-content/40 text-center mb-10 font-bold uppercase text-[10px] tracking-widest">К оплате: <span class="text-primary ml-1">{{ formatPrice(cartStore.totalPrice) }}</span></p>
+        <p class="text-base-content/40 text-center mb-10 font-bold uppercase text-[10px] tracking-widest">К оплате: <span class="text-primary ml-1">{{ formatPrice(promoApplied ? cartStore.totalPrice * 0.85 : cartStore.totalPrice) }}</span></p>
         
         <div class="relative bg-white p-10 rounded-[3rem] shadow-inner mb-12 group overflow-hidden border-8 border-base-200 transition-all hover:border-primary/20">
-          <svg viewBox="0 0 100 100" class="w-48 h-48 text-black fill-current relative z-10"><path d="M0 0h35v10H10v25H0V0zM65 0h35v35h-10V10H65V0zM0 65h10v25h25v10H0V65zM90 65h10v35H65v-10h25V65z" /><path d="M20 20h15v15H20V20zM65 20h15v15H65V20zM20 65h15v15H20V65z" /><path d="M42 20h16v16h-16V20zM20 42h16v16h-16V42zM42 42h16v16h-16V42zM64 42h16v16h-16V42zM42 64h16v16h-16V64zM64 64h8v8h-8V64zM72 72h8v8h-8V72z" /></svg>
+          <svg viewBox="0 0 100 100" class="w-48 h-48 text-black fill-current relative z-10"><path d="M0 0h35v10H10v25H0V0zM65 0h35v35h-10V10H65V0zM0 65h10v25h25v10H0V65zM90 65h10v35H65v-10h25V65z" /><path d="M20 20h15v15H20V20zM65 20h15v15H65V20zM20 65h15v15H20V65z" /><path d="M42 20h16v16h-16V20zM20 42h16v16h-16V42zM42 42h16v16h-16V42zM64 42h16v16h-16V42zM64 64h8v8h-8V64zM72 72h8v8h-8V72z" /></svg>
         </div>
 
         <div class="flex flex-col w-full gap-4">

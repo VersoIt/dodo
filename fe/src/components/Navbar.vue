@@ -2,7 +2,7 @@
 import { useAuthStore } from '../store/auth'
 import { useCartStore } from '../store/cart'
 import { useRouter } from 'vue-router'
-import { ShoppingCart, User, LogOut, Pizza, Menu, Info, ChefHat, Truck } from 'lucide-vue-next'
+import { ShoppingCart, User, LogOut, Pizza, Menu, Info, ChefHat, Truck, BarChart3 } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
@@ -35,6 +35,9 @@ const handleLogout = () => {
           </router-link>
           <router-link v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'manager'" to="/logistics" class="btn btn-ghost btn-sm gap-2 font-bold uppercase text-[10px] tracking-widest">
             <Truck class="w-4 h-4" /> Доставка
+          </router-link>
+          <router-link v-if="authStore.user?.role === 'manager'" to="/manager" class="btn btn-ghost btn-sm gap-2 font-bold uppercase text-[10px] tracking-widest text-secondary">
+            <BarChart3 class="w-4 h-4" /> Управление
           </router-link>
         </template>
 

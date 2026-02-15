@@ -56,6 +56,12 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue')
+    },
+    {
+      path: '/manager',
+      name: 'manager',
+      component: () => import('../views/ManagerView.vue'),
+      meta: { requiresAuth: true, role: 'manager' }
     }
   ]
 })
