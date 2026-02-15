@@ -37,7 +37,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 		items[i] = usecase.OrderItemInput{
 			ProductID: item.ProductId,
 			Quantity:  int(item.Quantity),
-			SizeMult:  1.0, // Default for now
+			SizeMult:  1.0, 
 		}
 	}
 
@@ -107,8 +107,14 @@ func (h *OrdersHandler) ListAllOrders(ctx context.Context, _ *orders_pb.ListAllO
 }
 
 func (h *OrdersHandler) UpdateOrderStatus(ctx context.Context, req *orders_pb.UpdateOrderStatusRequest) (*orders_pb.OrderResponse, error) {
-	order, err := h.uc.UpdateStatus(ctx, req.OrderId, req.Status)
+	h.log.Info("GRPC: UpdateOrderStatus received", 
+		slog.String("order_id", req.OrderId), 
+		slog.String("status", req.Status), 
+		slog.String("performer", req.PerformerId))
+
+	order, err := h.uc.UpdateStatus(ctx, req.OrderId, req.Status, req.PerformerId)
 	if err != nil {
+		h.log.Error("GRPC: UpdateStatus usecase failed", slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
 	}
 
@@ -139,6 +145,8 @@ func (h *OrdersHandler) mapOrder(o *orders.Order) *orders_pb.OrderResponse {
 			Floor:     addr.Floor,
 			Comment:   addr.Comment,
 		},
-		Items: pbItems,
+		Items:     pbItems,
+		ChefId:    o.ChefID(),
+		CourierId: o.CourierID(),
 	}
 }

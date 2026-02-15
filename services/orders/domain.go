@@ -138,6 +138,9 @@ type Order struct {
 	promoCode     string
 
 	finalPrice common.Money
+
+	chefID    string
+	courierID string
 }
 
 // --- Factory ---
@@ -166,6 +169,7 @@ var (
 	ErrInvalidDiscount   = errors.New("invalid discount")
 	ErrInvalidTransition = errors.New("invalid status transition")
 	ErrOrderNotFound     = errors.New("order not found")
+	ErrAlreadyAssigned   = errors.New("order is already assigned to someone else")
 )
 
 // --- Business Logic ---
@@ -235,11 +239,15 @@ func (o *Order) MarkPaid() error {
 	return nil
 }
 
-func (o *Order) SendToKitchen() error {
+func (o *Order) SendToKitchen(chefID string) error {
 	if o.status != StatusPaid {
 		return fmt.Errorf("%w: order must be paid", ErrInvalidTransition)
 	}
+	if o.chefID != "" && o.chefID != chefID {
+		return ErrAlreadyAssigned
+	}
 	o.status = StatusCooking
+	o.chefID = chefID
 	return nil
 }
 
@@ -251,11 +259,15 @@ func (o *Order) MarkReady() error {
 	return nil
 }
 
-func (o *Order) ShipToDelivery() error {
+func (o *Order) ShipToDelivery(courierID string) error {
 	if o.status != StatusReady {
 		return fmt.Errorf("%w: order is not ready", ErrInvalidTransition)
 	}
+	if o.courierID != "" && o.courierID != courierID {
+		return ErrAlreadyAssigned
+	}
 	o.status = StatusDelivering
+	o.courierID = courierID
 	return nil
 }
 
@@ -282,9 +294,11 @@ func (o *Order) DeliveryPrice() common.Money { return o.deliveryPrice }
 func (o *Order) Discount() common.Money      { return o.discount }
 func (o *Order) PromoCode() string           { return o.promoCode }
 func (o *Order) FinalPrice() common.Money    { return o.finalPrice }
+func (o *Order) ChefID() string              { return o.chefID }
+func (o *Order) CourierID() string           { return o.courierID }
 
 // ReconstructOrder builds an Order aggregate from storage.
-func ReconstructOrder(id, number, custID string, status OrderStatus, createdAt time.Time, addr DeliveryAddress, delPrice, discount common.Money, promo string, final common.Money, items []*OrderItem) *Order {
+func ReconstructOrder(id, number, custID string, status OrderStatus, createdAt time.Time, addr DeliveryAddress, delPrice, discount common.Money, promo string, final common.Money, items []*OrderItem, chefID, courierID string) *Order {
 	return &Order{
 		id:            id,
 		orderNumber:   number,
@@ -297,6 +311,8 @@ func ReconstructOrder(id, number, custID string, status OrderStatus, createdAt t
 		discount:      discount,
 		promoCode:     promo,
 		finalPrice:    final,
+		chefID:        chefID,
+		courierID:     courierID,
 	}
 }
 

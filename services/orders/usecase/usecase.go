@@ -10,8 +10,28 @@ import (
 )
 
 var (
-	ErrInvalidInput = errors.New("invalid input data")
+	ErrInvalidInput = errors.New("invalid input")
 )
+
+type OrderUseCase struct {
+	repo           orders.OrderRepository
+	catalogService orders.CatalogService
+	log            *slog.Logger
+}
+
+func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, log *slog.Logger) *OrderUseCase {
+	return &OrderUseCase{
+		repo:           repo,
+		catalogService: catalog,
+		log:            log,
+	}
+}
+
+type OrderItemInput struct {
+	ProductID string
+	Quantity  int
+	SizeMult  float64
+}
 
 type CreateOrderInput struct {
 	CustomerID string
@@ -19,120 +39,33 @@ type CreateOrderInput struct {
 	Items      []OrderItemInput
 }
 
-type OrderItemInput struct {
-	ProductID string
-	Quantity  int
-	SizeMult  float64
-	Toppings  []orders.Topping
-}
-
-type OrderUseCase struct {
-	repo      orders.OrderRepository
-	catalog   orders.CatalogService
-	analytics orders.AnalyticsService
-	log       *slog.Logger
-}
-
-func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, analytics orders.AnalyticsService, log *slog.Logger) *OrderUseCase {
-	return &OrderUseCase{
-		repo:      repo,
-		catalog:   catalog,
-		analytics: analytics,
-		log:       log,
-	}
-}
-
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput) (*orders.Order, error) {
-	// Валидация входных данных
-	if input.CustomerID == "" {
-		return nil, fmt.Errorf("%w: customer ID is required", ErrInvalidInput)
-	}
-	if len(input.Items) == 0 {
-		return nil, fmt.Errorf("%w: order must have at least one item", ErrInvalidInput)
-	}
-	if input.Address.City == "" || input.Address.Street == "" {
-		return nil, fmt.Errorf("%w: incomplete delivery address", ErrInvalidInput)
-	}
-
-	// Проверка контекста перед началом тяжелой операции
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-
 	order := orders.NewOrder(input.CustomerID, input.Address)
 
 	for _, item := range input.Items {
-		// Fetch actual product info from catalog
-		prod, err := uc.catalog.GetProduct(ctx, item.ProductID)
+		product, err := uc.catalogService.GetProduct(ctx, item.ProductID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch product %s from catalog: %w", item.ProductID, err)
 		}
 
-		if err := order.AddItem(
-			prod.ID,
-			prod.Name,
-			item.Quantity,
-			prod.BasePrice,
-			item.SizeMult,
-			item.Toppings,
-		); err != nil {
-			return nil, fmt.Errorf("failed to add item %s to order: %w", item.ProductID, err)
+		err = order.AddItem(product.ID, product.Name, item.Quantity, product.BasePrice, item.SizeMult, nil)
+		if err != nil {
+			return nil, err
 		}
 	}
 
 	if err := uc.repo.Save(ctx, order); err != nil {
-		return nil, fmt.Errorf("failed to save order to repository: %w", err)
+		return nil, err
 	}
 
 	return order, nil
-}
-
-func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
-	if orderID == "" {
-		return fmt.Errorf("%w: order ID is required", ErrInvalidInput)
-	}
-
-	order, err := uc.repo.FindByID(ctx, orderID)
-	if err != nil {
-		return fmt.Errorf("failed to find order %s: %w", orderID, err)
-	}
-
-	if err := order.MarkPaid(); err != nil {
-		return fmt.Errorf("could not process payment for order %s: %w", orderID, err)
-	}
-
-	if err := uc.repo.Save(ctx, order); err != nil {
-		return fmt.Errorf("failed to update order status after payment: %w", err)
-	}
-
-	// Report to analytics (Best effort or should it be transactional?
-	// In a real senior scenario we'd use Outbox pattern, but here we'll do a direct call for now)
-	if err := uc.analytics.ReportSale(ctx, "019c53ee-74af-72b9-afe6-103c1466ae0e", order.FinalPrice().InexactFloat64()); err != nil {
-		// We log it but don't fail the payment as it's already saved in DB
-		uc.log.Error("failed to report sale to analytics", slog.Any("error", err), slog.String("order_id", orderID))
-	}
-
-	return nil
 }
 
 func (uc *OrderUseCase) GetOrder(ctx context.Context, id string) (*orders.Order, error) {
-	if id == "" {
-		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
-	}
-
-	order, err := uc.repo.FindByID(ctx, id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find order %s: %w", id, err)
-	}
-
-	return order, nil
+	return uc.repo.FindByID(ctx, id)
 }
 
 func (uc *OrderUseCase) ListOrders(ctx context.Context, customerID string) ([]*orders.Order, error) {
-	if customerID == "" {
-		return nil, fmt.Errorf("%w: customer ID is required", ErrInvalidInput)
-	}
-
 	return uc.repo.FindByCustomerID(ctx, customerID)
 }
 
@@ -140,7 +73,20 @@ func (uc *OrderUseCase) ListAllOrders(ctx context.Context) ([]*orders.Order, err
 	return uc.repo.FindAll(ctx)
 }
 
-func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, statusStr string) (*orders.Order, error) {
+func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
+	order, err := uc.repo.FindByID(ctx, orderID)
+	if err != nil {
+		return err
+	}
+
+	if err := order.MarkPaid(); err != nil {
+		return err
+	}
+
+	return uc.repo.Save(ctx, order)
+}
+
+func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, statusStr string, performerID string) (*orders.Order, error) {
 	if orderID == "" {
 		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
 	}
@@ -155,25 +101,33 @@ func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, status
 		return nil, fmt.Errorf("failed to find order %s: %w", orderID, err)
 	}
 
+	uc.log.Info("Updating status in usecase", 
+		slog.String("order_id", orderID), 
+		slog.String("new_status", statusStr), 
+		slog.String("performer", performerID))
+
+	var transitionErr error
 	switch status {
 	case orders.StatusCooking:
-		err = order.SendToKitchen()
+		transitionErr = order.SendToKitchen(performerID)
 	case orders.StatusReady:
-		err = order.MarkReady()
+		transitionErr = order.MarkReady()
 	case orders.StatusDelivering:
-		err = order.ShipToDelivery()
+		transitionErr = order.ShipToDelivery(performerID)
 	case orders.StatusCompleted:
-		err = order.CompleteDelivery()
+		transitionErr = order.CompleteDelivery()
 	default:
 		return nil, fmt.Errorf("%w: direct transition to %s not allowed", orders.ErrInvalidTransition, statusStr)
 	}
 
-	if err != nil {
-		return nil, err
+	if transitionErr != nil {
+		return nil, transitionErr
 	}
 
+	// CRITICAL FIX: Save the order after updating status and assignments!
 	if err := uc.repo.Save(ctx, order); err != nil {
-		return nil, fmt.Errorf("failed to save order %s: %w", orderID, err)
+		uc.log.Error("Failed to save order after status update", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to save order: %w", err)
 	}
 
 	return order, nil

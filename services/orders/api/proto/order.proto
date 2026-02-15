@@ -16,6 +16,7 @@ message ListAllOrdersRequest {}
 message UpdateOrderStatusRequest {
   string order_id = 1;
   string status = 2;
+  string performer_id = 3;
 }
 
 message GetOrderRequest {
@@ -62,4 +63,6 @@ message OrderResponse {
   string order_number = 4;
   Address address = 5;
   repeated OrderItem items = 6;
+  string chef_id = 7;
+  string courier_id = 8;
 }

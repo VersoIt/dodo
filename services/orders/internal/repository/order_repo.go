@@ -2,14 +2,15 @@ package repository
 
 import (
 	"context"
-	"time"
+	"database/sql"
 	"log/slog"
+	"time"
 
-	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/orders"
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/Masterminds/squirrel"
+	"github.com/versoit/diploma/pkg/common"
+	"github.com/versoit/diploma/services/orders"
 )
 
 type orderRepo struct {
@@ -36,10 +37,22 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 	}()
 
 	addr := o.Address()
+	
+	// Prepare nullable IDs
+	var chefID, courierID *string
+	if o.ChefID() != "" {
+		cid := o.ChefID()
+		chefID = &cid
+	}
+	if o.CourierID() != "" {
+		coid := o.CourierID()
+		courierID = &coid
+	}
+
 	sqlStr, args, err := r.sb.Insert("orders").
-		Columns("id", "order_number", "customer_id", "status", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price").
-		Values(o.ID(), o.OrderNumber(), o.CustomerID(), o.Status(), addr.City, addr.Street, addr.House, addr.Apartment, addr.Floor, addr.Comment, o.DeliveryPrice(), o.Discount(), o.PromoCode(), o.FinalPrice()).
-		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, delivery_price = EXCLUDED.delivery_price, discount = EXCLUDED.discount, final_price = EXCLUDED.final_price").
+		Columns("id", "order_number", "customer_id", "status", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price", "chef_id", "courier_id").
+		Values(o.ID(), o.OrderNumber(), o.CustomerID(), o.Status(), addr.City, addr.Street, addr.House, addr.Apartment, addr.Floor, addr.Comment, o.DeliveryPrice(), o.Discount(), o.PromoCode(), o.FinalPrice(), chefID, courierID).
+		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, delivery_price = EXCLUDED.delivery_price, discount = EXCLUDED.discount, final_price = EXCLUDED.final_price, chef_id = EXCLUDED.chef_id, courier_id = EXCLUDED.courier_id").
 		ToSql()
 	if err != nil {
 		return err
@@ -91,7 +104,7 @@ func (r *orderRepo) Save(ctx context.Context, o *orders.Order) error {
 }
 
 func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, error) {
-	sqlStr, args, err := r.sb.Select("id", "order_number", "customer_id", "status", "created_at", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price").
+	sqlStr, args, err := r.sb.Select("id", "order_number", "customer_id", "status", "created_at", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price", "chef_id", "courier_id").
 		From("orders").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
@@ -104,12 +117,13 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		status                                                                  int
 		createdAt                                                               time.Time
 		delPrice, discount, finalPrice                                          common.Money
+		chefID, courierID                                                       sql.NullString
 	)
 
 	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(
 		&oid, &number, &cid, &status, &createdAt,
 		&city, &street, &house, &apartment, &floor, &comment,
-		&delPrice, &discount, &promo, &finalPrice,
+		&delPrice, &discount, &promo, &finalPrice, &chefID, &courierID,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -173,7 +187,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*orders.Order, err
 		City: city, Street: street, House: house, Apartment: apartment, Floor: floor, Comment: comment,
 	}
 
-	return orders.ReconstructOrder(oid, number, cid, orders.OrderStatus(status), createdAt, addr, delPrice, discount, promo, finalPrice, items), nil
+	return orders.ReconstructOrder(oid, number, cid, orders.OrderStatus(status), createdAt, addr, delPrice, discount, promo, finalPrice, items, chefID.String, courierID.String), nil
 }
 
 func (r *orderRepo) FindByCustomerID(ctx context.Context, customerID string) ([]*orders.Order, error) {

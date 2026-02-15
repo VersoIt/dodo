@@ -61,6 +61,7 @@ type UpdateOrderStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	PerformerId   string                 `protobuf:"bytes,3,opt,name=performer_id,json=performerId,proto3" json:"performer_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +106,13 @@ func (x *UpdateOrderStatusRequest) GetOrderId() string {
 func (x *UpdateOrderStatusRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateOrderStatusRequest) GetPerformerId() string {
+	if x != nil {
+		return x.PerformerId
 	}
 	return ""
 }
@@ -497,6 +505,8 @@ type OrderResponse struct {
 	OrderNumber   string                 `protobuf:"bytes,4,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
 	Address       *Address               `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
 	Items         []*OrderItem           `protobuf:"bytes,6,rep,name=items,proto3" json:"items,omitempty"`
+	ChefId        string                 `protobuf:"bytes,7,opt,name=chef_id,json=chefId,proto3" json:"chef_id,omitempty"`
+	CourierId     string                 `protobuf:"bytes,8,opt,name=courier_id,json=courierId,proto3" json:"courier_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -573,15 +583,30 @@ func (x *OrderResponse) GetItems() []*OrderItem {
 	return nil
 }
 
+func (x *OrderResponse) GetChefId() string {
+	if x != nil {
+		return x.ChefId
+	}
+	return ""
+}
+
+func (x *OrderResponse) GetCourierId() string {
+	if x != nil {
+		return x.CourierId
+	}
+	return ""
+}
+
 var File_order_proto protoreflect.FileDescriptor
 
 const file_order_proto_rawDesc = "" +
 	"\n" +
 	"\vorder.proto\x12\torders.v1\"\x16\n" +
-	"\x14ListAllOrdersRequest\"M\n" +
+	"\x14ListAllOrdersRequest\"p\n" +
 	"\x18UpdateOrderStatusRequest\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\",\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12!\n" +
+	"\fperformer_id\x18\x03 \x01(\tR\vperformerId\",\n" +
 	"\x0fGetOrderRequest\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\"4\n" +
 	"\x11ListOrdersRequest\x12\x1f\n" +
@@ -607,7 +632,7 @@ const file_order_proto_rawDesc = "" +
 	"\aaddress\x18\x02 \x01(\v2\x12.orders.v1.AddressR\aaddress\x12*\n" +
 	"\x05items\x18\x03 \x03(\v2\x14.orders.v1.OrderItemR\x05items\",\n" +
 	"\x0fPayOrderRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\"\xe0\x01\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"\x98\x02\n" +
 	"\rOrderResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1f\n" +
@@ -615,7 +640,10 @@ const file_order_proto_rawDesc = "" +
 	"finalPrice\x12!\n" +
 	"\forder_number\x18\x04 \x01(\tR\vorderNumber\x12,\n" +
 	"\aaddress\x18\x05 \x01(\v2\x12.orders.v1.AddressR\aaddress\x12*\n" +
-	"\x05items\x18\x06 \x03(\v2\x14.orders.v1.OrderItemR\x05items2\xca\x03\n" +
+	"\x05items\x18\x06 \x03(\v2\x14.orders.v1.OrderItemR\x05items\x12\x17\n" +
+	"\achef_id\x18\a \x01(\tR\x06chefId\x12\x1d\n" +
+	"\n" +
+	"courier_id\x18\b \x01(\tR\tcourierId2\xca\x03\n" +
 	"\fOrderService\x12F\n" +
 	"\vCreateOrder\x12\x1d.orders.v1.CreateOrderRequest\x1a\x18.orders.v1.OrderResponse\x12@\n" +
 	"\bPayOrder\x12\x1a.orders.v1.PayOrderRequest\x1a\x18.orders.v1.OrderResponse\x12@\n" +
