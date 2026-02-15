@@ -16,22 +16,16 @@ const handleLogin = async () => {
   try {
     loading.value = true
     error.value = ''
-    const response = await axios.post('/api/v1/auth/login', {
-      email: email.value,
-      password: password.value
-    })
+    const success = await authStore.login(email.value, password.value)
     
-    // Backend returns { success: true, data: { token: "..." } }
-    const result = response.data
-    if (result.success && result.data?.token) {
-      authStore.setToken(result.data.token)
+    if (success) {
       router.push('/')
     } else {
-      error.value = result.error || 'Invalid response from server'
+      error.value = 'Invalid email or password'
     }
   } catch (err: any) {
     console.error('Login failed:', err)
-    error.value = 'Invalid email or password'
+    error.value = 'An error occurred during login'
   } finally {
     loading.value = false
   }

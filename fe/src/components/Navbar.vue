@@ -62,7 +62,6 @@ const toggleMenu = () => {
           </template>
         </div>
 
-      <div class="flex-none flex items-center gap-3">
         <!-- User Name (Desktop) -->
         <span v-if="authStore.isAuthenticated" class="hidden md:block text-xs font-bold uppercase tracking-widest opacity-80">
           Hi, {{ authStore.user?.name || 'Friend' }}

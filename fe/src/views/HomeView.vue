@@ -29,14 +29,6 @@ const menuSection = ref<HTMLElement | null>(null)
 
 const categories = ['All', 'Classic', 'Premium', 'Veggie']
 
-const checkRoleAndRedirect = () => {
-  if (authStore.user?.role === 'chef') {
-    router.replace('/kitchen')
-  } else if (authStore.user?.role === 'courier') {
-    router.replace('/logistics')
-  }
-}
-
 const filteredProducts = computed(() => {
   if (selectedCategory.value === 'All') return products.value
   return products.value.filter(p => p.category === selectedCategory.value)
@@ -50,7 +42,6 @@ const fetchProducts = async () => {
   try {
     loading.value = true
     const response = await axios.get('/api/v1/catalog/products')
-    // Correctly handle the SuccessResponse { success: true, data: { products: [...] } }
     const responseData = response.data.data
     const productsData = responseData.products || []
     
@@ -71,7 +62,6 @@ const fetchProducts = async () => {
 }
 
 onMounted(() => {
-  checkRoleAndRedirect()
   fetchProducts()
 })
 </script>

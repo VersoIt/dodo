@@ -5,7 +5,7 @@ import { logger } from '../api/logger'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token') || '')
-  const user = ref<any>(null)
+  const user = ref<any>(JSON.parse(localStorage.getItem('user') || 'null'))
 
   const isAuthenticated = computed(() => !!token.value)
 
@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = ''
     user.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     delete axios.defaults.headers.common['Authorization']
   }
 
@@ -31,6 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await axios.get('/api/v1/auth/me')
       if (response.data.success) {
         user.value = response.data.data
+        localStorage.setItem('user', JSON.stringify(user.value))
         logger.info('User profile loaded', { email: user.value.email })
       }
     } catch (error) {
@@ -39,9 +41,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function login(email: string, password: string): Promise<boolean> {
+    try {
+      const response = await axios.post('/api/v1/auth/login', { email, password })
+      if (response.data.success && response.data.data.token) {
+        setToken(response.data.data.token)
+        await fetchMe()
+        return true
+      }
+      return false
+    } catch (error) {
+      logger.error('Login method failed', error)
+      return false
+    }
+  }
+
   if (token.value) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
   }
 
-  return { token, user, isAuthenticated, setToken, logout, fetchMe }
+  return { token, user, isAuthenticated, setToken, logout, fetchMe, login }
 })

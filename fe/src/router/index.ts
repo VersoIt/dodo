@@ -55,16 +55,31 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const userStr = localStorage.getItem('user')
+  const user = userStr && userStr !== 'null' ? JSON.parse(userStr) : {}
   const isAuthenticated = !!localStorage.getItem('token')
 
+  // 1. Auth check
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'login' })
-  } else if (to.meta.role && user.role !== to.meta.role && user.role !== 'manager') {
-    next({ name: 'home' })
-  } else {
-    next()
+    return next({ name: 'login' })
   }
+
+  // 2. Role-based access control
+  if (to.meta.role && user.role !== to.meta.role && user.role !== 'manager') {
+    return next({ name: 'home' })
+  }
+
+  // 3. Smart redirect for staff from Home page
+  if (to.name === 'home' && isAuthenticated) {
+    if (user.role === 'chef') {
+      return next({ name: 'kitchen' })
+    }
+    if (user.role === 'courier') {
+      return next({ name: 'logistics' })
+    }
+  }
+
+  next()
 })
 
 export default router
