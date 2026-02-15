@@ -56,7 +56,7 @@ const confirmPayment = async () => {
       cartStore.clearCart()
       addToast('Payment successful! Your order is being prepared.', 'success')
       showPaymentModal.value = false
-      router.push(`/order/${createdOrderId.value}`)
+      router.push(`/order/${createdOrderId.value}/success`)
     } else {
       addToast(response.data.error || 'Payment failed', 'error')
     }

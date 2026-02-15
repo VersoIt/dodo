@@ -244,30 +244,18 @@ onMounted(fetchProducts)
       </div>
     </section>
 
-    <!-- AUTH MODAL (For guests) -->
-    <Transition
-      enter-active-class="transition duration-300 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition duration-200 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div v-if="showAuthModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <!-- Backdrop -->
+    <!-- UNIFIED MODAL COMPONENT (FOR ALL MODALS) -->
+    <Transition name="modal-fade">
+      <div v-if="showAuthModal || showAddModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <!-- Backdrop with explicit transition classes -->
         <div 
-          class="fixed inset-0 bg-black/60 backdrop-blur-sm"
-          @click="showAuthModal = false"
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
+          @click="showAuthModal = false; showAddModal = false"
         ></div>
         
-        <!-- Modal Content -->
-        <Transition
-          appear
-          enter-active-class="transition duration-500 delay-100 ease-out"
-          enter-from-class="opacity-0 translate-y-8 scale-95"
-          enter-to-class="opacity-100 translate-y-0 scale-100"
-        >
-          <div class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl overflow-hidden">
+        <!-- Modal Content (Login Required) -->
+        <Transition name="modal-zoom" appear>
+          <div v-if="showAuthModal" class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl overflow-hidden">
             <div class="p-8 flex flex-col items-center text-center">
               <div class="bg-primary/10 p-4 rounded-full mb-6">
                 <LogIn class="w-12 h-12 text-primary" />
@@ -290,90 +278,108 @@ onMounted(fetchProducts)
               </div>
             </div>
           </div>
+
+          <!-- Modal Content (Add/Edit Product) -->
+          <div v-else-if="showAddModal" class="relative bg-base-100 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-base-200 overflow-hidden">
+            <div class="p-8 md:p-10">
+              <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-3 text-secondary">
+                  <PackagePlus class="w-8 h-8" />
+                  <h3 class="font-black text-2xl uppercase tracking-tight">{{ isEditing ? 'Edit Product' : 'Create New Item' }}</h3>
+                </div>
+                <button @click="showAddModal = false" class="btn btn-ghost btn-sm btn-circle bg-base-200/50"><X class="w-4 h-4" /></button>
+              </div>
+              
+              <form @submit.prevent="handleSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <!-- Left Col -->
+                <div class="space-y-4">
+                  <div class="form-control">
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Product Name</span></label>
+                    <div class="relative">
+                      <Tag class="absolute left-3 top-3 w-5 h-5 opacity-40" />
+                      <input v-model="productForm.name" type="text" placeholder="e.g. Pepperoni Extreme" class="input input-bordered w-full pl-10 rounded-xl" required />
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Price ($)</span></label>
+                    <div class="relative">
+                      <DollarSign class="absolute left-3 top-3 w-5 h-5 opacity-40" />
+                      <input v-model="productForm.price" type="number" step="0.01" placeholder="15.99" class="input input-bordered w-full pl-10 rounded-xl" required />
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Category</span></label>
+                    <select v-model="productForm.categoryId" class="select select-bordered w-full rounded-xl">
+                      <option v-for="(val, key) in categoryMap" :key="key" :value="val">{{ key }}</option>
+                    </select>
+                  </div>
+
+                  <div class="form-control pt-2">
+                    <label class="label cursor-pointer justify-start gap-4">
+                      <input v-model="productForm.isAvailable" type="checkbox" class="checkbox checkbox-secondary checkbox-sm rounded-lg" />
+                      <span class="label-text font-bold">Available for order</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Right Col -->
+                <div class="space-y-4">
+                  <div class="form-control">
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Image URL</span></label>
+                    <div class="relative">
+                      <ImageIcon class="absolute left-3 top-3 w-5 h-5 opacity-40" />
+                      <input v-model="productForm.imageUrl" type="text" placeholder="https://images.unsplash.com/..." class="input input-bordered w-full pl-10 rounded-xl" />
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Description</span></label>
+                    <div class="relative">
+                      <FileText class="absolute left-3 top-3 w-5 h-5 opacity-40" />
+                      <textarea v-model="productForm.description" class="textarea textarea-bordered w-full pl-10 h-32 rounded-xl" placeholder="Tell us about this delicious pizza..."></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-span-full mt-6 flex gap-3">
+                  <button type="submit" class="btn btn-secondary flex-1 btn-lg rounded-2xl shadow-lg shadow-secondary/20 font-black uppercase" :disabled="isSubmitting">
+                    <span v-if="isSubmitting" class="loading loading-spinner"></span>
+                    {{ isEditing ? 'Save Changes' : 'Publish to Menu' }}
+                  </button>
+                  <button type="button" @click="showAddModal = false" class="btn btn-ghost btn-lg rounded-2xl">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </Transition>
       </div>
     </Transition>
-
-    <!-- FORM MODAL (Add/Edit) -->
-    <dialog :class="{ 'modal-open': showAddModal }" class="modal modal-bottom sm:modal-middle transition-all">
-      <div class="modal-box bg-base-100 max-w-2xl border border-base-300 shadow-2xl">
-        <div class="flex justify-between items-center mb-6">
-          <div class="flex items-center gap-3 text-secondary">
-            <PackagePlus class="w-8 h-8" />
-            <h3 class="font-bold text-2xl">{{ isEditing ? 'Edit Product' : 'Create New Item' }}</h3>
-          </div>
-          <button @click="showAddModal = false" class="btn btn-ghost btn-sm btn-circle"><X /></button>
-        </div>
-        
-        <form @submit.prevent="handleSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Left Col -->
-          <div class="space-y-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-bold">Product Name</span></label>
-              <div class="relative">
-                <Tag class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <input v-model="productForm.name" type="text" placeholder="e.g. Pepperoni Extreme" class="input input-bordered w-full pl-10" required />
-              </div>
-            </div>
-
-            <div class="form-control">
-              <label class="label"><span class="label-text font-bold">Price ($)</span></label>
-              <div class="relative">
-                <DollarSign class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <input v-model="productForm.price" type="number" step="0.01" placeholder="15.99" class="input input-bordered w-full pl-10" required />
-              </div>
-            </div>
-
-            <div class="form-control">
-              <label class="label"><span class="label-text font-bold">Category</span></label>
-              <select v-model="productForm.categoryId" class="select select-bordered w-full">
-                <option v-for="(val, key) in categoryMap" :key="key" :value="val">{{ key }}</option>
-              </select>
-            </div>
-
-            <div class="form-control">
-              <label class="label cursor-pointer justify-start gap-4">
-                <input v-model="productForm.isAvailable" type="checkbox" class="checkbox checkbox-secondary" />
-                <span class="label-text font-bold">Available for order</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Right Col -->
-          <div class="space-y-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-bold">Image URL</span></label>
-              <div class="relative">
-                <ImageIcon class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <input v-model="productForm.imageUrl" type="text" placeholder="https://images.unsplash.com/..." class="input input-bordered w-full pl-10" />
-              </div>
-            </div>
-
-            <div class="form-control">
-              <label class="label"><span class="label-text font-bold">Description</span></label>
-              <div class="relative">
-                <FileText class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                <textarea v-model="productForm.description" class="textarea textarea-bordered w-full pl-10 h-32" placeholder="Tell us about this delicious pizza..."></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-span-full mt-4 flex gap-3">
-            <button type="submit" class="btn btn-secondary flex-1" :disabled="isSubmitting">
-              <span v-if="isSubmitting" class="loading loading-spinner"></span>
-              {{ isEditing ? 'Save Changes' : 'Publish to Menu' }}
-            </button>
-            <button type="button" @click="showAddModal = false" class="btn btn-ghost">Cancel</button>
-          </div>
-        </form>
-      </div>
-      <div class="modal-backdrop bg-black/60 backdrop-blur-sm" @click="showAddModal = false"></div>
-    </dialog>
   </div>
 </template>
 
 <style scoped>
 .tab-active {
   @apply font-bold !important;
+}
+
+/* Modal Animations */
+.modal-fade-enter-active, .modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.modal-fade-enter-from, .modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-zoom-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-zoom-leave-active {
+  transition: all 0.2s ease-in;
+}
+.modal-zoom-enter-from, .modal-zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
 }
 </style>
