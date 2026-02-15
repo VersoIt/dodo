@@ -26,6 +26,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Name     string `json:"name"`
+		Role     string `json:"role"`
 	}
 
 	req := new(Request)
@@ -33,7 +34,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request")
 	}
 
-	h.log.Info("Registering new user via gRPC", "email", req.Email, "name", req.Name)
+	h.log.Info("Registering new user via gRPC", "email", req.Email, "name", req.Name, "role", req.Role)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -42,6 +43,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		Email:    req.Email,
 		Password: req.Password,
 		Name:     req.Name,
+		Role:     req.Role,
 	})
 	if err != nil {
 		return HandleGrpcError(c, h.log, err, "registration failed")

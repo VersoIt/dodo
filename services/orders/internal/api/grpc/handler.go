@@ -54,12 +54,7 @@ func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOr
 		return nil, status.Errorf(codes.Internal, "failed to create order: %v", err)
 	}
 
-	return &orders_pb.OrderResponse{
-		OrderId:     order.ID(),
-		Status:      order.Status().String(),
-		FinalPrice:  order.FinalPrice().InexactFloat64(),
-		OrderNumber: order.OrderNumber(),
-	}, nil
+	return h.mapOrder(order), nil
 }
 
 func (h *OrdersHandler) PayOrder(ctx context.Context, req *orders_pb.PayOrderRequest) (*orders_pb.OrderResponse, error) {
@@ -80,12 +75,7 @@ func (h *OrdersHandler) GetOrder(ctx context.Context, req *orders_pb.GetOrderReq
 		return nil, status.Errorf(codes.NotFound, "order not found: %v", err)
 	}
 
-	return &orders_pb.OrderResponse{
-		OrderId:     order.ID(),
-		Status:      order.Status().String(),
-		FinalPrice:  order.FinalPrice().InexactFloat64(),
-		OrderNumber: order.OrderNumber(),
-	}, nil
+	return h.mapOrder(order), nil
 }
 
 func (h *OrdersHandler) ListOrders(ctx context.Context, req *orders_pb.ListOrdersRequest) (*orders_pb.ListOrdersResponse, error) {
@@ -96,13 +86,59 @@ func (h *OrdersHandler) ListOrders(ctx context.Context, req *orders_pb.ListOrder
 
 	pbOrders := make([]*orders_pb.OrderResponse, len(orderList))
 	for i, o := range orderList {
-		pbOrders[i] = &orders_pb.OrderResponse{
-			OrderId:     o.ID(),
-			Status:      o.Status().String(),
-			FinalPrice:  o.FinalPrice().InexactFloat64(),
-			OrderNumber: o.OrderNumber(),
-		}
+		pbOrders[i] = h.mapOrder(o)
 	}
 
 	return &orders_pb.ListOrdersResponse{Orders: pbOrders}, nil
+}
+
+func (h *OrdersHandler) ListAllOrders(ctx context.Context, _ *orders_pb.ListAllOrdersRequest) (*orders_pb.ListOrdersResponse, error) {
+	orderList, err := h.uc.ListAllOrders(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list all orders: %v", err)
+	}
+
+	pbOrders := make([]*orders_pb.OrderResponse, len(orderList))
+	for i, o := range orderList {
+		pbOrders[i] = h.mapOrder(o)
+	}
+
+	return &orders_pb.ListOrdersResponse{Orders: pbOrders}, nil
+}
+
+func (h *OrdersHandler) UpdateOrderStatus(ctx context.Context, req *orders_pb.UpdateOrderStatusRequest) (*orders_pb.OrderResponse, error) {
+	order, err := h.uc.UpdateStatus(ctx, req.OrderId, req.Status)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
+	}
+
+	return h.mapOrder(order), nil
+}
+
+func (h *OrdersHandler) mapOrder(o *orders.Order) *orders_pb.OrderResponse {
+	addr := o.Address()
+	pbItems := make([]*orders_pb.OrderItem, len(o.Items()))
+	for i, item := range o.Items() {
+		pbItems[i] = &orders_pb.OrderItem{
+			ProductId:   item.ProductID(),
+			ProductName: item.ProductName(),
+			Quantity:    int32(item.Quantity()),
+		}
+	}
+
+	return &orders_pb.OrderResponse{
+		OrderId:     o.ID(),
+		Status:      o.Status().String(),
+		FinalPrice:  o.FinalPrice().InexactFloat64(),
+		OrderNumber: o.OrderNumber(),
+		Address: &orders_pb.Address{
+			City:      addr.City,
+			Street:    addr.Street,
+			House:     addr.House,
+			Apartment: addr.Apartment,
+			Floor:     addr.Floor,
+			Comment:   addr.Comment,
+		},
+		Items: pbItems,
+	}
 }

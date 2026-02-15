@@ -61,6 +61,27 @@ func (s OrderStatus) String() string {
 	}
 }
 
+func ParseStatus(s string) (OrderStatus, error) {
+	switch s {
+	case "created":
+		return StatusCreated, nil
+	case "paid":
+		return StatusPaid, nil
+	case "cooking":
+		return StatusCooking, nil
+	case "ready":
+		return StatusReady, nil
+	case "delivering":
+		return StatusDelivering, nil
+	case "completed":
+		return StatusCompleted, nil
+	case "canceled":
+		return StatusCanceled, nil
+	default:
+		return -1, fmt.Errorf("unknown status: %s", s)
+	}
+}
+
 // --- Entities ---
 
 type OrderItem struct {
@@ -302,6 +323,7 @@ type OrderRepository interface {
 	Save(ctx context.Context, o *Order) error
 	FindByID(ctx context.Context, id string) (*Order, error)
 	FindByCustomerID(ctx context.Context, customerID string) ([]*Order, error)
+	FindAll(ctx context.Context) ([]*Order, error)
 }
 
 type ProductInfo struct {

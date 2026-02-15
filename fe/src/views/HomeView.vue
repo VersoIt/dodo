@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { Plus } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
+import { useAuthStore } from '../store/auth'
 import { inject } from 'vue'
 
+const router = useRouter()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 interface Product {
@@ -24,6 +28,14 @@ const selectedCategory = ref('All')
 const menuSection = ref<HTMLElement | null>(null)
 
 const categories = ['All', 'Classic', 'Premium', 'Veggie']
+
+const checkRoleAndRedirect = () => {
+  if (authStore.user?.role === 'chef') {
+    router.replace('/kitchen')
+  } else if (authStore.user?.role === 'courier') {
+    router.replace('/logistics')
+  }
+}
 
 const filteredProducts = computed(() => {
   if (selectedCategory.value === 'All') return products.value
@@ -59,6 +71,7 @@ const fetchProducts = async () => {
 }
 
 onMounted(() => {
+  checkRoleAndRedirect()
   fetchProducts()
 })
 </script>

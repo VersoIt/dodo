@@ -208,3 +208,35 @@ func (r *orderRepo) FindByCustomerID(ctx context.Context, customerID string) ([]
 	
 	return result, nil
 }
+
+func (r *orderRepo) FindAll(ctx context.Context) ([]*orders.Order, error) {
+	sqlStr, args, err := r.sb.Select("id").
+		From("orders").
+		OrderBy("created_at DESC").
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.Query(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*orders.Order
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+
+		order, err := r.FindByID(ctx, id)
+		if err != nil {
+			continue
+		}
+		result = append(result, order)
+	}
+
+	return result, nil
+}

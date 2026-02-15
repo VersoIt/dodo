@@ -39,6 +39,23 @@ func (r Role) String() string {
 	}
 }
 
+func ParseRole(s string) Role {
+	switch s {
+	case "admin":
+		return RoleAdmin
+	case "manager":
+		return RoleManager
+	case "chef":
+		return RoleChef
+	case "courier":
+		return RoleCourier
+	case "client":
+		return RoleClient
+	default:
+		return RoleClient
+	}
+}
+
 // --- Errors ---
 
 var (

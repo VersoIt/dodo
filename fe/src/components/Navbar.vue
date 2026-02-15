@@ -20,6 +20,15 @@ const navLinks = [
   { name: 'About', path: '/about' },
 ]
 
+const roleLinks = {
+  chef: { name: 'Kitchen', path: '/kitchen' },
+  courier: { name: 'Logistics', path: '/logistics' },
+  admin: [
+    { name: 'Kitchen', path: '/kitchen' },
+    { name: 'Logistics', path: '/logistics' }
+  ]
+}
+
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
@@ -40,6 +49,14 @@ const toggleMenu = () => {
         <router-link v-for="link in navLinks" :key="link.path" :to="link.path" class="btn btn-ghost btn-sm rounded-lg">
           {{ link.name }}
         </router-link>
+        
+        <!-- Role specific links -->
+        <template v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'admin'">
+          <router-link to="/kitchen" class="btn btn-ghost btn-sm rounded-lg text-secondary font-bold">Kitchen</router-link>
+        </template>
+        <template v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'admin'">
+          <router-link to="/logistics" class="btn btn-ghost btn-sm rounded-lg text-accent font-bold">Logistics</router-link>
+        </template>
       </div>
 
       <div class="flex-none flex items-center gap-3">
@@ -95,6 +112,12 @@ const toggleMenu = () => {
     <ul class="menu w-full gap-2">
       <li v-for="link in navLinks" :key="link.path">
         <router-link :to="link.path" @click="isMenuOpen = false" class="py-3 font-semibold">{{ link.name }}</router-link>
+      </li>
+      <li v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'admin'">
+        <router-link to="/kitchen" @click="isMenuOpen = false" class="py-3 font-bold text-secondary">Kitchen Dashboard</router-link>
+      </li>
+      <li v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'admin'">
+        <router-link to="/logistics" @click="isMenuOpen = false" class="py-3 font-bold text-accent">Logistics Dashboard</router-link>
       </li>
     </ul>
   </div>

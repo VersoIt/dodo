@@ -35,11 +35,36 @@ const router = createRouter({
       component: () => import('../views/ProfileView.vue')
     },
     {
+      path: '/kitchen',
+      name: 'kitchen',
+      component: () => import('../views/KitchenView.vue'),
+      meta: { requiresAuth: true, role: 'chef' }
+    },
+    {
+      path: '/logistics',
+      name: 'logistics',
+      component: () => import('../views/LogisticsView.vue'),
+      meta: { requiresAuth: true, role: 'courier' }
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue')
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const isAuthenticated = !!localStorage.getItem('token')
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next({ name: 'login' })
+  } else if (to.meta.role && user.role !== to.meta.role && user.role !== 'admin') {
+    next({ name: 'home' })
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -34,9 +34,14 @@ func (h *AuthHandler) Register(server *grpc.Server) {
 }
 
 func (h *AuthHandler) CreateUser(ctx context.Context, req *auth_pb.CreateUserRequest) (*auth_pb.UserResponse, error) {
-	h.log.Info("Creating user", slog.String("email", req.Email))
+	h.log.Info("Creating user", slog.String("email", req.Email), slog.String("role", req.Role))
 	
-	user, err := h.uc.Register(ctx, req.Email, req.Password, req.Name, auth.RoleClient)
+	role := auth.RoleClient
+	if req.Role != "" {
+		role = auth.ParseRole(req.Role)
+	}
+
+	user, err := h.uc.Register(ctx, req.Email, req.Password, req.Name, role)
 	if err != nil {
 		h.log.Error("Failed to register user", slog.String("email", req.Email), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)

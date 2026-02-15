@@ -7,6 +7,15 @@ service OrderService {
   rpc PayOrder(PayOrderRequest) returns (OrderResponse);
   rpc GetOrder(GetOrderRequest) returns (OrderResponse);
   rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+  rpc ListAllOrders(ListAllOrdersRequest) returns (ListOrdersResponse);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
+}
+
+message ListAllOrdersRequest {}
+
+message UpdateOrderStatusRequest {
+  string order_id = 1;
+  string status = 2;
 }
 
 message GetOrderRequest {
@@ -24,6 +33,10 @@ message ListOrdersResponse {
 message Address {
   string city = 1;
   string street = 2;
+  string house = 3;
+  string apartment = 4;
+  string floor = 5;
+  string comment = 6;
 }
 
 message OrderItem {
@@ -47,4 +60,6 @@ message OrderResponse {
   string status = 2;
   double final_price = 3;
   string order_number = 4;
+  Address address = 5;
+  repeated OrderItem items = 6;
 }

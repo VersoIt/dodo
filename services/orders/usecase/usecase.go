@@ -105,7 +105,7 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 		return fmt.Errorf("failed to update order status after payment: %w", err)
 	}
 
-	// Report to analytics (Best effort or should it be transactional? 
+	// Report to analytics (Best effort or should it be transactional?
 	// In a real senior scenario we'd use Outbox pattern, but here we'll do a direct call for now)
 	if err := uc.analytics.ReportSale(ctx, "019c53ee-74af-72b9-afe6-103c1466ae0e", order.FinalPrice().InexactFloat64()); err != nil {
 		// We log it but don't fail the payment as it's already saved in DB
@@ -134,4 +134,47 @@ func (uc *OrderUseCase) ListOrders(ctx context.Context, customerID string) ([]*o
 	}
 
 	return uc.repo.FindByCustomerID(ctx, customerID)
+}
+
+func (uc *OrderUseCase) ListAllOrders(ctx context.Context) ([]*orders.Order, error) {
+	return uc.repo.FindAll(ctx)
+}
+
+func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, statusStr string) (*orders.Order, error) {
+	if orderID == "" {
+		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
+	}
+
+	status, err := orders.ParseStatus(statusStr)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, err)
+	}
+
+	order, err := uc.repo.FindByID(ctx, orderID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find order %s: %w", orderID, err)
+	}
+
+	switch status {
+	case orders.StatusCooking:
+		err = order.SendToKitchen()
+	case orders.StatusReady:
+		err = order.MarkReady()
+	case orders.StatusDelivering:
+		err = order.ShipToDelivery()
+	case orders.StatusCompleted:
+		err = order.CompleteDelivery()
+	default:
+		return nil, fmt.Errorf("%w: direct transition to %s not allowed", ErrInvalidTransition, statusStr)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := uc.repo.Save(ctx, order); err != nil {
+		return nil, fmt.Errorf("failed to save order %s: %w", orderID, err)
+	}
+
+	return order, nil
 }

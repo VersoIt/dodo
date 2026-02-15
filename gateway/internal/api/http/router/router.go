@@ -44,15 +44,17 @@ func SetupRoutes(
 	orders := protected.Group("/orders")
 	orders.Post("/", orderHandler.CreateOrder)
 	orders.Get("/my", orderHandler.ListOrders)
+	orders.Get("/all", middleware.RequireRole("chef", "courier", "admin", "manager"), orderHandler.ListAllOrders)
 	orders.Get("/:id", orderHandler.GetOrderStatus)
+	orders.Patch("/:id/status", middleware.RequireRole("chef", "courier", "admin", "manager"), orderHandler.UpdateOrderStatus)
 	orders.Post("/:id/pay", orderHandler.PayOrder)
 
 	// Kitchen (Internal flow for cooks)
-	kitchen := protected.Group("/kitchen")
+	kitchen := protected.Group("/kitchen", middleware.RequireRole("chef", "admin"))
 	kitchen.Patch("/tickets/:id/status", kitchenHandler.UpdateStatus)
 	
 	// Logistics (Courier flow)
-	logistics := protected.Group("/logistics")
+	logistics := protected.Group("/logistics", middleware.RequireRole("courier", "admin"))
 	logistics.Post("/orders/:id/assign", logisticsHandler.AssignCourier)
 	logistics.Post("/orders/:id/location", logisticsHandler.UpdateLocation)
 

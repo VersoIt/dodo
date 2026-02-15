@@ -50,6 +50,32 @@ func NewAuthMiddleware() fiber.Handler {
 			c.Request().Header.Set("X-User-ID", userID)
 		}
 
+		role, ok := claims["role"].(string)
+		if ok {
+			c.Locals("role", role)
+		}
+
 		return c.Next()
+	}
+}
+
+func RequireRole(roles ...string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		userRole, ok := c.Locals("role").(string)
+		if !ok {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "Access denied: role not found",
+			})
+		}
+
+		for _, role := range roles {
+			if userRole == role {
+				return c.Next()
+			}
+		}
+
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": "Access denied: insufficient permissions",
+		})
 	}
 }

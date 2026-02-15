@@ -116,3 +116,44 @@ func (h *OrderHandler) ListOrders(c *fiber.Ctx) error {
 
 	return SuccessResponse(c, resp.Orders)
 }
+
+func (h *OrderHandler) ListAllOrders(c *fiber.Ctx) error {
+	h.log.Info("Listing all orders (admin/internal)")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.ListAllOrders(ctx, &orders_pb.ListAllOrdersRequest{})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to list all orders")
+	}
+
+	return SuccessResponse(c, resp.Orders)
+}
+
+func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
+	id := c.Params("id")
+	
+	type Request struct {
+		Status string `json:"status"`
+	}
+	req := new(Request)
+	if err := c.BodyParser(req); err != nil {
+		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request")
+	}
+
+	h.log.Info("Updating order status", slog.String("order_id", id), slog.String("status", req.Status))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.UpdateOrderStatus(ctx, &orders_pb.UpdateOrderStatusRequest{
+		OrderId: id,
+		Status:  req.Status,
+	})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to update status")
+	}
+
+	return SuccessResponse(c, resp)
+}

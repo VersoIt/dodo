@@ -8,6 +8,7 @@ const router = useRouter()
 const name = ref('')
 const email = ref('')
 const password = ref('')
+const role = ref('client')
 const loading = ref(false)
 const error = ref('')
 
@@ -18,7 +19,8 @@ const handleRegister = async () => {
     const response = await axios.post('/api/v1/auth/register', {
       name: name.value,
       email: email.value,
-      password: password.value
+      password: password.value,
+      role: role.value
     })
     
     if (response.data.success) {
@@ -104,6 +106,17 @@ const handleRegister = async () => {
                 required 
               />
             </div>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">I am a...</span>
+            </label>
+            <select v-model="role" class="select select-bordered w-full">
+              <option value="client">Client (Hungry Customer)</option>
+              <option value="chef">Chef (Master Pizza Maker)</option>
+              <option value="courier">Courier (Fast Delivery)</option>
+            </select>
           </div>
 
           <div class="card-actions mt-6">
