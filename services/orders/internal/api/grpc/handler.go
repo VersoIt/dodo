@@ -27,37 +27,64 @@ func (h *OrdersHandler) Register(server *grpc.Server) {
 }
 
 func (h *OrdersHandler) CreateOrder(ctx context.Context, req *orders_pb.CreateOrderRequest) (*orders_pb.OrderResponse, error) {
+	h.log.Info("Creating new order", slog.String("customer_id", req.CustomerId))
 	items := make([]usecase.OrderItemInput, len(req.Items))
 	for i, item := range req.Items {
 		items[i] = usecase.OrderItemInput{ProductID: item.ProductId, Quantity: int(item.Quantity), SizeMult: 1.0}
 	}
+	
+	addr := orders.DeliveryAddress{
+		City:      req.Address.City,
+		Street:    req.Address.Street,
+		House:     req.Address.House,
+		Apartment: req.Address.Apartment,
+		Floor:     req.Address.Floor,
+		Entrance:  req.Address.Entrance,
+		Comment:   req.Address.Comment,
+	}
+
 	order, err := h.uc.CreateOrder(ctx, usecase.CreateOrderInput{
 		CustomerID: req.CustomerId,
-		Address: orders.DeliveryAddress{City: req.Address.City, Street: req.Address.Street, House: req.Address.House, Apartment: req.Address.Apartment, Floor: req.Address.Floor, Entrance: req.Address.Entrance, Comment: req.Address.Comment},
-		Items: items,
-		PromoCode: req.PromoCode,
+		Address:    addr,
+		Items:      items,
+		PromoCode:  req.PromoCode,
 	})
-	if err != nil { return nil, status.Errorf(codes.Internal, "failed to create order: %v", err) }
+	if err != nil {
+		h.log.Error("failed to create order", slog.Any("error", err))
+		return nil, status.Errorf(codes.Internal, "failed to create order: %v", err)
+	}
 	return h.mapOrder(order), nil
 }
 
 func (h *OrdersHandler) GetOrder(ctx context.Context, req *orders_pb.GetOrderRequest) (*orders_pb.OrderResponse, error) {
 	order, err := h.uc.GetOrder(ctx, req.OrderId)
-	if err != nil { return nil, status.Errorf(codes.NotFound, "order not found") }
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "order not found")
+	}
 	return h.mapOrder(order), nil
 }
 
 func (h *OrdersHandler) ListOrders(ctx context.Context, req *orders_pb.ListOrdersRequest) (*orders_pb.ListOrdersResponse, error) {
-	orderList, _ := h.uc.ListOrders(ctx, req.CustomerId)
+	orderList, err := h.uc.ListOrders(ctx, req.CustomerId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list orders")
+	}
 	pbOrders := make([]*orders_pb.OrderResponse, len(orderList))
-	for i, o := range orderList { pbOrders[i] = h.mapOrder(o) }
+	for i, o := range orderList {
+		pbOrders[i] = h.mapOrder(o)
+	}
 	return &orders_pb.ListOrdersResponse{Orders: pbOrders}, nil
 }
 
 func (h *OrdersHandler) ListAllOrders(ctx context.Context, _ *orders_pb.ListAllOrdersRequest) (*orders_pb.ListOrdersResponse, error) {
-	orderList, _ := h.uc.ListAllOrders(ctx)
+	orderList, err := h.uc.ListAllOrders(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list all orders")
+	}
 	pbOrders := make([]*orders_pb.OrderResponse, len(orderList))
-	for i, o := range orderList { pbOrders[i] = h.mapOrder(o) }
+	for i, o := range orderList {
+		pbOrders[i] = h.mapOrder(o)
+	}
 	return &orders_pb.ListOrdersResponse{Orders: pbOrders}, nil
 }
 

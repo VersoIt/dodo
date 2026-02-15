@@ -7,6 +7,8 @@ import { ordersApi } from '../api'
 import { formatPrice, handleImageError } from '../utils/format'
 import AppModal from '../components/shared/AppModal.vue'
 
+import type { PromoCode } from '../types'
+
 const cartStore = useCartStore()
 const router = useRouter()
 const addToast = inject('addToast') as (msg: string, type?: any) => void
@@ -17,7 +19,7 @@ const showPaymentModal = ref(false)
 const createdOrderId = ref<string | null>(null)
 const promoCode = ref('')
 const promoApplied = ref(false)
-const promoData = ref<any>(null)
+const promoData = ref<PromoCode | null>(null)
 
 const address = ref({ street: '', house: '', apartment: '', floor: '', entrance: '', comment: '' })
 
@@ -35,7 +37,7 @@ const applyPromo = async () => {
   if (!promoCode.value) return
   try {
     const res = await ordersApi.checkPromoCode(promoCode.value.toUpperCase())
-    if (res.success) {
+    if (res.success && res.data) {
       promoData.value = res.data
       promoApplied.value = true
       addToast(`Промокод применен! Скидка ${promoData.value.amount}${promoData.value.type === 'percent' ? '%' : ' ₽'}`, 'success')
@@ -56,12 +58,12 @@ const handleCheckout = async () => {
       address: { city: 'Пицца-Сити', ...address.value },
       promo_code: promoApplied.value ? promoCode.value.toUpperCase() : ''
     })
-    if (res.success) {
+    if (res.success && res.data) {
       createdOrderId.value = res.data.order_id
       showPaymentModal.value = true
     }
   } catch (error: any) {
-    addToast(error.response?.data?.error || 'Ошибка при оформлении', 'error')
+    addToast(error.message || 'Ошибка при оформлении', 'error')
   } finally {
     isPlacingOrder.value = false
   }

@@ -13,12 +13,12 @@ const isEditing = ref(false)
 const orders = ref<any[]>([])
 const loadingOrders = ref(false)
 
-const editName = ref('')
+const editFullName = ref('')
 const editPhone = ref('')
 const isSaving = ref(false)
 
 const startEditing = () => {
-  editName.value = authStore.user?.name || ''
+  editFullName.value = authStore.user?.full_name || ''
   editPhone.value = authStore.user?.phone || ''
   isEditing.value = true
 }
@@ -26,9 +26,17 @@ const startEditing = () => {
 const saveProfile = async () => {
   try {
     isSaving.value = true
-    const res = await authApi.updateProfile({ name: editName.value, phone: editPhone.value })
-    if (res.success) { authStore.user = res.data; isEditing.value = false; addToast('Профиль обновлен!', 'success') }
-  } catch (err) { addToast('Не удалось обновить профиль', 'error') } finally { isSaving.value = false }
+    const res = await authApi.updateProfile({ full_name: editFullName.value, phone: editPhone.value })
+    if (res.success && res.data) {
+      authStore.user = res.data
+      isEditing.value = false
+      addToast('Профиль обновлен!', 'success')
+    }
+  } catch (err) {
+    addToast('Не удалось обновить профиль', 'error')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 const fetchOrders = async () => {
@@ -57,19 +65,19 @@ onMounted(async () => { await authStore.fetchMe() })
           <div class="card-body">
             <div class="flex items-center justify-between mb-8">
               <div class="flex items-center gap-6">
-                <div class="avatar placeholder"><div class="bg-primary text-primary-content rounded-2xl w-20 shadow-lg"><span class="text-3xl font-bold uppercase">{{ authStore.user?.name?.[0] || 'U' }}</span></div></div>
-                <div><h1 class="text-3xl font-bold tracking-tight">{{ authStore.user?.name || 'Любитель пиццы' }}</h1><p class="text-base-content/60">{{ authStore.user?.email }}</p></div>
+                <div class="avatar placeholder"><div class="bg-primary text-primary-content rounded-2xl w-20 shadow-lg"><span class="text-3xl font-bold uppercase">{{ authStore.user?.full_name?.[0] || 'U' }}</span></div></div>
+                <div><h1 class="text-3xl font-bold tracking-tight">{{ authStore.user?.full_name || 'Любитель пиццы' }}</h1><p class="text-base-content/60">{{ authStore.user?.email }}</p></div>
               </div>
               <button v-if="!isEditing" @click="startEditing" class="btn btn-outline btn-sm rounded-lg">Изменить</button>
             </div>
             <div v-if="!isEditing" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1"><p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2"><User class="w-3 h-3" /> Имя</p><p class="font-bold text-lg">{{ authStore.user?.name || 'Не указано' }}</p></div>
+              <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1"><p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2"><User class="w-3 h-3" /> Имя</p><p class="font-bold text-lg">{{ authStore.user?.full_name || 'Не указано' }}</p></div>
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1"><p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2"><Phone class="w-3 h-3" /> Телефон</p><p class="font-bold text-lg">{{ authStore.user?.phone || 'Не указано' }}</p></div>
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1"><p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2"><Mail class="w-3 h-3" /> Email</p><p class="font-bold text-lg">{{ authStore.user?.email }}</p></div>
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1"><p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2"><Shield class="w-3 h-3" /> Роль</p><div class="badge badge-secondary font-bold uppercase text-[10px]">{{ authStore.user?.role || 'client' }}</div></div>
             </div>
             <div v-else class="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div class="form-control w-full"><label class="label"><span class="label-text font-bold">Полное имя</span></label><input v-model="editName" type="text" class="input input-bordered w-full rounded-xl" placeholder="Иван Иванов" /></div>
+              <div class="form-control w-full"><label class="label"><span class="label-text font-bold">Полное имя</span></label><input v-model="editFullName" type="text" class="input input-bordered w-full rounded-xl" placeholder="Иван Иванов" /></div>
               <div class="form-control w-full"><label class="label"><span class="label-text font-bold">Номер телефона</span></label><input v-model="editPhone" type="text" class="input input-bordered w-full rounded-xl" placeholder="+7 999 000 00 00" /></div>
               <div class="flex gap-2 justify-end mt-6"><button @click="isEditing = false" class="btn btn-ghost rounded-lg gap-2"><X class="w-4 h-4" /> Отмена</button><button @click="saveProfile" class="btn btn-primary rounded-lg gap-2" :disabled="isSaving"><span v-if="isSaving" class="loading loading-spinner"></span><Save class="w-4 h-4" /> Сохранить</button></div>
             </div>

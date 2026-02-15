@@ -4,6 +4,8 @@ go 1.24.0
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2 v2.0.2
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/shopspring/decimal v1.4.0

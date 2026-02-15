@@ -3,30 +3,19 @@ import { ref, onMounted, inject } from 'vue'
 import { BarChart3, Tag, TrendingUp, Users, DollarSign, Plus, Trash2 } from 'lucide-vue-next'
 import { formatPrice } from '../utils/format'
 import { ordersApi } from '../api'
-import AppModal from '../components/shared/AppModal.vue'
+import type { PromoCode, ProductStat, Analytics } from '../types'
 
-interface ProductStat {
-  name: string
-  count: number
-  revenue: number
-}
-
-interface Stats {
-  total_revenue: number
-  orders_count: number
-  avg_check: number
-  top_products: ProductStat[]
-}
+interface Stats extends Analytics {}
 
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const activeTab = ref('kpi')
 const loading = ref(true)
 const stats = ref<Stats>({ total_revenue: 0, orders_count: 0, avg_check: 0, top_products: [] })
-const promos = ref<any[]>([])
+const promos = ref<PromoCode[]>([])
 
 const showAddPromoModal = ref(false)
-const newPromo = ref({ code: '', amount: 0, type: 'percent' })
+const newPromo = ref<{ code: string, amount: number, type: 'percent' | 'fixed' }>({ code: '', amount: 0, type: 'percent' })
 
 const fetchData = async () => {
   try {
@@ -35,8 +24,8 @@ const fetchData = async () => {
       ordersApi.getAnalytics(),
       ordersApi.listPromos()
     ])
-    if (statsRes.success) stats.value = statsRes.data
-    if (promosRes.success) promos.value = promosRes.data || []
+    if (statsRes.success && statsRes.data) stats.value = statsRes.data
+    if (promosRes.success && promosRes.data) promos.value = promosRes.data
   } catch (err) { console.error('Failed to load manager data') } finally { loading.value = false }
 }
 

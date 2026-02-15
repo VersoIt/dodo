@@ -30,7 +30,7 @@ func (h *CatalogHandler) ListProducts(c *fiber.Ctx) error {
 		return HandleGrpcError(c, h.log, err, "failed to list products")
 	}
 
-	return SuccessResponse(c, resp)
+	return SuccessResponse(c, resp.Products)
 }
 
 func (h *CatalogHandler) GetProduct(c *fiber.Ctx) error {

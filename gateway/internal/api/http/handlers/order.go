@@ -19,24 +19,62 @@ func NewOrderHandler(log *slog.Logger, client orders_pb.OrderServiceClient) *Ord
 }
 
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(string)
+	userID, ok := c.Locals("user_id").(string)
+	if !ok {
+		return ErrorResponse(c, fiber.StatusUnauthorized, "unauthorized")
+	}
+
 	var req struct {
-		Items []struct { ProductID string `json:"product_id"`; Quantity int `json:"quantity"` } `json:"items"`
-		Address struct { City string `json:"city"`; Street string `json:"street"`; House string `json:"house"`; Apartment string `json:"apartment"`; Floor string `json:"floor"`; Entrance string `json:"entrance"`; Comment string `json:"comment"` } `json:"address"`
+		Items []struct {
+			ProductID string `json:"product_id"`
+			Quantity  int    `json:"quantity"`
+		} `json:"items"`
+		Address struct {
+			City      string `json:"city"`
+			Street    string `json:"street"`
+			House     string `json:"house"`
+			Apartment string `json:"apartment"`
+			Floor     string `json:"floor"`
+			Entrance  string `json:"entrance"`
+			Comment   string `json:"comment"`
+		} `json:"address"`
 		PromoCode string `json:"promo_code"`
 	}
-	if err := c.BodyParser(&req); err != nil { return ErrorResponse(c, fiber.StatusBadRequest, "invalid request") }
+
+	if err := c.BodyParser(&req); err != nil {
+		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request body")
+	}
+
 	pbItems := make([]*orders_pb.OrderItem, len(req.Items))
-	for i, it := range req.Items { pbItems[i] = &orders_pb.OrderItem{ProductId: it.ProductID, Quantity: int32(it.Quantity)} }
-	
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	for i, it := range req.Items {
+		pbItems[i] = &orders_pb.OrderItem{
+			ProductId: it.ProductID,
+			Quantity:  int32(it.Quantity),
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
 	defer cancel()
+
 	resp, err := h.client.CreateOrder(ctx, &orders_pb.CreateOrderRequest{
-		CustomerId: userID, Items: pbItems,
-		Address: &orders_pb.Address{City: req.Address.City, Street: req.Address.Street, House: req.Address.House, Apartment: req.Address.Apartment, Floor: req.Address.Floor, Entrance: req.Address.Entrance, Comment: req.Address.Comment},
+		CustomerId: userID,
+		Items:      pbItems,
+		Address: &orders_pb.Address{
+			City:      req.Address.City,
+			Street:    req.Address.Street,
+			House:     req.Address.House,
+			Apartment: req.Address.Apartment,
+			Floor:     req.Address.Floor,
+			Entrance:  req.Address.Entrance,
+			Comment:   req.Address.Comment,
+		},
 		PromoCode: req.PromoCode,
 	})
-	if err != nil { return HandleGrpcError(c, h.log, err, "failed to create order") }
+
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to create order")
+	}
+
 	return SuccessResponse(c, resp)
 }
 

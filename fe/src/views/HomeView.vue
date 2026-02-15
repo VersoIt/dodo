@@ -8,11 +8,13 @@ import { CATEGORIES, CATEGORY_MAP, HERO_IMAGE } from '../constants'
 import { formatPrice, handleImageError } from '../utils/format'
 import AppModal from '../components/shared/AppModal.vue'
 
+import type { Product } from '../types'
+
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
-const products = ref<any[]>([])
+const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const selectedCategory = ref('Все')
@@ -28,26 +30,36 @@ const productForm = ref({ name: '', description: '', price: 0, imageUrl: '', cat
 
 const filteredProducts = computed(() => {
   if (selectedCategory.value === 'Все') return products.value
-  return products.value.filter(p => p.category === selectedCategory.value)
+  return products.value.filter(p => {
+    const categoryName = CATEGORIES[p.category_id + 1] || 'Классика'
+    return categoryName === selectedCategory.value
+  })
 })
 
 const fetchProducts = async () => {
   try {
     loading.value = true
-    const data = await catalogApi.getProducts()
-    const productsData = data.data.products || []
-    products.value = productsData.map((p: any) => ({
-      ...p,
-      imageUrl: p.image_url || HERO_IMAGE,
-      category: CATEGORIES[p.category_id + 1] || 'Классика',
-      isAvailable: p.is_available ?? true
-    }))
+    const res = await catalogApi.getProducts()
+    if (res.success && Array.isArray(res.data)) {
+      products.value = res.data.map((p: any) => ({
+        ...p,
+        base_price: p.price,
+        image_url: p.image_url || HERO_IMAGE,
+        is_available: p.is_available ?? true
+      }))
+    }
   } catch (err) { error.value = 'Не удалось загрузить товары.' } finally { loading.value = false }
 }
 
-const handleAddToCart = (product: any) => {
+const handleAddToCart = (product: Product) => {
   if (!authStore.isAuthenticated) { showAuthModal.value = true; return }
-  cartStore.addToCart(product)
+  // Map internal store format if needed, but for now assuming direct mapping
+  cartStore.addToCart({
+    id: product.id,
+    name: product.name,
+    price: product.base_price,
+    imageUrl: product.image_url
+  })
   addToast(`${product.name} добавлена в корзину!`, 'success')
 }
 
@@ -57,9 +69,16 @@ const openAddModal = () => {
   showAddModal.value = true
 }
 
-const openEditModal = (product: any) => {
+const openEditModal = (product: Product) => {
   isEditing.value = true; editingId.value = product.id
-  productForm.value = { name: product.name, description: product.description, price: product.price, imageUrl: product.imageUrl, categoryId: product.category_id, isAvailable: product.isAvailable }
+  productForm.value = { 
+    name: product.name, 
+    description: product.description, 
+    price: product.base_price, 
+    imageUrl: product.image_url, 
+    categoryId: product.category_id, 
+    isAvailable: product.is_available 
+  }
   showAddModal.value = true
 }
 
@@ -105,15 +124,15 @@ onMounted(fetchProducts)
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div v-for="product in filteredProducts" :key="product.id" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-500 group rounded-[2rem] border border-base-200 overflow-hidden">
           <figure class="relative h-56 overflow-hidden">
-            <img :src="product.imageUrl" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="handleImageError" />
-            <div class="absolute top-4 right-4"><span class="badge badge-primary badge-lg font-black shadow-lg">{{ formatPrice(product.price) }}</span></div>
-            <div class="absolute top-4 left-4 flex flex-col gap-2"><span class="badge badge-ghost bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase border-none px-3 py-3">{{ product.category }}</span><span v-if="!product.isAvailable" class="badge badge-error text-[9px] font-black uppercase px-3 py-3">SOLD OUT</span></div>
+            <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="handleImageError" />
+            <div class="absolute top-4 right-4"><span class="badge badge-primary badge-lg font-black shadow-lg">{{ formatPrice(product.base_price) }}</span></div>
+            <div class="absolute top-4 left-4 flex flex-col gap-2"><span class="badge badge-ghost bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase border-none px-3 py-3">{{ CATEGORIES[product.category_id + 1] || 'Классика' }}</span><span v-if="!product.is_available" class="badge badge-error text-[9px] font-black uppercase px-3 py-3">SOLD OUT</span></div>
           </figure>
           <div class="card-body p-8">
             <h3 class="card-title text-2xl font-black tracking-tight leading-tight">{{ product.name }}</h3>
             <p class="text-sm text-base-content/60 line-clamp-2 mt-2 leading-relaxed">{{ product.description }}</p>
             <div class="card-actions justify-end mt-8">
-              <button v-if="authStore.user?.role !== 'manager'" @click="handleAddToCart(product)" class="btn btn-primary btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-primary/10 h-14" :disabled="!product.isAvailable"><Plus class="w-5 h-5" /> В корзину</button>
+              <button v-if="authStore.user?.role !== 'manager'" @click="handleAddToCart(product)" class="btn btn-primary btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-primary/10 h-14" :disabled="!product.is_available"><Plus class="w-5 h-5" /> В корзину</button>
               <button v-else @click="openEditModal(product)" class="btn btn-outline btn-block btn-secondary rounded-2xl gap-3 font-black uppercase h-14"><FileText class="w-5 h-5" /> Изменить</button>
             </div>
           </div>

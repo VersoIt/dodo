@@ -24,12 +24,15 @@ func ErrorResponse(c *fiber.Ctx, status int, message string) error {
 func HandleGrpcError(c *fiber.Ctx, log *slog.Logger, err error, defaultMsg string) error {
 	st, ok := status.FromError(err)
 	if !ok {
+		log.Error("Non-gRPC Error", "error", err.Error(), "path", c.Path())
 		return ErrorResponse(c, fiber.StatusInternalServerError, defaultMsg)
 	}
 
 	log.Error("gRPC Error",
 		"code", st.Code().String(),
 		"msg", st.Message(),
+		"path", c.Path(),
+		"method", c.Method(),
 		"request_id", c.Get("X-Request-ID"))
 
 	switch st.Code() {
@@ -41,6 +44,8 @@ func HandleGrpcError(c *fiber.Ctx, log *slog.Logger, err error, defaultMsg strin
 		return ErrorResponse(c, fiber.StatusConflict, st.Message())
 	case codes.Unauthenticated:
 		return ErrorResponse(c, fiber.StatusUnauthorized, st.Message())
+	case codes.PermissionDenied:
+		return ErrorResponse(c, fiber.StatusForbidden, "insufficient permissions")
 	case codes.Unavailable:
 		return ErrorResponse(c, fiber.StatusServiceUnavailable, "service temporarily unavailable")
 	default:

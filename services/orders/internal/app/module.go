@@ -17,6 +17,7 @@ import (
 				return context.WithCancel(context.Background())
 			},
 					common.NewPGXPool,
+					common.NewTransactionManager,
 					repository.NewOrderRepository,
 					infrastructure.NewCatalogClient,
 					infrastructure.NewAnalyticsClient,

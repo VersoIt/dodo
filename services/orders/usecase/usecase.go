@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	"github.com/google/uuid"
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/orders"
@@ -20,13 +21,15 @@ var (
 type OrderUseCase struct {
 	repo           orders.OrderRepository
 	catalogService orders.CatalogService
+	tm             trm.Manager
 	log            *slog.Logger
 }
 
-func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, log *slog.Logger) *OrderUseCase {
+func NewOrderUseCase(repo orders.OrderRepository, catalog orders.CatalogService, tm trm.Manager, log *slog.Logger) *OrderUseCase {
 	return &OrderUseCase{
 		repo:           repo,
 		catalogService: catalog,
+		tm:             tm,
 		log:            log,
 	}
 }
@@ -45,36 +48,38 @@ type CreateOrderInput struct {
 }
 
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput) (*orders.Order, error) {
-	order := orders.NewOrder(input.CustomerID, input.Address)
+	var order *orders.Order
+	err := uc.tm.Do(ctx, func(ctx context.Context) error {
+		order = orders.NewOrder(input.CustomerID, input.Address)
 
-	if input.PromoCode != "" {
-		promo, err := uc.repo.FindPromoByCode(ctx, input.PromoCode)
-		if err == nil && promo.IsActive() {
-			// We need to calculate discount. For simplicity, we'll do it after adding items.
+		for _, item := range input.Items {
+			product, err := uc.catalogService.GetProduct(ctx, item.ProductID)
+			if err != nil {
+				return fmt.Errorf("failed to fetch product %s from catalog: %w", item.ProductID, err)
+			}
+
+			if err := order.AddItem(product.ID, product.Name, item.Quantity, product.BasePrice, item.SizeMult, nil); err != nil {
+				return fmt.Errorf("failed to add item to order: %w", err)
+			}
 		}
-	}
 
-	for _, item := range input.Items {
-		product, err := uc.catalogService.GetProduct(ctx, item.ProductID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch product %s from catalog: %w", item.ProductID, err)
+		if input.PromoCode != "" {
+			promo, err := uc.repo.FindPromoByCode(ctx, input.PromoCode)
+			if err == nil && promo.IsActive() {
+				discount := promo.CalculateDiscount(order.FinalPrice())
+				if err := order.ApplyPromoCode(promo.Code(), discount); err != nil {
+					uc.log.Warn("failed to apply promo code", slog.String("code", input.PromoCode), slog.Any("error", err))
+				}
+			}
 		}
 
-		err = order.AddItem(product.ID, product.Name, item.Quantity, product.BasePrice, item.SizeMult, nil)
-		if err != nil {
-			return nil, err
+		if err := uc.repo.Save(ctx, order); err != nil {
+			return fmt.Errorf("failed to save order: %w", err)
 		}
-	}
+		return nil
+	})
 
-	if input.PromoCode != "" {
-		promo, err := uc.repo.FindPromoByCode(ctx, input.PromoCode)
-		if err == nil && promo.IsActive() {
-			discount := promo.CalculateDiscount(order.FinalPrice())
-			_ = order.ApplyPromoCode(promo.Code(), discount)
-		}
-	}
-
-	if err := uc.repo.Save(ctx, order); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
