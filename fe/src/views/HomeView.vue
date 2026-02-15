@@ -245,30 +245,38 @@ onMounted(fetchProducts)
     </section>
 
     <!-- AUTH MODAL (For guests) -->
-    <dialog :class="{ 'modal-open': showAuthModal }" class="modal modal-bottom sm:modal-middle">
-      <div class="modal-box bg-base-100 border-t-4 border-primary shadow-2xl">
-        <div class="flex flex-col items-center text-center py-4">
-          <div class="bg-primary/10 p-4 rounded-full mb-4">
+    <div v-if="showAuthModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto">
+      <!-- Backdrop with blur and fade -->
+      <div 
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
+        @click="showAuthModal = false"
+      ></div>
+      
+      <!-- Modal Content -->
+      <div class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+        <div class="p-8 flex flex-col items-center text-center">
+          <div class="bg-primary/10 p-4 rounded-full mb-6">
             <LogIn class="w-12 h-12 text-primary" />
           </div>
-          <h3 class="font-bold text-2xl mb-2">Login Required</h3>
-          <p class="text-base-content/60 mb-8 px-4">You need to have an account to place orders. Join our pizza-loving community today!</p>
+          <h3 class="font-bold text-3xl mb-2 tracking-tight text-base-content">Login Required</h3>
+          <p class="text-base-content/60 mb-8 px-2 leading-relaxed">
+            You need to have an account to place orders. Join our pizza-loving community today!
+          </p>
           
           <div class="flex flex-col w-full gap-3">
-            <router-link to="/login" class="btn btn-primary btn-block gap-2">
+            <router-link to="/login" class="btn btn-primary btn-lg btn-block gap-2 shadow-lg shadow-primary/20">
               <LogIn class="w-5 h-5" /> Sign In
             </router-link>
-            <router-link to="/register" class="btn btn-outline btn-block">
+            <router-link to="/register" class="btn btn-outline btn-lg btn-block border-2">
               Create New Account
             </router-link>
-            <button @click="showAuthModal = false" class="btn btn-ghost btn-sm mt-2">
+            <button @click="showAuthModal = false" class="btn btn-ghost btn-sm mt-4 opacity-50 hover:opacity-100">
               Maybe later
             </button>
           </div>
         </div>
       </div>
-      <div class="modal-backdrop bg-black/60 backdrop-blur-sm" @click="showAuthModal = false"></div>
-    </dialog>
+    </div>
 
     <!-- FORM MODAL (Add/Edit) -->
     <dialog :class="{ 'modal-open': showAddModal }" class="modal modal-bottom sm:modal-middle transition-all">
