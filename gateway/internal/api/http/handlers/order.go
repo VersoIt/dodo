@@ -48,7 +48,7 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.CreateOrder(ctx, &orders_pb.CreateOrderRequest{
@@ -70,7 +70,7 @@ func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
 	h.log.Info("Paying for order", slog.String("order_id", id))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.PayOrder(ctx, &orders_pb.PayOrderRequest{
@@ -87,7 +87,7 @@ func (h *OrderHandler) GetOrderStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
 	h.log.Info("Checking order status", slog.String("order_id", id))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.GetOrder(ctx, &orders_pb.GetOrderRequest{
@@ -104,7 +104,7 @@ func (h *OrderHandler) ListOrders(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
 	h.log.Info("Listing orders for user", slog.String("user_id", userID))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.ListOrders(ctx, &orders_pb.ListOrdersRequest{
@@ -120,7 +120,7 @@ func (h *OrderHandler) ListOrders(c *fiber.Ctx) error {
 func (h *OrderHandler) ListAllOrders(c *fiber.Ctx) error {
 	h.log.Info("Listing all orders (admin/internal)")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.ListAllOrders(ctx, &orders_pb.ListAllOrdersRequest{})
@@ -144,7 +144,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
 
 	h.log.Info("Updating order status", slog.String("order_id", id), slog.String("status", req.Status))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.UpdateOrderStatus(ctx, &orders_pb.UpdateOrderStatusRequest{

@@ -245,38 +245,54 @@ onMounted(fetchProducts)
     </section>
 
     <!-- AUTH MODAL (For guests) -->
-    <div v-if="showAuthModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto">
-      <!-- Backdrop with blur and fade -->
-      <div 
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
-        @click="showAuthModal = false"
-      ></div>
-      
-      <!-- Modal Content -->
-      <div class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
-        <div class="p-8 flex flex-col items-center text-center">
-          <div class="bg-primary/10 p-4 rounded-full mb-6">
-            <LogIn class="w-12 h-12 text-primary" />
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showAuthModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div 
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          @click="showAuthModal = false"
+        ></div>
+        
+        <!-- Modal Content -->
+        <Transition
+          appear
+          enter-active-class="transition duration-500 delay-100 ease-out"
+          enter-from-class="opacity-0 translate-y-8 scale-95"
+          enter-to-class="opacity-100 translate-y-0 scale-100"
+        >
+          <div class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl overflow-hidden">
+            <div class="p-8 flex flex-col items-center text-center">
+              <div class="bg-primary/10 p-4 rounded-full mb-6">
+                <LogIn class="w-12 h-12 text-primary" />
+              </div>
+              <h3 class="font-bold text-3xl mb-2 tracking-tight">Login Required</h3>
+              <p class="text-base-content/60 mb-8 px-2">
+                You need to have an account to place orders. Join our pizza-loving community today!
+              </p>
+              
+              <div class="flex flex-col w-full gap-3">
+                <router-link to="/login" class="btn btn-primary btn-lg btn-block gap-2 shadow-lg shadow-primary/20">
+                  <LogIn class="w-5 h-5" /> Sign In
+                </router-link>
+                <router-link to="/register" class="btn btn-outline btn-lg btn-block border-2">
+                  Create New Account
+                </router-link>
+                <button @click="showAuthModal = false" class="btn btn-ghost btn-sm mt-4 opacity-50 hover:opacity-100">
+                  Maybe later
+                </button>
+              </div>
+            </div>
           </div>
-          <h3 class="font-bold text-3xl mb-2 tracking-tight text-base-content">Login Required</h3>
-          <p class="text-base-content/60 mb-8 px-2 leading-relaxed">
-            You need to have an account to place orders. Join our pizza-loving community today!
-          </p>
-          
-          <div class="flex flex-col w-full gap-3">
-            <router-link to="/login" class="btn btn-primary btn-lg btn-block gap-2 shadow-lg shadow-primary/20">
-              <LogIn class="w-5 h-5" /> Sign In
-            </router-link>
-            <router-link to="/register" class="btn btn-outline btn-lg btn-block border-2">
-              Create New Account
-            </router-link>
-            <button @click="showAuthModal = false" class="btn btn-ghost btn-sm mt-4 opacity-50 hover:opacity-100">
-              Maybe later
-            </button>
-          </div>
-        </div>
+        </Transition>
       </div>
-    </div>
+    </Transition>
 
     <!-- FORM MODAL (Add/Edit) -->
     <dialog :class="{ 'modal-open': showAddModal }" class="modal modal-bottom sm:modal-middle transition-all">
