@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { Plus, PackagePlus, Image as ImageIcon, Tag, DollarSign, FileText, X, Check } from 'lucide-vue-next'
+import { Plus, PackagePlus, Image as ImageIcon, Tag, DollarSign, FileText, X, Check, LogIn } from 'lucide-vue-next'
 import { useCartStore } from '../store/cart'
 import { useAuthStore } from '../store/auth'
 import { inject } from 'vue'
@@ -29,6 +29,7 @@ const error = ref<string | null>(null)
 const selectedCategory = ref('All')
 const menuSection = ref<HTMLElement | null>(null)
 const showAddModal = ref(false)
+const showAuthModal = ref(false)
 const isSubmitting = ref(false)
 const isEditing = ref(false)
 const editingId = ref<string | null>(null)
@@ -66,7 +67,6 @@ const fetchProducts = async () => {
   try {
     loading.value = true
     const response = await axios.get('/api/v1/catalog/products')
-    // gRPC products use snake_case: category_id, image_url, is_available
     const productsData = response.data.data.products || []
     
     products.value = productsData.map((p: any) => ({
@@ -85,6 +85,15 @@ const fetchProducts = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleAddToCart = (product: Product) => {
+  if (!authStore.isAuthenticated) {
+    showAuthModal.value = true
+    return
+  }
+  cartStore.addToCart(product)
+  addToast(`${product.name} added to cart!`, 'success')
 }
 
 const openAddModal = () => {
@@ -215,7 +224,7 @@ onMounted(fetchProducts)
             <div class="card-actions justify-end mt-auto">
               <button 
                 v-if="authStore.user?.role !== 'manager'"
-                @click="cartStore.addToCart(product); addToast(`${product.name} added to cart!`)" 
+                @click="handleAddToCart(product)" 
                 class="btn btn-primary btn-sm gap-2"
                 :disabled="!product.isAvailable"
               >
@@ -235,7 +244,33 @@ onMounted(fetchProducts)
       </div>
     </section>
 
-    <!-- FORM MODAL -->
+    <!-- AUTH MODAL (For guests) -->
+    <dialog :class="{ 'modal-open': showAuthModal }" class="modal modal-bottom sm:modal-middle">
+      <div class="modal-box bg-base-100 border-t-4 border-primary shadow-2xl">
+        <div class="flex flex-col items-center text-center py-4">
+          <div class="bg-primary/10 p-4 rounded-full mb-4">
+            <LogIn class="w-12 h-12 text-primary" />
+          </div>
+          <h3 class="font-bold text-2xl mb-2">Login Required</h3>
+          <p class="text-base-content/60 mb-8 px-4">You need to have an account to place orders. Join our pizza-loving community today!</p>
+          
+          <div class="flex flex-col w-full gap-3">
+            <router-link to="/login" class="btn btn-primary btn-block gap-2">
+              <LogIn class="w-5 h-5" /> Sign In
+            </router-link>
+            <router-link to="/register" class="btn btn-outline btn-block">
+              Create New Account
+            </router-link>
+            <button @click="showAuthModal = false" class="btn btn-ghost btn-sm mt-2">
+              Maybe later
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-backdrop bg-black/60 backdrop-blur-sm" @click="showAuthModal = false"></div>
+    </dialog>
+
+    <!-- FORM MODAL (Add/Edit) -->
     <dialog :class="{ 'modal-open': showAddModal }" class="modal modal-bottom sm:modal-middle transition-all">
       <div class="modal-box bg-base-100 max-w-2xl border border-base-300 shadow-2xl">
         <div class="flex justify-between items-center mb-6">
