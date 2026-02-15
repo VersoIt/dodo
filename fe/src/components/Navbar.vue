@@ -49,9 +49,9 @@ const handleLogout = () => {
         </template>
       </div>
 
-      <!-- Cart -->
+      <!-- Cart (Hidden for Managers and Staff) -->
       <router-link 
-        v-if="!authStore.isAuthenticated || authStore.user?.role === 'client' || authStore.user?.role === 'manager'" 
+        v-if="!authStore.isAuthenticated || authStore.user?.role === 'client'" 
         to="/cart" 
         class="btn btn-ghost btn-circle relative bg-base-200/50 hover:bg-primary/10 group transition-colors"
       >

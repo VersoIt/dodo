@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, inject, computed, watch } from 'vue'
-import axios from 'axios'
-import { Truck, MapPin, CheckCircle2, Package, User, AlertCircle, Play } from 'lucide-vue-next'
+import { Truck, MapPin, CheckCircle2, Package, User, AlertCircle } from 'lucide-vue-next'
 import { useAuthStore } from '../store/auth'
+import { ordersApi } from '../api'
+import { ORDER_STATUS } from '../constants'
+import { shortId } from '../utils/format'
+import AppModal from '../components/shared/AppModal.vue'
 
 const orders = ref<any[]>([])
 const loading = ref(true)
@@ -12,17 +15,11 @@ const addToast = inject('addToast') as (msg: string, type?: any) => void
 const showConfirmModal = ref(false)
 const pendingAction = ref<{ orderId: string, status: string, title: string, description: string } | null>(null)
 
-const STATUS_READY = 'ready'
-const STATUS_DELIVERING = 'delivering'
-const STATUS_COMPLETED = 'completed'
-
 const fetchLogisticsOrders = async () => {
   try {
     loading.value = true
-    const response = await axios.get('/api/v1/orders/all') 
-    if (response.data.success) {
-      orders.value = response.data.data || []
-    }
+    const res = await ordersApi.getAllOrders()
+    if (res.success) orders.value = res.data || []
   } catch (err) {
     console.error('Failed to fetch orders:', err)
   } finally {
@@ -36,32 +33,31 @@ const filteredOrders = computed(() => {
   
   return orders.value.filter((o: any) => {
     const courierId = o.courier_id || o.courierId
-    const isUnassignedReady = o.status === STATUS_READY && (!courierId || courierId === "")
-    const isMyActiveDelivery = o.status === STATUS_DELIVERING && courierId === myId
+    const isUnassignedReady = o.status === ORDER_STATUS.READY && (!courierId || courierId === "")
+    const isMyActiveDelivery = o.status === ORDER_STATUS.DELIVERING && courierId === myId
     return isUnassignedReady || isMyActiveDelivery
   })
 })
 
 const openConfirm = (order: any, nextStatus: string) => {
-  const isStart = nextStatus === STATUS_DELIVERING
+  const isStart = nextStatus === ORDER_STATUS.DELIVERING
   pendingAction.value = {
     orderId: order.order_id,
     status: nextStatus,
-    title: isStart ? 'Забрать заказ?' : 'Доставлено?',
+    title: isStart ? 'Забрать заказ?' : 'Заказ доставлен?',
     description: isStart 
-      ? `Взять заказ #${order.order_number.split('-').pop()} на доставку?` 
-      : 'Подтвердите, что вы успешно передали заказ клиенту.'
+      ? `Начать доставку заказа #${order.order_number.split('-').pop()}?` 
+      : 'Подтвердите, что вы успешно передали пиццу клиенту.'
   }
   showConfirmModal.value = true
 }
 
 const handleConfirm = async () => {
   if (!pendingAction.value) return
-  
   try {
     const { orderId, status } = pendingAction.value
-    await axios.patch(`/api/v1/orders/${orderId}/status`, { status })
-    addToast(status === STATUS_DELIVERING ? 'Заказ принят в доставку' : 'Заказ доставлен!', 'success')
+    await ordersApi.updateStatus(orderId, status)
+    addToast(status === ORDER_STATUS.DELIVERING ? 'Удачной дороги!' : 'Заказ доставлен!', 'success')
     showConfirmModal.value = false
     pendingAction.value = null
     await fetchLogisticsOrders()
@@ -77,127 +73,106 @@ onMounted(fetchLogisticsOrders)
 
 <template>
   <div class="max-w-6xl mx-auto px-4 py-8">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-      <div class="flex items-center gap-4">
-        <div class="bg-secondary p-4 rounded-[1.5rem] shadow-xl shadow-secondary/20">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+      <div class="flex items-center gap-5">
+        <div class="bg-secondary p-5 rounded-[1.75rem] shadow-2xl shadow-secondary/20 animate-in zoom-in duration-500">
           <Truck class="w-10 h-10 text-secondary-content" />
         </div>
         <div>
-          <h1 class="text-4xl font-black tracking-tighter uppercase italic text-secondary">Логистика</h1>
-          <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em]">Доставка заказов</p>
+          <h1 class="text-5xl font-black tracking-tighter uppercase italic text-secondary">Доставка</h1>
+          <p class="text-base-content/40 font-black uppercase text-[10px] tracking-[0.3em] mt-1 ml-1">Live Logistics Fleet</p>
         </div>
       </div>
-      <div class="flex items-center gap-4 bg-base-100 border border-base-200 p-2 rounded-2xl shadow-sm">
-        <div class="w-10 h-10 rounded-xl bg-base-200 flex items-center justify-center">
-          <User class="w-5 h-5 opacity-40" />
+      <div class="flex items-center gap-4 bg-base-100 border border-base-200 p-2.5 rounded-3xl shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-secondary/5 flex items-center justify-center text-secondary font-black text-xl shadow-inner">
+          {{ authStore.user?.name?.charAt(0).toUpperCase() }}
         </div>
-        <div class="pr-4">
-          <p class="text-[10px] font-black uppercase opacity-30 leading-none mb-1">Курьер</p>
-          <p class="text-sm font-black">{{ authStore.user?.name || 'Загрузка...' }}</p>
+        <div class="pr-6">
+          <p class="text-[9px] font-black uppercase opacity-30 leading-none mb-1.5 tracking-widest">Courier on route</p>
+          <p class="text-sm font-black">{{ authStore.user?.name || 'Loading...' }}</p>
         </div>
       </div>
     </div>
 
-    <div v-if="loading && orders.length === 0" class="flex justify-center py-32">
-      <span class="loading loading-spinner loading-lg text-secondary"></span>
+    <div v-if="loading && orders.length === 0" class="flex justify-center py-40"><span class="loading loading-spinner loading-lg text-secondary"></span></div>
+
+    <div v-else-if="filteredOrders.length === 0" class="text-center py-48 bg-base-100 rounded-[4rem] border-2 border-dashed border-base-300 animate-in fade-in duration-700">
+      <div class="bg-base-200 p-10 rounded-full inline-block mb-8 shadow-inner"><Package class="w-16 h-16 opacity-10" /></div>
+      <h2 class="text-3xl font-black opacity-20 uppercase tracking-tighter italic">Все пиццы доставлены</h2>
+      <p class="text-base-content/30 max-w-xs mx-auto mt-3 font-bold uppercase text-[10px] tracking-widest">Новых заказов пока нет. Ожидайте готовности.</p>
     </div>
 
-    <div v-else-if="filteredOrders.length === 0" class="text-center py-40 bg-base-100 rounded-[3.5rem] border-2 border-dashed border-base-300">
-      <div class="bg-base-200 p-8 rounded-full inline-block mb-6"><Package class="w-12 h-12 opacity-10" /></div>
-      <h2 class="text-2xl font-black opacity-20 uppercase tracking-tighter">Нет заказов</h2>
-      <p class="text-base-content/30 max-w-xs mx-auto mt-2 font-bold uppercase text-[10px] tracking-widest">Ждем, когда кухня закончит готовку</p>
-    </div>
-
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-10">
       <div v-for="order in filteredOrders" :key="order.order_id" 
-        class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden transition-all duration-300"
-        :class="{ 'ring-4 ring-secondary ring-inset': order.status === STATUS_DELIVERING }"
+        class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden transition-all duration-500 hover:shadow-2xl group"
+        :class="{ 'ring-4 ring-secondary ring-inset shadow-secondary/10 scale-[1.01]': order.status === ORDER_STATUS.DELIVERING }"
       >
-        <div class="bg-secondary/5 px-8 py-4 flex justify-between items-center border-b border-secondary/10">
-           <span class="font-black text-secondary uppercase tracking-tighter">#{{ order.order_number.split('-').pop() }}</span>
-           <div class="badge font-black uppercase text-[10px] py-3.5 px-4 rounded-lg border-none" 
-            :class="order.status === STATUS_READY ? 'badge-success text-white' : 'badge-info'">
-            {{ order.status === STATUS_READY ? 'Готов к выдаче' : 'В пути' }}
+        <div class="bg-secondary/5 px-10 py-5 flex justify-between items-center border-b border-secondary/10">
+           <div>
+             <span class="text-2xl font-black text-secondary tracking-tighter italic italic">#{{ order.order_number.split('-').pop() }}</span>
+             <span v-if="order.status === ORDER_STATUS.DELIVERING" class="badge badge-secondary font-black text-[9px] h-5 tracking-widest px-3 ml-3">MY ROUTE</span>
+           </div>
+           <div class="badge font-black uppercase text-[10px] py-4 px-5 rounded-xl border-none shadow-sm" 
+            :class="order.status === ORDER_STATUS.READY ? 'badge-success text-white' : 'badge-info'">
+            {{ order.status === ORDER_STATUS.READY ? 'Готов к выдаче' : 'В пути' }}
            </div>
         </div>
         
-        <div class="card-body p-8">
-          <div class="flex items-start gap-6 mb-8">
-            <div class="bg-error/10 p-5 rounded-[1.5rem] shadow-sm"><MapPin class="w-8 h-8 text-error" /></div>
+        <div class="card-body p-10">
+          <div class="flex items-start gap-8 mb-10">
+            <div class="bg-error/10 p-6 rounded-[2rem] shadow-sm group-hover:scale-110 transition-transform duration-500">
+              <MapPin class="w-10 h-10 text-error" />
+            </div>
             <div class="flex-1">
-              <p class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-2">Адрес доставки</p>
-              <p class="font-black text-2xl leading-tight mb-1">{{ order.address.street }}</p>
-              <p class="text-base-content/60 font-bold tracking-tight">{{ order.address.city }}</p>
-              <div v-if="order.address.house" class="flex gap-3 mt-5">
-                <div class="bg-base-200 px-4 py-2 rounded-xl text-sm font-black">Дом: {{ order.address.house }}</div>
-                <div v-if="order.address.apartment" class="bg-base-200 px-4 py-2 rounded-xl text-sm font-black">Кв: {{ order.address.apartment }}</div>
+              <p class="text-[10px] font-black uppercase tracking-[0.3em] text-base-content/30 mb-2">Target Destination</p>
+              <p class="font-black text-3xl leading-tight mb-2 tracking-tight">{{ order.address.street }}</p>
+              <p class="text-base-content/60 font-bold text-lg">{{ order.address.city }}</p>
+              <div v-if="order.address.house" class="flex flex-wrap gap-4 mt-6">
+                <div class="bg-base-200/50 border border-base-300 px-5 py-3 rounded-2xl text-base font-black">Дом {{ order.address.house }}</div>
+                <div v-if="order.address.apartment" class="bg-base-200/50 border border-base-300 px-5 py-3 rounded-2xl text-base font-black">Кв. {{ order.address.apartment }}</div>
               </div>
             </div>
           </div>
 
-          <div class="divider opacity-20 my-0"></div>
+          <div class="divider opacity-10 my-0"></div>
 
-          <div class="py-8">
-            <p class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-4">Состав заказа</p>
-            <div class="flex flex-wrap gap-2">
-              <span v-for="item in order.items" :key="item.product_id" class="badge badge-lg bg-base-100 border-2 border-base-200 font-black text-xs py-5 px-5 rounded-2xl">
-                <span class="text-secondary mr-2 font-black text-base">x{{ item.quantity }}</span> {{ item.product_name }}
+          <div class="py-10">
+            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-base-content/30 mb-5">Order Content</p>
+            <div class="flex flex-wrap gap-3">
+              <span v-for="item in order.items" :key="item.product_id" class="badge badge-lg bg-base-100 border-2 border-base-200 font-black text-sm py-6 px-6 rounded-[1.25rem] group-hover:border-secondary/20 transition-colors">
+                <span class="text-secondary mr-3 font-black text-xl italic">{{ item.quantity }}x</span> {{ item.product_name }}
               </span>
             </div>
           </div>
 
-          <div class="card-actions">
-            <button 
-              v-if="order.status === STATUS_READY"
-              @click="openConfirm(order, STATUS_DELIVERING)"
-              class="btn btn-secondary btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-secondary/10 h-16 text-lg"
-            >
-              <Truck class="w-6 h-6" /> Забрать заказ
+          <div class="card-actions mt-auto pt-4">
+            <button v-if="order.status === ORDER_STATUS.READY" @click="openConfirm(order, ORDER_STATUS.DELIVERING)" class="btn btn-secondary btn-block h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-secondary/20 text-xl italic transition-all hover:scale-[1.02]">
+              <Truck class="w-8 h-8" /> Принять заказ
             </button>
-            <button 
-              v-if="order.status === STATUS_DELIVERING"
-              @click="openConfirm(order, STATUS_COMPLETED)"
-              class="btn btn-success btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-success/10 h-16 text-lg text-white"
-            >
-              <CheckCircle2 class="w-6 h-6" /> Доставлено
+            <button v-if="order.status === ORDER_STATUS.DELIVERING" @click="openConfirm(order, ORDER_STATUS.COMPLETED)" class="btn btn-success btn-block h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-success/20 text-xl italic transition-all hover:scale-[1.02] text-white">
+              <CheckCircle2 class="w-8 h-8" /> Доставлено
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <Transition name="modal-fade">
-      <div v-if="showConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/80" @click="showConfirmModal = false"></div>
-        <Transition name="modal-zoom" appear>
-          <div class="relative bg-base-100 w-full max-w-sm rounded-[3rem] shadow-2xl border border-base-200 p-10 text-center">
-              <div class="bg-secondary/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 animate-in zoom-in duration-300">
-                <AlertCircle class="w-12 h-12 text-secondary" />
-              </div>
-              <h3 class="font-black text-3xl uppercase tracking-tighter mb-3 leading-none">{{ pendingAction?.title }}</h3>
-              <p class="text-base-content/50 text-sm mb-10 leading-relaxed font-medium px-4">
-                {{ pendingAction?.description }}
-              </p>
-              <div class="flex flex-col gap-3">
-                <button @click="handleConfirm" class="btn btn-secondary btn-lg rounded-2xl h-16 font-black uppercase shadow-xl shadow-secondary/20 tracking-tight">
-                  Подтвердить
-                </button>
-                <button @click="showConfirmModal = false" class="btn btn-ghost btn-lg rounded-2xl font-bold opacity-40">
-                  Отмена
-                </button>
-              </div>
+    <!-- ACTION CONFIRMATION MODAL -->
+    <AppModal :show="showConfirmModal" @close="showConfirmModal = false">
+      <div class="p-12 text-center">
+          <div class="bg-secondary/10 w-28 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-inner">
+            <AlertCircle class="w-14 h-14 text-secondary" />
           </div>
-        </Transition>
+          <h3 class="font-black text-4xl uppercase tracking-tighter mb-4 leading-none italic text-secondary">{{ pendingAction?.title }}</h3>
+          <p class="text-base-content/50 text-base mb-12 leading-relaxed font-bold px-6">
+            {{ pendingAction?.description }}
+          </p>
+          <div class="flex flex-col gap-4">
+            <button @click="handleConfirm" class="btn btn-secondary h-20 rounded-3xl text-xl font-black uppercase shadow-2xl shadow-secondary/20 tracking-tight">Подтвердить</button>
+            <button @click="showConfirmModal = false" class="btn btn-ghost h-16 rounded-2xl font-black uppercase text-[10px] tracking-widest opacity-40">Отмена</button>
+          </div>
       </div>
-    </Transition>
+    </AppModal>
   </div>
 </template>
-
-<style scoped>
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s ease; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
-.modal-zoom-enter-active { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-.modal-zoom-leave-active { transition: all 0.15s ease-in; }
-.modal-zoom-enter-from, .modal-zoom-leave-to { opacity: 0; transform: scale(0.97) translateY(8px); }
-</style>

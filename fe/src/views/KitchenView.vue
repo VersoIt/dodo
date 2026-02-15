@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, inject, computed, watch } from 'vue'
-import axios from 'axios'
 import { ChefHat, Clock, CheckCircle2, Play, User, AlertCircle } from 'lucide-vue-next'
 import { useAuthStore } from '../store/auth'
+import { ordersApi } from '../api'
+import { ORDER_STATUS } from '../constants'
+import { shortId } from '../utils/format'
+import AppModal from '../components/shared/AppModal.vue'
 
 const orders = ref<any[]>([])
 const loading = ref(true)
@@ -12,17 +15,11 @@ const addToast = inject('addToast') as (msg: string, type?: any) => void
 const showConfirmModal = ref(false)
 const pendingAction = ref<{ orderId: string, status: string, title: string, description: string } | null>(null)
 
-const STATUS_PAID = 'paid'
-const STATUS_COOKING = 'cooking'
-const STATUS_READY = 'ready'
-
 const fetchKitchenOrders = async () => {
   try {
     loading.value = true
-    const response = await axios.get('/api/v1/orders/all') 
-    if (response.data.success) {
-      orders.value = response.data.data || []
-    }
+    const res = await ordersApi.getAllOrders()
+    if (res.success) orders.value = res.data || []
   } catch (err) {
     console.error('Failed to fetch orders:', err)
   } finally {
@@ -36,14 +33,14 @@ const filteredOrders = computed(() => {
   
   return orders.value.filter((o: any) => {
     const chefId = o.chef_id || o.chefId
-    const isUnassignedPaid = o.status === STATUS_PAID && (!chefId || chefId === "")
-    const isMyActiveCooking = o.status === STATUS_COOKING && chefId === myId
+    const isUnassignedPaid = o.status === ORDER_STATUS.PAID && (!chefId || chefId === "")
+    const isMyActiveCooking = o.status === ORDER_STATUS.COOKING && chefId === myId
     return isUnassignedPaid || isMyActiveCooking
   })
 })
 
 const openConfirm = (order: any, nextStatus: string) => {
-  const isStart = nextStatus === STATUS_COOKING
+  const isStart = nextStatus === ORDER_STATUS.COOKING
   pendingAction.value = {
     orderId: order.order_id,
     status: nextStatus,
@@ -57,11 +54,10 @@ const openConfirm = (order: any, nextStatus: string) => {
 
 const handleConfirm = async () => {
   if (!pendingAction.value) return
-  
   try {
     const { orderId, status } = pendingAction.value
-    await axios.patch(`/api/v1/orders/${orderId}/status`, { status })
-    addToast(status === STATUS_COOKING ? 'Вы начали готовить' : 'Заказ готов!', 'success')
+    await ordersApi.updateStatus(orderId, status)
+    addToast(status === ORDER_STATUS.COOKING ? 'Вы начали готовить' : 'Заказ готов!', 'success')
     showConfirmModal.value = false
     pendingAction.value = null
     await fetchKitchenOrders()
@@ -77,118 +73,98 @@ onMounted(fetchKitchenOrders)
 
 <template>
   <div class="max-w-6xl mx-auto px-4 py-8">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-      <div class="flex items-center gap-4">
-        <div class="bg-primary p-4 rounded-[1.5rem] shadow-xl shadow-primary/20">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+      <div class="flex items-center gap-5">
+        <div class="bg-primary p-5 rounded-[1.75rem] shadow-2xl shadow-primary/20 animate-in zoom-in duration-500">
           <ChefHat class="w-10 h-10 text-primary-content" />
         </div>
         <div>
-          <h1 class="text-4xl font-black tracking-tighter uppercase italic">Кухня</h1>
-          <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em]">Очередь заказов</p>
+          <h1 class="text-5xl font-black tracking-tighter uppercase italic">Кухня</h1>
+          <p class="text-base-content/40 font-black uppercase text-[10px] tracking-[0.3em] mt-1 ml-1">Live Order Queue</p>
         </div>
       </div>
-      <div class="flex items-center gap-4 bg-base-100 border border-base-200 p-2 rounded-2xl shadow-sm">
-        <div class="w-10 h-10 rounded-xl bg-base-200 flex items-center justify-center">
-          <User class="w-5 h-5 opacity-40" />
+      <div class="flex items-center gap-4 bg-base-100 border border-base-200 p-2.5 rounded-3xl shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary font-black text-xl shadow-inner">
+          {{ authStore.user?.name?.charAt(0).toUpperCase() }}
         </div>
-        <div class="pr-4">
-          <p class="text-[10px] font-black uppercase opacity-30 leading-none mb-1">Шеф-повар</p>
-          <p class="text-sm font-black">{{ authStore.user?.name || 'Загрузка...' }}</p>
+        <div class="pr-6">
+          <p class="text-[9px] font-black uppercase opacity-30 leading-none mb-1.5 tracking-widest">Chef on duty</p>
+          <p class="text-sm font-black">{{ authStore.user?.name || 'Loading...' }}</p>
         </div>
       </div>
     </div>
 
-    <div v-if="loading && orders.length === 0" class="flex justify-center py-32">
-      <span class="loading loading-spinner loading-lg text-primary"></span>
+    <div v-if="loading && orders.length === 0" class="flex justify-center py-40"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+
+    <div v-else-if="filteredOrders.length === 0" class="text-center py-48 bg-base-100 rounded-[4rem] border-2 border-dashed border-base-300 animate-in fade-in duration-700">
+      <div class="bg-base-200 p-10 rounded-full inline-block mb-8 shadow-inner"><Clock class="w-16 h-16 opacity-10" /></div>
+      <h2 class="text-3xl font-black opacity-20 uppercase tracking-tighter italic">Все заказы готовы</h2>
+      <p class="text-base-content/30 max-w-xs mx-auto mt-3 font-bold uppercase text-[10px] tracking-widest">Отличная работа! Отдохните немного.</p>
     </div>
 
-    <div v-else-if="filteredOrders.length === 0" class="text-center py-40 bg-base-100 rounded-[3.5rem] border-2 border-dashed border-base-300">
-      <div class="bg-base-200 p-8 rounded-full inline-block mb-6"><Clock class="w-12 h-12 opacity-10" /></div>
-      <h2 class="text-2xl font-black opacity-20 uppercase tracking-tighter">Очередь пуста</h2>
-      <p class="text-base-content/30 max-w-xs mx-auto mt-2 font-bold uppercase text-[10px] tracking-widest">Можно немного передохнуть</p>
-    </div>
-
-    <!-- FIXED GRID TO 2 COLUMNS (Same as Logistics) -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-10">
       <div v-for="order in filteredOrders" :key="order.order_id" 
-        class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden transition-all duration-300"
-        :class="{ 'ring-4 ring-primary ring-inset': order.status === STATUS_COOKING }"
+        class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden transition-all duration-500 hover:shadow-2xl group"
+        :class="{ 'ring-4 ring-primary ring-inset shadow-primary/10 scale-[1.01]': order.status === ORDER_STATUS.COOKING }"
       >
-        <div class="p-8">
-          <div class="flex justify-between items-start mb-6">
-            <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="text-3xl font-black tracking-tighter">#{{ order.order_number.split('-').pop() }}</span>
-                <span v-if="order.status === STATUS_COOKING" class="badge badge-primary font-black text-[8px] h-4 uppercase">В работе</span>
+        <div class="p-10">
+          <div class="flex justify-between items-start mb-8">
+            <div class="space-y-2">
+              <div class="flex items-center gap-3">
+                <span class="text-4xl font-black tracking-tighter italic">#{{ order.order_number.split('-').pop() }}</span>
+                <span v-if="order.status === ORDER_STATUS.COOKING" class="badge badge-primary font-black text-[9px] h-5 tracking-widest px-3">ACTIVE</span>
               </div>
-              <p class="text-[9px] font-bold opacity-30 uppercase tracking-[0.2em] font-mono">{{ order.order_id.slice(0,12) }}</p>
+              <p class="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] font-mono">{{ shortId(order.order_id) }}</p>
             </div>
-            <div class="badge font-black uppercase text-[10px] py-3.5 px-4 rounded-lg border-none" 
-              :class="order.status === STATUS_COOKING ? 'badge-warning' : 'badge-info'">
-              {{ order.status === STATUS_COOKING ? 'Готовится' : 'Оплачен' }}
+            <div class="badge font-black uppercase text-[10px] py-4 px-5 rounded-xl border-none shadow-sm" 
+              :class="order.status === ORDER_STATUS.COOKING ? 'badge-warning' : 'badge-info'">
+              {{ order.status === ORDER_STATUS.COOKING ? 'Готовится' : 'Оплачен' }}
             </div>
           </div>
 
-          <div class="divider opacity-20 my-0"></div>
+          <div class="divider opacity-10 my-0"></div>
           
-          <div class="py-8 space-y-3">
-            <div v-for="item in order.items" :key="item.product_id" class="flex justify-between items-center bg-base-200/40 p-4 rounded-2xl border border-base-300/10">
-              <span class="font-bold text-sm tracking-tight"><span class="text-primary font-black mr-3 text-lg">x{{ item.quantity }}</span> {{ item.product_name }}</span>
+          <div class="py-10 space-y-4">
+            <div v-for="item in order.items" :key="item.product_id" class="flex justify-between items-center bg-base-200/40 p-6 rounded-[1.5rem] border border-base-300/10 group-hover:bg-base-200/60 transition-colors">
+              <span class="font-black text-base tracking-tight"><span class="text-primary font-black mr-4 text-2xl italic">x{{ item.quantity }}</span> {{ item.product_name }}</span>
             </div>
           </div>
 
-          <div class="card-actions">
+          <div class="card-actions mt-4">
             <button 
-              v-if="order.status === STATUS_PAID"
-              @click="openConfirm(order, STATUS_COOKING)"
-              class="btn btn-primary btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-primary/10 h-16 text-lg"
+              v-if="order.status === ORDER_STATUS.PAID"
+              @click="openConfirm(order, ORDER_STATUS.COOKING)"
+              class="btn btn-primary btn-block h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-primary/20 text-xl italic transition-all hover:scale-[1.02]"
             >
-              <Play class="w-6 h-6" /> Начать готовить
+              <Play class="w-7 h-7" /> Начать готовку
             </button>
             <button 
-              v-if="order.status === STATUS_COOKING"
-              @click="openConfirm(order, STATUS_READY)"
-              class="btn btn-success btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-success/10 h-16 text-lg text-white"
+              v-if="order.status === ORDER_STATUS.COOKING"
+              @click="openConfirm(order, ORDER_STATUS.READY)"
+              class="btn btn-success btn-block h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-success/20 text-xl italic transition-all hover:scale-[1.02] text-white"
             >
-              <CheckCircle2 class="w-6 h-6" /> Готово!
+              <CheckCircle2 class="w-7 h-7" /> Завершить
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <Transition name="modal-fade">
-      <div v-if="showConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/80" @click="showConfirmModal = false"></div>
-        <Transition name="modal-zoom" appear>
-          <div class="relative bg-base-100 w-full max-w-sm rounded-[3rem] shadow-2xl border border-base-200 p-10 text-center">
-              <div class="bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 animate-in zoom-in duration-300">
-                <AlertCircle class="w-12 h-12 text-primary" />
-              </div>
-              <h3 class="font-black text-3xl uppercase tracking-tighter mb-3 leading-none">{{ pendingAction?.title }}</h3>
-              <p class="text-base-content/50 text-sm mb-10 leading-relaxed font-medium px-4">
-                {{ pendingAction?.description }}
-              </p>
-              <div class="flex flex-col gap-3">
-                <button @click="handleConfirm" class="btn btn-primary btn-lg rounded-2xl h-16 font-black uppercase shadow-xl shadow-primary/20 tracking-tight">
-                  Подтвердить
-                </button>
-                <button @click="showConfirmModal = false" class="btn btn-ghost btn-lg rounded-2xl font-bold opacity-40">
-                  Отмена
-                </button>
-              </div>
+    <!-- ACTION CONFIRMATION MODAL -->
+    <AppModal :show="showConfirmModal" @close="showConfirmModal = false">
+      <div class="p-12 text-center">
+          <div class="bg-primary/10 w-28 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-inner">
+            <AlertCircle class="w-14 h-14 text-primary" />
           </div>
-        </Transition>
+          <h3 class="font-black text-4xl uppercase tracking-tighter mb-4 leading-none italic">{{ pendingAction?.title }}</h3>
+          <p class="text-base-content/50 text-base mb-12 leading-relaxed font-bold px-6">
+            {{ pendingAction?.description }}
+          </p>
+          <div class="flex flex-col gap-4">
+            <button @click="handleConfirm" class="btn btn-primary h-20 rounded-3xl text-xl font-black uppercase shadow-2xl shadow-primary/20 tracking-tight">Подтвердить</button>
+            <button @click="showConfirmModal = false" class="btn btn-ghost h-16 rounded-2xl font-black uppercase text-[10px] tracking-widest opacity-40">Отмена</button>
+          </div>
       </div>
-    </Transition>
+    </AppModal>
   </div>
 </template>
-
-<style scoped>
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s ease; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
-.modal-zoom-enter-active { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-.modal-zoom-leave-active { transition: all 0.15s ease-in; }
-.modal-zoom-enter-from, .modal-zoom-leave-to { opacity: 0; transform: scale(0.97) translateY(8px); }
-</style>
