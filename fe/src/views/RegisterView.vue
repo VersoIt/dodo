@@ -1,55 +1,51 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import { UserPlus, Mail, Lock, User } from 'lucide-vue-next'
+import { useAuthStore } from '../store/auth'
+import { UserPlus, Mail, Lock, User, ShieldCheck, AlertCircle } from 'lucide-vue-next'
 import axios from 'axios'
 
-import { useAuthStore } from '../store/auth'
-
-const router = useRouter()
 const authStore = useAuthStore()
+const router = useRouter()
 const name = ref('')
 const email = ref('')
 const password = ref('')
-const role = ref('client')
+const role = ref('client') // Default role
 const loading = ref(false)
 const error = ref('')
+const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const handleRegister = async () => {
+  if (!name.value || !email.value || !password.value) {
+    error.value = 'Пожалуйста, заполните все поля'
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+  
   try {
-    loading.value = true
-    error.value = ''
-    
-    // 1. Register the user
-    const regResp = await axios.post('/api/v1/auth/register', {
+    const response = await axios.post('/api/v1/auth/register', {
       name: name.value,
       email: email.value,
       password: password.value,
       role: role.value
     })
-    
-    if (regResp.data.success) {
-      // 2. Automatically login after successful registration
+
+    if (response.data.success) {
+      addToast('Регистрация успешна!', 'success')
+      // Auto-login
       const loginSuccess = await authStore.login(email.value, password.value)
-      
       if (loginSuccess) {
-        // 3. Redirect based on role
-        if (role.value === 'chef') {
-          router.push('/kitchen')
-        } else if (role.value === 'courier') {
-          router.push('/logistics')
-        } else {
-          router.push('/')
-        }
+        if (role.value === 'chef') router.push('/kitchen')
+        else if (role.value === 'courier') router.push('/logistics')
+        else router.push('/')
       } else {
         router.push('/login')
       }
-    } else {
-      error.value = regResp.data.error || 'Failed to create account'
     }
   } catch (err: any) {
-    console.error('Registration failed:', err)
-    error.value = 'Failed to create account. Please try again.'
+    error.value = err.response?.data?.error || 'Ошибка при регистрации'
   } finally {
     loading.value = false
   }
@@ -57,102 +53,74 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center py-12">
-    <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200">
-      <div class="card-body">
-        <div class="flex flex-col items-center gap-2 mb-6">
-          <div class="p-3 bg-secondary rounded-2xl text-secondary-content">
-            <UserPlus class="w-8 h-8" />
-          </div>
-          <h1 class="text-3xl font-bold">Join Us</h1>
-          <p class="text-base-content/60">Create your Pizza Good account</p>
+  <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div class="max-w-md w-full">
+      <div class="text-center mb-10">
+        <div class="bg-secondary/10 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <UserPlus class="w-10 h-10 text-secondary" />
         </div>
+        <h1 class="text-4xl font-black tracking-tight uppercase italic text-secondary">Регистрация</h1>
+        <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em] mt-2">Станьте частью нашей команды</p>
+      </div>
 
-        <div v-if="error" class="alert alert-error mb-6">
-          <span>{{ error }}</span>
-        </div>
-
-        <form @submit.prevent="handleRegister" class="space-y-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Full Name</span>
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-content/50">
-                <User class="w-5 h-5" />
-              </span>
-              <input 
-                v-model="name"
-                type="text" 
-                placeholder="John Doe" 
-                class="input input-bordered w-full pl-10" 
-                required 
-              />
+      <div class="card bg-base-100 shadow-2xl border border-base-200 overflow-hidden rounded-[2.5rem]">
+        <div class="card-body p-10">
+          <form @submit.prevent="handleRegister" class="space-y-5">
+            <div v-if="error" class="alert alert-error rounded-2xl py-3 text-sm flex gap-2">
+              <AlertCircle class="w-4 h-4" />
+              <span>{{ error }}</span>
             </div>
-          </div>
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Email Address</span>
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-content/50">
-                <Mail class="w-5 h-5" />
-              </span>
-              <input 
-                v-model="email"
-                type="email" 
-                placeholder="you@example.com" 
-                class="input input-bordered w-full pl-10" 
-                required 
-              />
+            <div class="form-control">
+              <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40 tracking-widest">Полное имя</span></label>
+              <div class="relative">
+                <User class="absolute left-4 top-3.5 w-5 h-5 opacity-30" />
+                <input v-model="name" type="text" placeholder="Иван Иванов" class="input input-bordered w-full pl-12 rounded-2xl h-12" required />
+              </div>
             </div>
-          </div>
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Password</span>
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-content/50">
-                <Lock class="w-5 h-5" />
-              </span>
-              <input 
-                v-model="password"
-                type="password" 
-                placeholder="••••••••" 
-                class="input input-bordered w-full pl-10" 
-                required 
-              />
+            <div class="form-control">
+              <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40 tracking-widest">Email адрес</span></label>
+              <div class="relative">
+                <Mail class="absolute left-4 top-3.5 w-5 h-5 opacity-30" />
+                <input v-model="email" type="email" placeholder="ivan@example.com" class="input input-bordered w-full pl-12 rounded-2xl h-12" required />
+              </div>
             </div>
-          </div>
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">I am a...</span>
-            </label>
-            <select v-model="role" class="select select-bordered w-full">
-              <option value="client">Client (Hungry Customer)</option>
-              <option value="chef">Chef (Master Pizza Maker)</option>
-              <option value="courier">Courier (Fast Delivery)</option>
-              <option value="manager">Manager (Staff Supervisor)</option>
-            </select>
-          </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40 tracking-widest">Пароль</span></label>
+              <div class="relative">
+                <Lock class="absolute left-4 top-3.5 w-5 h-5 opacity-30" />
+                <input v-model="password" type="password" placeholder="••••••••" class="input input-bordered w-full pl-12 rounded-2xl h-12" required />
+              </div>
+            </div>
 
-          <div class="card-actions mt-6">
-            <button class="btn btn-secondary btn-block" :disabled="loading">
+            <div class="form-control">
+              <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40 tracking-widest">Ваша роль</span></label>
+              <div class="relative">
+                <ShieldCheck class="absolute left-4 top-3.5 w-5 h-5 opacity-30" />
+                <select v-model="role" class="select select-bordered w-full pl-12 rounded-2xl h-12 font-bold">
+                  <option value="client">Клиент</option>
+                  <option value="chef">Повар</option>
+                  <option value="courier">Курьер</option>
+                  <option value="manager">Менеджер</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary btn-block h-14 rounded-2xl font-black uppercase shadow-lg shadow-secondary/20 mt-6" :disabled="loading">
               <span v-if="loading" class="loading loading-spinner"></span>
-              Create Account
+              <span v-else>Зарегистрироваться</span>
             </button>
+          </form>
+
+          <div class="divider opacity-30 my-8">ИЛИ</div>
+
+          <div class="text-center">
+            <p class="text-sm text-base-content/60">Уже есть аккаунт?</p>
+            <router-link to="/login" class="link link-secondary font-black uppercase text-[10px] tracking-widest mt-2 block">Войти в систему</router-link>
           </div>
-        </form>
-
-        <div class="divider">OR</div>
-
-        <p class="text-center text-sm">
-          Already have an account? 
-          <router-link to="/login" class="link link-secondary font-bold">Sign In</router-link>
-        </p>
+        </div>
       </div>
     </div>
   </div>

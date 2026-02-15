@@ -33,11 +33,11 @@ const saveProfile = async () => {
     if (response.data.success) {
       authStore.user = response.data.data
       isEditing.value = false
-      addToast('Profile updated!', 'success')
+      addToast('Профиль обновлен!', 'success')
     }
   } catch (err) {
     console.error('Failed to update profile:', err)
-    addToast('Failed to update profile', 'error')
+    addToast('Не удалось обновить профиль', 'error')
   } finally {
     isSaving.value = false
   }
@@ -73,7 +73,7 @@ onMounted(async () => {
           :class="{ 'btn-active bg-primary/10 text-primary': activeTab === 'profile' }"
         >
           <User class="w-5 h-5" />
-          Profile Info
+          Информация
         </button>
         <button 
           v-if="authStore.user?.role === 'client'"
@@ -82,14 +82,14 @@ onMounted(async () => {
           :class="{ 'btn-active bg-primary/10 text-primary': activeTab === 'orders' }"
         >
           <Package class="w-5 h-5" />
-          My Orders
+          Мои заказы
         </button>
         <div class="divider"></div>
         <button 
           @click="authStore.logout(); $router.push('/login')"
           class="btn btn-ghost w-full justify-start gap-3 text-error hover:bg-error/10"
         >
-          Logout
+          Выйти
         </button>
       </div>
 
@@ -105,25 +105,25 @@ onMounted(async () => {
                   </div>
                 </div>
                 <div>
-                  <h1 class="text-3xl font-bold tracking-tight">{{ authStore.user?.name || 'Pizza Lover' }}</h1>
+                  <h1 class="text-3xl font-bold tracking-tight">{{ authStore.user?.name || 'Любитель пиццы' }}</h1>
                   <p class="text-base-content/60">{{ authStore.user?.email }}</p>
                 </div>
               </div>
-              <button v-if="!isEditing" @click="startEditing" class="btn btn-outline btn-sm rounded-lg">Edit Profile</button>
+              <button v-if="!isEditing" @click="startEditing" class="btn btn-outline btn-sm rounded-lg">Изменить</button>
             </div>
 
             <div v-if="!isEditing" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
                 <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
-                  <User class="w-3 h-3" /> Full Name
+                  <User class="w-3 h-3" /> Имя
                 </p>
-                <p class="font-bold text-lg">{{ authStore.user?.name || 'Not set' }}</p>
+                <p class="font-bold text-lg">{{ authStore.user?.name || 'Не указано' }}</p>
               </div>
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
                 <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
-                  <Phone class="w-3 h-3" /> Phone Number
+                  <Phone class="w-3 h-3" /> Телефон
                 </p>
-                <p class="font-bold text-lg">{{ authStore.user?.phone || 'Not set' }}</p>
+                <p class="font-bold text-lg">{{ authStore.user?.phone || 'Не указано' }}</p>
               </div>
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
                 <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
@@ -133,7 +133,7 @@ onMounted(async () => {
               </div>
               <div class="p-4 bg-base-200/50 border border-base-300/50 rounded-2xl space-y-1">
                 <p class="text-[10px] font-black uppercase tracking-widest text-base-content/40 flex items-center gap-2">
-                  <Shield class="w-3 h-3" /> Role
+                  <Shield class="w-3 h-3" /> Роль
                 </p>
                 <div class="badge badge-secondary font-bold uppercase text-[10px]">{{ authStore.user?.role || 'client' }}</div>
               </div>
@@ -142,20 +142,20 @@ onMounted(async () => {
             <!-- Edit Mode -->
             <div v-else class="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div class="form-control w-full">
-                <label class="label"><span class="label-text font-bold">Full Name</span></label>
-                <input v-model="editName" type="text" class="input input-bordered w-full rounded-xl" placeholder="John Doe" />
+                <label class="label"><span class="label-text font-bold">Полное имя</span></label>
+                <input v-model="editName" type="text" class="input input-bordered w-full rounded-xl" placeholder="Иван Иванов" />
               </div>
               <div class="form-control w-full">
-                <label class="label"><span class="label-text font-bold">Phone Number</span></label>
-                <input v-model="editPhone" type="text" class="input input-bordered w-full rounded-xl" placeholder="+1 234 567 890" />
+                <label class="label"><span class="label-text font-bold">Номер телефона</span></label>
+                <input v-model="editPhone" type="text" class="input input-bordered w-full rounded-xl" placeholder="+7 999 000 00 00" />
               </div>
               <div class="flex gap-2 justify-end mt-6">
                 <button @click="isEditing = false" class="btn btn-ghost rounded-lg gap-2">
-                  <X class="w-4 h-4" /> Cancel
+                  <X class="w-4 h-4" /> Отмена
                 </button>
                 <button @click="saveProfile" class="btn btn-primary rounded-lg gap-2" :disabled="isSaving">
                   <span v-if="isSaving" class="loading loading-spinner"></span>
-                  <Save class="w-4 h-4" /> Save Changes
+                  <Save class="w-4 h-4" /> Сохранить
                 </button>
               </div>
             </div>
@@ -163,7 +163,7 @@ onMounted(async () => {
         </div>
 
         <div v-if="activeTab === 'orders'" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-          <h2 class="text-2xl font-bold mb-4">Order History</h2>
+          <h2 class="text-2xl font-bold mb-4">История заказов</h2>
           
           <div v-if="loadingOrders" class="flex justify-center py-12">
             <span class="loading loading-spinner loading-lg text-primary"></span>
@@ -172,9 +172,9 @@ onMounted(async () => {
           <div v-else-if="orders.length === 0" class="card bg-base-100 border border-dashed border-base-300 py-12">
             <div class="flex flex-col items-center text-center">
               <Package class="w-16 h-16 text-base-content/20 mb-4" />
-              <h3 class="text-xl font-bold">No orders yet</h3>
-              <p class="text-base-content/60 mb-6">Hungry? Treat yourself to a delicious pizza!</p>
-              <router-link to="/" class="btn btn-primary">Browse Menu</router-link>
+              <h3 class="text-xl font-bold">Заказов пока нет</h3>
+              <p class="text-base-content/60 mb-6">Проголодались? Пора заказать вкусную пиццу!</p>
+              <router-link to="/" class="btn btn-primary">В меню</router-link>
             </div>
           </div>
 
@@ -185,17 +185,17 @@ onMounted(async () => {
                   <span class="font-mono font-bold text-lg tracking-tight">#{{ order.order_number }}</span>
                   <div class="badge badge-outline uppercase text-[10px] font-black tracking-widest" 
                     :class="{ 
-                      'badge-success border-green-500 text-green-500': order.status === 'paid',
-                      'badge-warning border-yellow-500 text-yellow-500': order.status === 'pending'
+                      'badge-success border-green-500 text-green-500': order.status === 'completed' || order.status === 'paid',
+                      'badge-warning border-yellow-500 text-yellow-500': order.status === 'cooking' || order.status === 'created'
                     }">
                     {{ order.status }}
                   </div>
                 </div>
-                <p class="text-[10px] uppercase font-bold text-base-content/40">Feb 14, 2026</p>
+                <p class="text-[10px] uppercase font-bold text-base-content/40">15 Февраля, 2026</p>
               </div>
               <div class="text-right">
-                <p class="text-2xl font-black text-primary">${{ order.final_price?.toFixed(2) }}</p>
-                <router-link :to="'/order/' + order.order_id" class="btn btn-link btn-xs text-primary no-underline hover:underline p-0 h-auto min-h-0">View Details</router-link>
+                <p class="text-2xl font-black text-primary">{{ order.final_price?.toLocaleString() }} ₽</p>
+                <router-link :to="'/order/' + order.order_id" class="btn btn-link btn-xs text-primary no-underline hover:underline p-0 h-auto min-h-0">Подробнее</router-link>
               </div>
             </div>
           </div>

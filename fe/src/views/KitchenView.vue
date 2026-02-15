@@ -22,8 +22,6 @@ const fetchKitchenOrders = async () => {
     const response = await axios.get('/api/v1/orders/all') 
     if (response.data.success) {
       orders.value = response.data.data || []
-      // Debug log to see exactly what backend returns
-      console.log('[Kitchen] Data from backend:', JSON.stringify(orders.value, null, 2))
     }
   } catch (err) {
     console.error('Failed to fetch orders:', err)
@@ -34,21 +32,12 @@ const fetchKitchenOrders = async () => {
 
 const filteredOrders = computed(() => {
   const myId = authStore.user?.id || authStore.user?.user_id
-  if (!myId) {
-    console.warn('[Kitchen] No user ID found in store')
-    return []
-  }
+  if (!myId) return []
   
   return orders.value.filter((o: any) => {
     const chefId = o.chef_id || o.chefId
-    
     const isUnassignedPaid = o.status === STATUS_PAID && (!chefId || chefId === "")
     const isMyActiveCooking = o.status === STATUS_COOKING && chefId === myId
-    
-    if (o.status === STATUS_COOKING) {
-      console.log(`[Kitchen] Order ${o.order_number}: status=cooking, chef_id=${chefId}, my_id=${myId}, MATCH=${chefId === myId}`)
-    }
-    
     return isUnassignedPaid || isMyActiveCooking
   })
 })
@@ -58,10 +47,10 @@ const openConfirm = (order: any, nextStatus: string) => {
   pendingAction.value = {
     orderId: order.order_id,
     status: nextStatus,
-    title: isStart ? 'Accept Order?' : 'Complete Cooking?',
+    title: isStart ? 'Принять заказ?' : 'Завершить готовку?',
     description: isStart 
-      ? `Accept Order #${order.order_number.split('-').pop()}? This will assign it to you.` 
-      : 'Finish preparing this pizza and move it to ready state.'
+      ? `Взять заказ #${order.order_number.split('-').pop()} в работу?` 
+      : 'Подтвердите, что пицца готова к выдаче курьеру.'
   }
   showConfirmModal.value = true
 }
@@ -71,17 +60,13 @@ const handleConfirm = async () => {
   
   try {
     const { orderId, status } = pendingAction.value
-    console.log(`[Kitchen] Patching order ${orderId} to status ${status}`)
-    const resp = await axios.patch(`/api/v1/orders/${orderId}/status`, { status })
-    console.log('[Kitchen] Patch response:', resp.data)
-    
-    addToast(status === STATUS_COOKING ? 'Started cooking!' : 'Pizza ready!', 'success')
+    await axios.patch(`/api/v1/orders/${orderId}/status`, { status })
+    addToast(status === STATUS_COOKING ? 'Вы начали готовить' : 'Заказ готов!', 'success')
     showConfirmModal.value = false
     pendingAction.value = null
     await fetchKitchenOrders()
   } catch (err: any) {
-    console.error('[Kitchen] Status update failed:', err)
-    addToast(err.response?.data?.error || 'Update failed', 'error')
+    addToast(err.response?.data?.error || 'Ошибка обновления', 'error')
     showConfirmModal.value = false
   }
 }
@@ -98,8 +83,8 @@ onMounted(fetchKitchenOrders)
           <ChefHat class="w-10 h-10 text-primary-content" />
         </div>
         <div>
-          <h1 class="text-4xl font-black tracking-tighter uppercase italic">Kitchen</h1>
-          <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em]">Live Orders</p>
+          <h1 class="text-4xl font-black tracking-tighter uppercase italic">Кухня</h1>
+          <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em]">Очередь заказов</p>
         </div>
       </div>
       <div class="flex items-center gap-4 bg-base-100 border border-base-200 p-2 rounded-2xl shadow-sm">
@@ -107,8 +92,8 @@ onMounted(fetchKitchenOrders)
           <User class="w-5 h-5 opacity-40" />
         </div>
         <div class="pr-4">
-          <p class="text-[10px] font-black uppercase opacity-30 leading-none mb-1">Active Chef</p>
-          <p class="text-sm font-black">{{ authStore.user?.name || 'Loading...' }}</p>
+          <p class="text-[10px] font-black uppercase opacity-30 leading-none mb-1">Шеф-повар</p>
+          <p class="text-sm font-black">{{ authStore.user?.name || 'Загрузка...' }}</p>
         </div>
       </div>
     </div>
@@ -119,11 +104,12 @@ onMounted(fetchKitchenOrders)
 
     <div v-else-if="filteredOrders.length === 0" class="text-center py-40 bg-base-100 rounded-[3.5rem] border-2 border-dashed border-base-300">
       <div class="bg-base-200 p-8 rounded-full inline-block mb-6"><Clock class="w-12 h-12 opacity-10" /></div>
-      <h2 class="text-2xl font-black opacity-20 uppercase tracking-tighter">No orders found</h2>
-      <p class="text-base-content/30 max-w-xs mx-auto mt-2 font-bold uppercase text-[10px] tracking-widest">Everything is under control</p>
+      <h2 class="text-2xl font-black opacity-20 uppercase tracking-tighter">Очередь пуста</h2>
+      <p class="text-base-content/30 max-w-xs mx-auto mt-2 font-bold uppercase text-[10px] tracking-widest">Можно немного передохнуть</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- FIXED GRID TO 2 COLUMNS (Same as Logistics) -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div v-for="order in filteredOrders" :key="order.order_id" 
         class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden transition-all duration-300"
         :class="{ 'ring-4 ring-primary ring-inset': order.status === STATUS_COOKING }"
@@ -133,13 +119,13 @@ onMounted(fetchKitchenOrders)
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span class="text-3xl font-black tracking-tighter">#{{ order.order_number.split('-').pop() }}</span>
-                <span v-if="order.status === STATUS_COOKING" class="badge badge-primary font-black text-[8px] h-4">IN WORK</span>
+                <span v-if="order.status === STATUS_COOKING" class="badge badge-primary font-black text-[8px] h-4 uppercase">В работе</span>
               </div>
               <p class="text-[9px] font-bold opacity-30 uppercase tracking-[0.2em] font-mono">{{ order.order_id.slice(0,12) }}</p>
             </div>
             <div class="badge font-black uppercase text-[10px] py-3.5 px-4 rounded-lg border-none" 
               :class="order.status === STATUS_COOKING ? 'badge-warning' : 'badge-info'">
-              {{ order.status }}
+              {{ order.status === STATUS_COOKING ? 'Готовится' : 'Оплачен' }}
             </div>
           </div>
 
@@ -157,14 +143,14 @@ onMounted(fetchKitchenOrders)
               @click="openConfirm(order, STATUS_COOKING)"
               class="btn btn-primary btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-primary/10 h-16 text-lg"
             >
-              <Play class="w-6 h-6" /> Start Cooking
+              <Play class="w-6 h-6" /> Начать готовить
             </button>
             <button 
               v-if="order.status === STATUS_COOKING"
               @click="openConfirm(order, STATUS_READY)"
               class="btn btn-success btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-success/10 h-16 text-lg text-white"
             >
-              <CheckCircle2 class="w-6 h-6" /> Ready to Go
+              <CheckCircle2 class="w-6 h-6" /> Готово!
             </button>
           </div>
         </div>
@@ -186,10 +172,10 @@ onMounted(fetchKitchenOrders)
               </p>
               <div class="flex flex-col gap-3">
                 <button @click="handleConfirm" class="btn btn-primary btn-lg rounded-2xl h-16 font-black uppercase shadow-xl shadow-primary/20 tracking-tight">
-                  Confirm
+                  Подтвердить
                 </button>
                 <button @click="showConfirmModal = false" class="btn btn-ghost btn-lg rounded-2xl font-bold opacity-40">
-                  Cancel
+                  Отмена
                 </button>
               </div>
           </div>

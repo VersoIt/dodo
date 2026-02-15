@@ -26,7 +26,7 @@ interface Product {
 const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
-const selectedCategory = ref('All')
+const selectedCategory = ref('Все')
 const menuSection = ref<HTMLElement | null>(null)
 const showAddModal = ref(false)
 const showAuthModal = ref(false)
@@ -34,17 +34,16 @@ const isSubmitting = ref(false)
 const isEditing = ref(false)
 const editingId = ref<string | null>(null)
 
-const categories = ['All', 'Classic', 'Premium', 'Veggie', 'Spicy', 'Drinks', 'Desserts']
+const categories = ['Все', 'Классика', 'Премиум', 'Вегетарианская', 'Острая', 'Напитки', 'Десерты']
 const categoryMap: Record<string, number> = {
-  'Classic': 0,
-  'Premium': 1,
-  'Veggie': 2,
-  'Spicy': 3,
-  'Drinks': 4,
-  'Desserts': 5
+  'Классика': 0,
+  'Премиум': 1,
+  'Вегетарианская': 2,
+  'Острая': 3,
+  'Напитки': 4,
+  'Десерты': 5
 }
 
-// Form data for product
 const productForm = ref({
   name: '',
   description: '',
@@ -55,7 +54,7 @@ const productForm = ref({
 })
 
 const filteredProducts = computed(() => {
-  if (selectedCategory.value === 'All') return products.value
+  if (selectedCategory.value === 'Все') return products.value
   return products.value.filter(p => p.category === selectedCategory.value)
 })
 
@@ -76,12 +75,12 @@ const fetchProducts = async () => {
       price: p.price,
       imageUrl: p.image_url || `https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=500&auto=format&fit=crop&sig=${p.id}`,
       categoryId: p.category_id,
-      category: categories[p.category_id + 1] || 'Classic',
+      category: categories[p.category_id + 1] || 'Классика',
       isAvailable: p.is_available ?? true
     }))
   } catch (err: any) {
     console.error('Error fetching products:', err)
-    error.value = 'Failed to load products.'
+    error.value = 'Не удалось загрузить товары.'
   } finally {
     loading.value = false
   }
@@ -93,7 +92,7 @@ const handleAddToCart = (product: Product) => {
     return
   }
   cartStore.addToCart(product)
-  addToast(`${product.name} added to cart!`, 'success')
+  addToast(`${product.name} добавлена в корзину!`, 'success')
 }
 
 const openAddModal = () => {
@@ -137,12 +136,12 @@ const handleSubmit = async () => {
     }
 
     if (response.data.success) {
-      addToast(isEditing.value ? 'Product updated!' : 'Product added!', 'success')
+      addToast(isEditing.value ? 'Товар обновлен!' : 'Товар добавлен!', 'success')
       showAddModal.value = false
       await fetchProducts()
     }
   } catch (err: any) {
-    addToast(err.response?.data?.error || 'Operation failed', 'error')
+    addToast(err.response?.data?.error || 'Ошибка операции', 'error')
   } finally {
     isSubmitting.value = false
   }
@@ -159,16 +158,16 @@ onMounted(fetchProducts)
       <div class="hero-content text-center text-neutral-content">
         <div class="max-w-md">
           <h1 class="mb-5 text-5xl font-extrabold uppercase tracking-tighter text-white">
-            {{ authStore.user?.role === 'manager' ? 'Menu Management' : 'Hot & Fresh' }}
+            {{ authStore.user?.role === 'manager' ? 'Управление Меню' : 'Горячая и Свежая' }}
           </h1>
           <p class="mb-5 text-lg text-white/80">
             {{ authStore.user?.role === 'manager' 
-               ? 'Update your catalog, add new seasonal pizzas and manage availability.' 
-               : 'Experience the best pizza in town, delivered straight to your door.' }}
+               ? 'Обновляйте каталог, добавляйте новинки и управляйте наличием.' 
+               : 'Лучшая пицца в городе, доставленная прямо к вашей двери.' }}
           </p>
-          <button v-if="authStore.user?.role !== 'manager'" @click="scrollToMenu" class="btn btn-primary btn-lg">Order Now</button>
+          <button v-if="authStore.user?.role !== 'manager'" @click="scrollToMenu" class="btn btn-primary btn-lg">Заказать сейчас</button>
           <button v-else @click="openAddModal" class="btn btn-secondary btn-lg gap-2">
-            <Plus class="w-6 h-6" /> Add New Product
+            <Plus class="w-6 h-6" /> Добавить товар
           </button>
         </div>
       </div>
@@ -178,8 +177,8 @@ onMounted(fetchProducts)
     <section ref="menuSection">
       <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div class="flex items-center gap-3">
-          <h2 class="text-3xl font-bold">Catalog</h2>
-          <div v-if="authStore.user?.role === 'manager'" class="badge badge-secondary badge-outline">Admin Mode</div>
+          <h2 class="text-3xl font-bold">Каталог</h2>
+          <div v-if="authStore.user?.role === 'manager'" class="badge badge-secondary badge-outline">Режим Менеджера</div>
         </div>
         <div class="tabs tabs-boxed">
           <a 
@@ -203,7 +202,7 @@ onMounted(fetchProducts)
       </div>
 
       <div v-else-if="products.length === 0" class="text-center py-12">
-        <p class="text-base-content/60">No products found in this category.</p>
+        <p class="text-base-content/60">В этой категории пока нет товаров.</p>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -211,11 +210,11 @@ onMounted(fetchProducts)
           <figure class="relative h-48 overflow-hidden">
             <img :src="product.imageUrl" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
             <div class="absolute top-2 right-2">
-              <span class="badge badge-secondary font-semibold">${{ product.price?.toFixed(2) }}</span>
+              <span class="badge badge-secondary font-semibold">{{ product.price?.toLocaleString() }} ₽</span>
             </div>
             <div class="absolute top-2 left-2 flex flex-col gap-1">
               <span class="badge badge-ghost bg-black/40 text-white text-[10px] uppercase border-none">{{ product.category }}</span>
-              <span v-if="!product.isAvailable" class="badge badge-error text-[10px] uppercase font-bold">Out of stock</span>
+              <span v-if="!product.isAvailable" class="badge badge-error text-[10px] uppercase font-bold">Нет в наличии</span>
             </div>
           </figure>
           <div class="card-body p-6">
@@ -229,14 +228,14 @@ onMounted(fetchProducts)
                 :disabled="!product.isAvailable"
               >
                 <Plus class="w-4 h-4" />
-                Add to Cart
+                В корзину
               </button>
               <button 
                 v-else
                 @click="openEditModal(product)"
                 class="btn btn-outline btn-sm btn-secondary gap-2"
               >
-                <FileText class="w-4 h-4" /> Edit
+                <FileText class="w-4 h-4" /> Изменить
               </button>
             </div>
           </div>
@@ -244,16 +243,14 @@ onMounted(fetchProducts)
       </div>
     </section>
 
-    <!-- UNIFIED MODAL COMPONENT (NO BLUR) -->
+    <!-- UNIFIED MODAL COMPONENT (RUSSIAN) -->
     <Transition name="modal-fade">
       <div v-if="showAuthModal || showAddModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <!-- Backdrop (Dark only, no blur) -->
         <div 
           class="fixed inset-0 bg-black/70"
           @click="showAuthModal = false; showAddModal = false"
         ></div>
         
-        <!-- Modal Content -->
         <Transition name="modal-zoom" appear>
           <!-- Login Modal -->
           <div v-if="showAuthModal" class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl overflow-hidden">
@@ -261,20 +258,20 @@ onMounted(fetchProducts)
               <div class="bg-primary/10 p-4 rounded-full mb-6">
                 <LogIn class="w-12 h-12 text-primary" />
               </div>
-              <h3 class="font-bold text-3xl mb-2 tracking-tight">Login Required</h3>
+              <h3 class="font-bold text-3xl mb-2 tracking-tight">Нужна авторизация</h3>
               <p class="text-base-content/60 mb-8 px-2">
-                You need to have an account to place orders. Join our pizza-loving community today!
+                Вам нужно войти в аккаунт, чтобы делать заказы. Присоединяйтесь к нашему сообществу любителей пиццы!
               </p>
               
               <div class="flex flex-col w-full gap-3">
                 <router-link to="/login" class="btn btn-primary btn-lg btn-block gap-2 shadow-lg shadow-primary/20">
-                  <LogIn class="w-5 h-5" /> Sign In
+                  <LogIn class="w-5 h-5" /> Войти
                 </router-link>
                 <router-link to="/register" class="btn btn-outline btn-lg btn-block border-2">
-                  Create New Account
+                  Создать аккаунт
                 </router-link>
                 <button @click="showAuthModal = false" class="btn btn-ghost btn-sm mt-4 opacity-50 hover:opacity-100">
-                  Maybe later
+                  Может позже
                 </button>
               </div>
             </div>
@@ -286,30 +283,29 @@ onMounted(fetchProducts)
               <div class="flex justify-between items-center mb-8">
                 <div class="flex items-center gap-3 text-secondary">
                   <PackagePlus class="w-8 h-8" />
-                  <h3 class="font-black text-2xl uppercase tracking-tight">{{ isEditing ? 'Edit Product' : 'Create New Item' }}</h3>
+                  <h3 class="font-black text-2xl uppercase tracking-tight">{{ isEditing ? 'Изменить товар' : 'Новый товар' }}</h3>
                 </div>
                 <button @click="showAddModal = false" class="btn btn-ghost btn-sm btn-circle bg-base-200/50"><X class="w-4 h-4" /></button>
               </div>
               
               <form @submit.prevent="handleSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <!-- Form fields remain same -->
                 <div class="space-y-4">
                   <div class="form-control">
-                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Product Name</span></label>
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Название товара</span></label>
                     <div class="relative">
                       <Tag class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                      <input v-model="productForm.name" type="text" placeholder="e.g. Pepperoni Extreme" class="input input-bordered w-full pl-10 rounded-xl" required />
+                      <input v-model="productForm.name" type="text" placeholder="например, Пепперони Экстрим" class="input input-bordered w-full pl-10 rounded-xl" required />
                     </div>
                   </div>
                   <div class="form-control">
-                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Price ($)</span></label>
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Цена (₽)</span></label>
                     <div class="relative">
-                      <DollarSign class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                      <input v-model="productForm.price" type="number" step="0.01" placeholder="15.99" class="input input-bordered w-full pl-10 rounded-xl" required />
+                      <span class="absolute left-3 top-2.5 font-bold opacity-40">₽</span>
+                      <input v-model="productForm.price" type="number" step="1" placeholder="599" class="input input-bordered w-full pl-10 rounded-xl" required />
                     </div>
                   </div>
                   <div class="form-control">
-                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Category</span></label>
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Категория</span></label>
                     <select v-model="productForm.categoryId" class="select select-bordered w-full rounded-xl">
                       <option v-for="(val, key) in categoryMap" :key="key" :value="val">{{ key }}</option>
                     </select>
@@ -317,32 +313,32 @@ onMounted(fetchProducts)
                   <div class="form-control pt-2">
                     <label class="label cursor-pointer justify-start gap-4">
                       <input v-model="productForm.isAvailable" type="checkbox" class="checkbox checkbox-secondary checkbox-sm rounded-lg" />
-                      <span class="label-text font-bold">Available for order</span>
+                      <span class="label-text font-bold">Доступен для заказа</span>
                     </label>
                   </div>
                 </div>
                 <div class="space-y-4">
                   <div class="form-control">
-                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Image URL</span></label>
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">URL изображения</span></label>
                     <div class="relative">
                       <ImageIcon class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                      <input v-model="productForm.imageUrl" type="text" placeholder="https://images.unsplash.com/..." class="input input-bordered w-full pl-10 rounded-xl" />
+                      <input v-model="productForm.imageUrl" type="text" placeholder="https://..." class="input input-bordered w-full pl-10 rounded-xl" />
                     </div>
                   </div>
                   <div class="form-control">
-                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Description</span></label>
+                    <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Описание</span></label>
                     <div class="relative">
                       <FileText class="absolute left-3 top-3 w-5 h-5 opacity-40" />
-                      <textarea v-model="productForm.description" class="textarea textarea-bordered w-full pl-10 h-32 rounded-xl" placeholder="Tell us about this delicious pizza..."></textarea>
+                      <textarea v-model="productForm.description" class="textarea textarea-bordered w-full pl-10 h-32 rounded-xl" placeholder="Расскажите об этой вкусной пицце..."></textarea>
                     </div>
                   </div>
                 </div>
                 <div class="col-span-full mt-6 flex gap-3">
                   <button type="submit" class="btn btn-secondary flex-1 btn-lg rounded-2xl shadow-lg shadow-secondary/20 font-black uppercase" :disabled="isSubmitting">
                     <span v-if="isSubmitting" class="loading loading-spinner"></span>
-                    {{ isEditing ? 'Save Changes' : 'Publish to Menu' }}
+                    {{ isEditing ? 'Сохранить изменения' : 'Опубликовать в меню' }}
                   </button>
-                  <button type="button" @click="showAddModal = false" class="btn btn-ghost btn-lg rounded-2xl">Cancel</button>
+                  <button type="button" @click="showAddModal = false" class="btn btn-ghost btn-lg rounded-2xl">Отмена</button>
                 </div>
               </form>
             </div>
@@ -357,23 +353,9 @@ onMounted(fetchProducts)
 .tab-active {
   @apply font-bold !important;
 }
-
-/* Modal Animations (Snappier, No Blur) */
-.modal-fade-enter-active, .modal-fade-leave-active {
-  transition: opacity 0.15s ease;
-}
-.modal-fade-enter-from, .modal-fade-leave-to {
-  opacity: 0;
-}
-
-.modal-zoom-enter-active {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.modal-zoom-leave-active {
-  transition: all 0.15s ease-in;
-}
-.modal-zoom-enter-from, .modal-zoom-leave-to {
-  opacity: 0;
-  transform: scale(0.98) translateY(5px);
-}
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+.modal-zoom-enter-active { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-zoom-leave-active { transition: all 0.15s ease-in; }
+.modal-zoom-enter-from, .modal-zoom-leave-to { opacity: 0; transform: scale(0.98) translateY(5px); }
 </style>

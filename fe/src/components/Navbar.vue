@@ -1,128 +1,90 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ShoppingCart, User, Menu, X, Pizza, LogOut, Package, UserCircle } from 'lucide-vue-next'
-import { useCartStore } from '../store/cart'
 import { useAuthStore } from '../store/auth'
+import { useCartStore } from '../store/cart'
+import { useRouter } from 'vue-router'
+import { ShoppingCart, User, LogOut, Pizza, Menu, Info, ChefHat, Truck } from 'lucide-vue-next'
 
-const router = useRouter()
-const isMenuOpen = ref(false)
-const cartStore = useCartStore()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
+const router = useRouter()
 
 const handleLogout = () => {
   authStore.logout()
-  router.push('/login')
-}
-
-const navLinks = [
-  { name: 'Menu', path: '/' },
-  { name: 'About', path: '/about' },
-]
-
-const roleLinks = {
-  chef: { name: 'Kitchen', path: '/kitchen' },
-  courier: { name: 'Logistics', path: '/logistics' },
-  admin: [
-    { name: 'Kitchen', path: '/kitchen' },
-    { name: 'Logistics', path: '/logistics' }
-  ]
-}
-
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
+  router.push('/')
 }
 </script>
 
 <template>
-  <div class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
-    <div class="container mx-auto px-4">
-      <div class="flex-1">
-        <router-link :to="authStore.user?.role === 'chef' ? '/kitchen' : (authStore.user?.role === 'courier' ? '/logistics' : '/')" class="btn btn-ghost normal-case text-xl flex items-center gap-2 p-0 hover:bg-transparent">
-          <Pizza class="w-8 h-8" />
-          <span class="font-bold tracking-tighter">PIZZA GOOD</span>
-        </router-link>
-      </div>
-      
-      <!-- Desktop Menu -->
-      <div v-if="authStore.user?.role === 'client' || authStore.user?.role === 'manager' || !authStore.isAuthenticated" class="hidden md:flex items-center gap-2 px-4">
-        <router-link v-for="link in navLinks" :key="link.path" :to="link.path" class="btn btn-ghost btn-sm rounded-lg">
-          {{ link.name }}
-        </router-link>
-      </div>
-
-      <div class="flex-none flex items-center gap-3">
-        <!-- Dashboard links for Manager always visible, for others only if they are that role -->
-        <div class="hidden md:flex items-center gap-2">
-          <template v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'manager'">
-            <router-link to="/kitchen" class="btn btn-ghost btn-sm rounded-lg text-secondary font-bold">Kitchen</router-link>
-          </template>
-          <template v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'manager'">
-            <router-link to="/logistics" class="btn btn-ghost btn-sm rounded-lg text-accent font-bold">Logistics</router-link>
-          </template>
+  <div class="navbar bg-base-100 shadow-lg px-4 md:px-8 rounded-2xl mt-4 sticky top-4 z-50 border border-base-200">
+    <div class="flex-1">
+      <router-link to="/" class="btn btn-ghost gap-2 px-2 hover:bg-transparent group">
+        <div class="bg-primary p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
+          <Pizza class="w-6 h-6 text-primary-content" />
         </div>
-
-        <!-- User Name (Desktop) -->
-        <span v-if="authStore.isAuthenticated" class="hidden md:block text-xs font-bold uppercase tracking-widest opacity-80">
-          Hi, {{ authStore.user?.name || 'Friend' }}
-        </span>
-
-        <router-link v-if="authStore.isAuthenticated && authStore.user?.role === 'client'" to="/cart" class="btn btn-ghost btn-circle btn-sm">
-          <div class="indicator">
-            <ShoppingCart class="h-5 w-5" />
-            <span v-if="cartStore.totalItems > 0" class="badge badge-sm indicator-item badge-secondary font-bold">{{ cartStore.totalItems }}</span>
-          </div>
-        </router-link>
-        
-        <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-circle btn-sm">
-            <User v-if="!authStore.isAuthenticated" class="h-5 w-5" />
-            <div v-else class="avatar placeholder">
-              <div class="bg-primary-focus text-primary-content rounded-full w-8">
-                <span class="text-xs font-bold uppercase">{{ authStore.user?.name?.[0] || 'U' }}</span>
-              </div>
-            </div>
-          </label>
-          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 text-base-content rounded-2xl w-56 border border-base-200">
-            <template v-if="!authStore.isAuthenticated">
-              <li class="menu-title px-4 py-2 font-bold text-primary">Guest</li>
-              <li><router-link to="/login">Login</router-link></li>
-              <li><router-link to="/register">Register</router-link></li>
-            </template>
-            <template v-else>
-              <li class="menu-title px-4 py-2 font-bold text-primary truncate max-w-full">
-                {{ authStore.user?.name || 'My Account' }}
-              </li>
-              <li><router-link to="/profile" class="py-3"><UserCircle class="w-4 h-4" /> Profile Info</router-link></li>
-              <li v-if="authStore.user?.role === 'client'"><router-link to="/profile" class="py-3"><Package class="w-4 h-4" /> My Orders</router-link></li>
-              <div class="divider my-0 opacity-50"></div>
-              <li><a @click="handleLogout" class="text-error font-bold py-3"><LogOut class="w-4 h-4" /> Logout</a></li>
-            </template>
-          </ul>
-        </div>
-
-        <button class="btn btn-ghost btn-circle btn-sm md:hidden" @click="toggleMenu">
-          <Menu v-if="!isMenuOpen" class="h-5 w-5" />
-          <X v-else class="h-5 w-5" />
-        </button>
-      </div>
+        <span class="text-xl font-black tracking-tighter uppercase italic">Пиццерия</span>
+      </router-link>
     </div>
-  </div>
 
-  <!-- Mobile Menu Drawer -->
-  <div v-if="isMenuOpen" class="md:hidden bg-base-100 p-4 border-b border-base-200 shadow-xl">
-    <ul class="menu w-full gap-2">
-      <template v-if="authStore.user?.role === 'client' || authStore.user?.role === 'manager' || !authStore.isAuthenticated">
-        <li v-for="link in navLinks" :key="link.path">
-          <router-link :to="link.path" @click="isMenuOpen = false" class="py-3 font-semibold">{{ link.name }}</router-link>
-        </li>
-      </template>
-      <li v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'manager'">
-        <router-link to="/kitchen" @click="isMenuOpen = false" class="py-3 font-bold text-secondary">Kitchen Dashboard</router-link>
-      </li>
-      <li v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'manager'">
-        <router-link to="/logistics" @click="isMenuOpen = false" class="py-3 font-bold text-accent">Logistics Dashboard</router-link>
-      </li>
-    </ul>
+    <div class="flex-none gap-2 md:gap-4">
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center gap-1 mr-4">
+        <!-- Staff specific links -->
+        <template v-if="authStore.isAuthenticated">
+          <router-link v-if="authStore.user?.role === 'chef' || authStore.user?.role === 'manager'" to="/kitchen" class="btn btn-ghost btn-sm gap-2 font-bold uppercase text-[10px] tracking-widest">
+            <ChefHat class="w-4 h-4" /> Кухня
+          </router-link>
+          <router-link v-if="authStore.user?.role === 'courier' || authStore.user?.role === 'manager'" to="/logistics" class="btn btn-ghost btn-sm gap-2 font-bold uppercase text-[10px] tracking-widest">
+            <Truck class="w-4 h-4" /> Доставка
+          </router-link>
+        </template>
+
+        <!-- General links -->
+        <template v-if="!authStore.isAuthenticated || authStore.user?.role === 'client' || authStore.user?.role === 'manager'">
+          <router-link to="/" class="btn btn-ghost btn-sm gap-2 font-bold uppercase text-[10px] tracking-widest">
+            <Menu class="w-4 h-4" /> Меню
+          </router-link>
+          <router-link to="/about" class="btn btn-ghost btn-sm gap-2 font-bold uppercase text-[10px] tracking-widest">
+            <Info class="w-4 h-4" /> О нас
+          </router-link>
+        </template>
+      </div>
+
+      <!-- Cart -->
+      <router-link 
+        v-if="!authStore.isAuthenticated || authStore.user?.role === 'client' || authStore.user?.role === 'manager'" 
+        to="/cart" 
+        class="btn btn-ghost btn-circle relative bg-base-200/50 hover:bg-primary/10 group transition-colors"
+      >
+        <ShoppingCart class="w-5 h-5 group-hover:text-primary transition-colors" />
+        <span v-if="cartStore.totalItems > 0" class="badge badge-primary badge-sm absolute -top-1 -right-1 font-bold animate-in zoom-in h-5 w-5 p-0">
+          {{ cartStore.totalItems }}
+        </span>
+      </router-link>
+
+      <!-- User Menu -->
+      <div v-if="authStore.isAuthenticated" class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost gap-3 px-2 md:px-4 rounded-xl hover:bg-base-200 transition-all">
+          <div class="flex flex-col items-end hidden md:flex">
+            <span class="text-[10px] font-black uppercase opacity-40 leading-none mb-1">{{ authStore.user?.role }}</span>
+            <span class="text-sm font-bold leading-none">{{ authStore.user?.name }}</span>
+          </div>
+          <div class="avatar placeholder">
+            <div class="bg-primary text-primary-content rounded-xl w-10 h-10 shadow-lg shadow-primary/20">
+              <span class="text-xl font-black">{{ authStore.user?.name?.charAt(0).toUpperCase() }}</span>
+            </div>
+          </div>
+        </div>
+        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content bg-base-100 rounded-2xl w-52 border border-base-200">
+          <li class="menu-title opacity-40 uppercase text-[9px] font-black tracking-[0.2em] px-4 py-2">Аккаунт</li>
+          <li><router-link to="/profile" class="py-3 rounded-xl gap-3"><User class="w-4 h-4 opacity-50" /> Профиль</router-link></li>
+          <div class="divider my-1 opacity-50 px-2"></div>
+          <li><button @click="handleLogout" class="text-error py-3 rounded-xl gap-3 hover:bg-error/10"><LogOut class="w-4 h-4" /> Выйти</button></li>
+        </ul>
+      </div>
+
+      <router-link v-else to="/login" class="btn btn-primary rounded-xl px-6 font-black uppercase italic shadow-lg shadow-primary/20">
+        Войти
+      </router-link>
+    </div>
   </div>
 </template>

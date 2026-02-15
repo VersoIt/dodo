@@ -23,7 +23,6 @@ const fetchOrder = async () => {
   }
 }
 
-// Map string statuses to index for the progress bar
 const statusMap: Record<string, number> = {
   'created': 0,
   'paid': 1,
@@ -40,12 +39,12 @@ const getStatusIndex = computed(() => {
 })
 
 const steps = [
-  { label: 'Received', icon: PackageCheck },
-  { label: 'Paid', icon: CreditCard },
-  { label: 'Cooking', icon: ChefHat },
-  { label: 'Ready', icon: CheckCircle2 },
-  { label: 'On the Way', icon: Truck },
-  { label: 'Enjoy!', icon: CheckCircle2 }
+  { label: 'Принят', icon: PackageCheck },
+  { label: 'Оплачен', icon: CreditCard },
+  { label: 'Готовится', icon: ChefHat },
+  { label: 'Готов', icon: CheckCircle2 },
+  { label: 'В пути', icon: Truck },
+  { label: 'Доставлен!', icon: CheckCircle2 }
 ]
 
 const handlePayment = async () => {
@@ -79,14 +78,14 @@ onUnmounted(() => {
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-3xl font-black tracking-tight uppercase">Order Details</h1>
+            <h1 class="text-3xl font-black tracking-tight uppercase">Заказ</h1>
             <div class="badge badge-primary font-bold uppercase text-[10px] tracking-widest px-3 py-3">#{{ order.order_number }}</div>
           </div>
-          <p class="text-base-content/60 mt-1">Status tracked in real-time</p>
+          <p class="text-base-content/60 mt-1">Отслеживание в реальном времени</p>
         </div>
         <div class="badge badge-lg py-4 px-6 gap-2 font-bold uppercase text-xs" 
           :class="order.status === 'completed' ? 'badge-success' : 'badge-warning'">
-          {{ order.status }}
+          {{ order.status === 'completed' ? 'Выполнен' : 'В работе' }}
         </div>
       </div>
 
@@ -94,7 +93,7 @@ onUnmounted(() => {
       <div class="card bg-base-100 shadow-2xl border border-base-200 overflow-hidden">
         <div class="card-body p-8">
           <h2 class="card-title mb-8 text-xl font-bold flex items-center gap-2">
-            <Clock class="w-5 h-5 text-primary" /> Track Order
+            <Clock class="w-5 h-5 text-primary" /> Статус заказа
           </h2>
           <ul class="steps steps-vertical md:steps-horizontal w-full">
             <li 
@@ -116,7 +115,7 @@ onUnmounted(() => {
         <!-- Order Summary -->
         <div class="card bg-base-100 shadow-xl border border-base-200 h-fit">
           <div class="card-body p-8">
-            <h2 class="card-title mb-6 font-bold">Items Summary</h2>
+            <h2 class="card-title mb-6 font-bold">Состав заказа</h2>
             <div class="divide-y divide-base-200">
               <div v-for="item in order.items" :key="item.product_id" class="py-4 flex justify-between items-center">
                 <div>
@@ -125,8 +124,8 @@ onUnmounted(() => {
               </div>
               <div class="pt-6 mt-4 space-y-2">
                 <div class="flex justify-between text-2xl font-black pt-4">
-                  <span>Total</span>
-                  <span class="text-primary">${{ order.final_price ? order.final_price.toFixed(2) : '0.00' }}</span>
+                  <span>Итого</span>
+                  <span class="text-primary">{{ order.final_price?.toLocaleString() }} ₽</span>
                 </div>
               </div>
             </div>
@@ -138,7 +137,7 @@ onUnmounted(() => {
           <div class="card bg-base-100 shadow-xl border border-base-200">
             <div class="card-body p-8">
               <h2 class="card-title mb-4 font-bold flex items-center gap-2">
-                <MapPin class="w-5 h-5 text-error" /> Delivery Address
+                <MapPin class="w-5 h-5 text-error" /> Адрес доставки
               </h2>
               <div class="p-4 bg-base-200/50 rounded-2xl border border-base-300">
                 <p class="font-bold text-lg">{{ order.address?.street }}</p>
@@ -149,10 +148,10 @@ onUnmounted(() => {
 
           <div v-if="order.status === 'created'" class="card bg-primary text-primary-content shadow-xl shadow-primary/20 overflow-hidden">
             <div class="card-body p-8">
-              <h2 class="card-title text-2xl font-black uppercase tracking-tighter">Action Required</h2>
-              <p class="opacity-80">This order is not paid yet. Pay now to start cooking!</p>
+              <h2 class="card-title text-2xl font-black uppercase tracking-tighter">Оплата</h2>
+              <p class="opacity-80">Заказ еще не оплачен. Оплатите его, чтобы мы начали готовить!</p>
               <div class="card-actions mt-4">
-                <button @click="handlePayment" class="btn btn-neutral btn-block btn-lg rounded-xl shadow-xl">Pay Now</button>
+                <button @click="handlePayment" class="btn btn-neutral btn-block btn-lg rounded-xl shadow-xl">Оплатить сейчас</button>
               </div>
             </div>
           </div>
@@ -163,10 +162,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.step::after {
-  @apply bg-base-300 opacity-20;
-}
-.step-primary::after {
-  @apply bg-primary opacity-100;
-}
+.step::after { @apply bg-base-300 opacity-20; }
+.step-primary::after { @apply bg-primary opacity-100; }
 </style>
