@@ -13,7 +13,6 @@ let pollInterval: any = null
 const fetchOrder = async () => {
   try {
     const response = await axios.get(`/api/v1/orders/${orderId}`)
-    // Backend returns { success: true, data: { ... } }
     if (response.data.success) {
       order.value = response.data.data
     }
@@ -83,7 +82,7 @@ onUnmounted(() => {
             <h1 class="text-3xl font-black tracking-tight uppercase">Order Details</h1>
             <div class="badge badge-primary font-bold uppercase text-[10px] tracking-widest px-3 py-3">#{{ order.order_number }}</div>
           </div>
-          <p class="text-base-content/60 mt-1">Placed on Feb 15, 2026</p>
+          <p class="text-base-content/60 mt-1">Status tracked in real-time</p>
         </div>
         <div class="badge badge-lg py-4 px-6 gap-2 font-bold uppercase text-xs" 
           :class="order.status === 'completed' ? 'badge-success' : 'badge-warning'">
@@ -122,22 +121,12 @@ onUnmounted(() => {
               <div v-for="item in order.items" :key="item.product_id" class="py-4 flex justify-between items-center">
                 <div>
                   <p class="font-bold"><span class="text-primary font-black">x{{ item.quantity }}</span> {{ item.product_name }}</p>
-                  <p class="text-xs opacity-50">Customized Pizza</p>
                 </div>
-                <!-- Price might not be in the item response, but final_price is the total -->
               </div>
               <div class="pt-6 mt-4 space-y-2">
-                <div class="flex justify-between text-sm opacity-60">
-                  <span>Subtotal</span>
-                  <span>Calculated at checkout</span>
-                </div>
-                <div class="flex justify-between text-sm opacity-60">
-                  <span>Delivery</span>
-                  <span class="text-success font-bold">FREE</span>
-                </div>
                 <div class="flex justify-between text-2xl font-black pt-4">
                   <span>Total</span>
-                  <span class="text-primary">${{ order.final_price?.toFixed(2) || '0.00' }}</span>
+                  <span class="text-primary">${{ order.final_price ? order.final_price.toFixed(2) : '0.00' }}</span>
                 </div>
               </div>
             </div>
@@ -154,9 +143,6 @@ onUnmounted(() => {
               <div class="p-4 bg-base-200/50 rounded-2xl border border-base-300">
                 <p class="font-bold text-lg">{{ order.address?.street }}</p>
                 <p class="text-base-content/60">{{ order.address?.city }}</p>
-                <p v-if="order.address?.house" class="text-sm mt-2">
-                  House: {{ order.address.house }}, Apt: {{ order.address.apartment }}
-                </p>
               </div>
             </div>
           </div>
@@ -172,12 +158,6 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-    </div>
-
-    <div v-else class="text-center py-20">
-      <h2 class="text-2xl font-bold">Order not found</h2>
-      <p class="mb-8 opacity-60">We couldn't find the details for this order.</p>
-      <router-link to="/" class="btn btn-primary">Go Home</router-link>
     </div>
   </div>
 </template>

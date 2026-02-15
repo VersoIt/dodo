@@ -44,7 +44,7 @@ const categoryMap: Record<string, number> = {
   'Desserts': 5
 }
 
-// Form data for new product
+// Form data for product
 const productForm = ref({
   name: '',
   description: '',
@@ -244,17 +244,18 @@ onMounted(fetchProducts)
       </div>
     </section>
 
-    <!-- UNIFIED MODAL COMPONENT (FOR ALL MODALS) -->
+    <!-- UNIFIED MODAL COMPONENT (NO BLUR) -->
     <Transition name="modal-fade">
       <div v-if="showAuthModal || showAddModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <!-- Backdrop with explicit transition classes -->
+        <!-- Backdrop (Dark only, no blur) -->
         <div 
-          class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
+          class="fixed inset-0 bg-black/70"
           @click="showAuthModal = false; showAddModal = false"
         ></div>
         
-        <!-- Modal Content (Login Required) -->
+        <!-- Modal Content -->
         <Transition name="modal-zoom" appear>
+          <!-- Login Modal -->
           <div v-if="showAuthModal" class="relative bg-base-100 w-full max-w-md rounded-3xl border-t-4 border-primary shadow-2xl overflow-hidden">
             <div class="p-8 flex flex-col items-center text-center">
               <div class="bg-primary/10 p-4 rounded-full mb-6">
@@ -279,7 +280,7 @@ onMounted(fetchProducts)
             </div>
           </div>
 
-          <!-- Modal Content (Add/Edit Product) -->
+          <!-- Add/Edit Product Modal -->
           <div v-else-if="showAddModal" class="relative bg-base-100 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-base-200 overflow-hidden">
             <div class="p-8 md:p-10">
               <div class="flex justify-between items-center mb-8">
@@ -291,7 +292,7 @@ onMounted(fetchProducts)
               </div>
               
               <form @submit.prevent="handleSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <!-- Left Col -->
+                <!-- Form fields remain same -->
                 <div class="space-y-4">
                   <div class="form-control">
                     <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Product Name</span></label>
@@ -300,7 +301,6 @@ onMounted(fetchProducts)
                       <input v-model="productForm.name" type="text" placeholder="e.g. Pepperoni Extreme" class="input input-bordered w-full pl-10 rounded-xl" required />
                     </div>
                   </div>
-
                   <div class="form-control">
                     <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Price ($)</span></label>
                     <div class="relative">
@@ -308,14 +308,12 @@ onMounted(fetchProducts)
                       <input v-model="productForm.price" type="number" step="0.01" placeholder="15.99" class="input input-bordered w-full pl-10 rounded-xl" required />
                     </div>
                   </div>
-
                   <div class="form-control">
                     <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Category</span></label>
                     <select v-model="productForm.categoryId" class="select select-bordered w-full rounded-xl">
                       <option v-for="(val, key) in categoryMap" :key="key" :value="val">{{ key }}</option>
                     </select>
                   </div>
-
                   <div class="form-control pt-2">
                     <label class="label cursor-pointer justify-start gap-4">
                       <input v-model="productForm.isAvailable" type="checkbox" class="checkbox checkbox-secondary checkbox-sm rounded-lg" />
@@ -323,8 +321,6 @@ onMounted(fetchProducts)
                     </label>
                   </div>
                 </div>
-
-                <!-- Right Col -->
                 <div class="space-y-4">
                   <div class="form-control">
                     <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Image URL</span></label>
@@ -333,7 +329,6 @@ onMounted(fetchProducts)
                       <input v-model="productForm.imageUrl" type="text" placeholder="https://images.unsplash.com/..." class="input input-bordered w-full pl-10 rounded-xl" />
                     </div>
                   </div>
-
                   <div class="form-control">
                     <label class="label"><span class="label-text font-bold uppercase text-[10px] opacity-50">Description</span></label>
                     <div class="relative">
@@ -342,7 +337,6 @@ onMounted(fetchProducts)
                     </div>
                   </div>
                 </div>
-
                 <div class="col-span-full mt-6 flex gap-3">
                   <button type="submit" class="btn btn-secondary flex-1 btn-lg rounded-2xl shadow-lg shadow-secondary/20 font-black uppercase" :disabled="isSubmitting">
                     <span v-if="isSubmitting" class="loading loading-spinner"></span>
@@ -364,22 +358,22 @@ onMounted(fetchProducts)
   @apply font-bold !important;
 }
 
-/* Modal Animations */
+/* Modal Animations (Snappier, No Blur) */
 .modal-fade-enter-active, .modal-fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 .modal-fade-enter-from, .modal-fade-leave-to {
   opacity: 0;
 }
 
 .modal-zoom-enter-active {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .modal-zoom-leave-active {
-  transition: all 0.2s ease-in;
+  transition: all 0.15s ease-in;
 }
 .modal-zoom-enter-from, .modal-zoom-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(10px);
+  transform: scale(0.98) translateY(5px);
 }
 </style>

@@ -69,13 +69,6 @@ onMounted(fetchOrderDetails)
           </button>
         </div>
       </div>
-
-      <!-- Live Tip -->
-      <div class="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/30">
-        <span>Pizza Good System</span>
-        <div class="w-1 h-1 bg-base-content/20 rounded-full"></div>
-        <span>2026 Edition</span>
-      </div>
     </div>
   </div>
 </template>
