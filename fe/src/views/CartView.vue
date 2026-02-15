@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '../store/cart'
 import { useRouter } from 'vue-router'
-import { Trash2, Minus, Plus, ShoppingBag, CreditCard, QrCode, ShieldCheck, X } from 'lucide-vue-next'
+import { Trash2, Minus, Plus, ShoppingBag, CreditCard, QrCode, ShieldCheck, X, Check } from 'lucide-vue-next'
 import axios from 'axios'
 import { inject, ref } from 'vue'
 
@@ -49,12 +49,11 @@ const confirmPayment = async () => {
   
   try {
     isPaying.value = true
-    // Simulate API call to pay for order
     const response = await axios.post(`/api/v1/orders/${createdOrderId.value}/pay`)
     
     if (response.data.success) {
       cartStore.clearCart()
-      addToast('Payment successful! Your order is being prepared.', 'success')
+      addToast('Payment successful!', 'success')
       showPaymentModal.value = false
       router.push(`/order/${createdOrderId.value}/success`)
     } else {
@@ -117,7 +116,7 @@ const confirmPayment = async () => {
         </div>
       </div>
 
-      <!-- Summary -->
+      <!-- Summary Card -->
       <div class="lg:col-span-1">
         <div class="card bg-base-100 shadow-2xl border border-primary/10 sticky top-24 overflow-hidden">
           <div class="bg-primary/5 px-6 py-4 border-b border-primary/10">
@@ -152,35 +151,23 @@ const confirmPayment = async () => {
                 Place Order
               </button>
             </div>
-            
-            <div class="mt-6 flex items-center justify-center gap-2 opacity-40">
-              <ShieldCheck class="w-4 h-4" />
-              <span class="text-[10px] font-bold uppercase tracking-widest">Secure Checkout</span>
-            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- PAYMENT MODAL -->
-    <Transition
-      enter-active-class="transition duration-300 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition duration-200 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
+    <!-- UNIFIED PAYMENT MODAL (NO BLUR, SNAPPY ANIMATION) -->
+    <Transition name="modal-fade">
       <div v-if="showPaymentModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-md" @click="!isPaying && (showPaymentModal = false)"></div>
+        <!-- Backdrop -->
+        <div 
+          class="fixed inset-0 bg-black/80" 
+          @click="!isPaying && (showPaymentModal = false)"
+        ></div>
         
-        <Transition
-          appear
-          enter-active-class="transition duration-500 delay-100 ease-out"
-          enter-from-class="opacity-0 translate-y-12 scale-95"
-          enter-to-class="opacity-100 translate-y-0 scale-100"
-        >
-          <div class="relative bg-base-100 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
+        <!-- Modal Content -->
+        <Transition name="modal-zoom" appear>
+          <div class="relative bg-base-100 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
             <!-- Close Button -->
             <button 
               v-if="!isPaying"
@@ -191,18 +178,18 @@ const confirmPayment = async () => {
             </button>
 
             <div class="p-10 flex flex-col items-center">
-              <div class="bg-primary/10 p-4 rounded-3xl mb-6">
+              <div class="bg-primary/10 p-5 rounded-3xl mb-6">
                 <QrCode class="w-12 h-12 text-primary" />
               </div>
-              <h3 class="font-black text-3xl mb-2 text-center leading-tight">Scan to Pay</h3>
-              <p class="text-base-content/60 text-center mb-8 px-4">
-                Total amount: <span class="font-black text-primary">${{ cartStore.totalPrice.toFixed(2) }}</span>
+              <h3 class="font-black text-3xl mb-2 text-center tracking-tighter uppercase italic">Scan to Pay</h3>
+              <p class="text-base-content/50 text-center mb-8 font-medium">
+                Total to pay: <span class="text-primary font-black ml-1">${{ cartStore.totalPrice.toFixed(2) }}</span>
               </p>
 
-              <!-- QR MOCKUP -->
-              <div class="relative bg-white p-6 rounded-[2rem] shadow-inner mb-8 group overflow-hidden">
+              <!-- QR CODE AREA -->
+              <div class="relative bg-white p-8 rounded-[2.5rem] shadow-inner mb-10 group overflow-hidden border-4 border-base-200">
                 <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <svg viewBox="0 0 100 100" class="w-48 h-48 text-black fill-current relative z-10">
+                <svg viewBox="0 0 100 100" class="w-44 h-44 text-black fill-current relative z-10">
                   <path d="M0 0h35v10H10v25H0V0zM65 0h35v35h-10V10H65V0zM0 65h10v25h25v10H0V65zM90 65h10v35H65v-10h25V65z" />
                   <path d="M20 20h15v15H20V20zM65 20h15v15H65V20zM20 65h15v15H20V65z" />
                   <path d="M42 20h16v16h-16V20zM20 42h16v16h-16V42zM42 42h16v16h-16V42zM64 42h16v16h-16V42zM42 64h16v16h-16V64zM64 64h8v8h-8V64zM72 72h8v8h-8V72z" />
@@ -212,16 +199,16 @@ const confirmPayment = async () => {
               <div class="flex flex-col w-full gap-3">
                 <button 
                   @click="confirmPayment" 
-                  class="btn btn-primary btn-xl btn-block rounded-2xl h-16 text-lg font-black shadow-xl shadow-primary/30"
+                  class="btn btn-primary btn-block rounded-2xl h-16 text-lg font-black uppercase shadow-xl shadow-primary/20 tracking-tight"
                   :disabled="isPaying"
                 >
                   <span v-if="isPaying" class="loading loading-spinner"></span>
-                  <Check v-else class="w-6 h-6" />
+                  <Check v-else class="w-6 h-6 mr-2" />
                   Confirm Payment
                 </button>
-                <div class="flex items-center justify-center gap-2 mt-4 opacity-40">
+                <div class="flex items-center justify-center gap-2 mt-4 opacity-30">
                   <ShieldCheck class="w-4 h-4" />
-                  <span class="text-[10px] font-bold uppercase tracking-widest">End-to-End Encrypted</span>
+                  <span class="text-[9px] font-black uppercase tracking-[0.2em]">Secured & Encrypted</span>
                 </div>
               </div>
             </div>
@@ -233,7 +220,22 @@ const confirmPayment = async () => {
 </template>
 
 <style scoped>
-.btn-xl {
-  @apply min-h-[4rem] text-lg;
+/* Unified Snappy Modal Animations */
+.modal-fade-enter-active, .modal-fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.modal-fade-enter-from, .modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-zoom-enter-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-zoom-leave-active {
+  transition: all 0.15s ease-in;
+}
+.modal-zoom-enter-from, .modal-zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.97) translateY(8px);
 }
 </style>
