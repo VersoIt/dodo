@@ -135,6 +135,7 @@ const handleRegister = async () => {
               <option value="client">Client (Hungry Customer)</option>
               <option value="chef">Chef (Master Pizza Maker)</option>
               <option value="courier">Courier (Fast Delivery)</option>
+              <option value="manager">Manager (Staff Supervisor)</option>
             </select>
           </div>
 

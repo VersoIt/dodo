@@ -60,7 +60,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !isAuthenticated) {
     next({ name: 'login' })
-  } else if (to.meta.role && user.role !== to.meta.role && user.role !== 'admin') {
+  } else if (to.meta.role && user.role !== to.meta.role && user.role !== 'manager') {
     next({ name: 'home' })
   } else {
     next()

@@ -15,7 +15,6 @@ import (
 type Role int
 
 const (
-	RoleAdmin   Role = 0
 	RoleManager Role = 1
 	RoleChef    Role = 2
 	RoleCourier Role = 3
@@ -24,8 +23,6 @@ const (
 
 func (r Role) String() string {
 	switch r {
-	case RoleAdmin:
-		return "admin"
 	case RoleManager:
 		return "manager"
 	case RoleChef:
@@ -41,8 +38,6 @@ func (r Role) String() string {
 
 func ParseRole(s string) Role {
 	switch s {
-	case "admin":
-		return RoleAdmin
 	case "manager":
 		return RoleManager
 	case "chef":
