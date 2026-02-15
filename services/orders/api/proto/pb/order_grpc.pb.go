@@ -20,11 +20,16 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	OrderService_CreateOrder_FullMethodName       = "/orders.v1.OrderService/CreateOrder"
-	OrderService_PayOrder_FullMethodName          = "/orders.v1.OrderService/PayOrder"
 	OrderService_GetOrder_FullMethodName          = "/orders.v1.OrderService/GetOrder"
 	OrderService_ListOrders_FullMethodName        = "/orders.v1.OrderService/ListOrders"
 	OrderService_ListAllOrders_FullMethodName     = "/orders.v1.OrderService/ListAllOrders"
 	OrderService_UpdateOrderStatus_FullMethodName = "/orders.v1.OrderService/UpdateOrderStatus"
+	OrderService_PayOrder_FullMethodName          = "/orders.v1.OrderService/PayOrder"
+	OrderService_CreatePromoCode_FullMethodName   = "/orders.v1.OrderService/CreatePromoCode"
+	OrderService_ListPromos_FullMethodName        = "/orders.v1.OrderService/ListPromos"
+	OrderService_DeletePromo_FullMethodName       = "/orders.v1.OrderService/DeletePromo"
+	OrderService_CheckPromoCode_FullMethodName    = "/orders.v1.OrderService/CheckPromoCode"
+	OrderService_GetAnalytics_FullMethodName      = "/orders.v1.OrderService/GetAnalytics"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -32,11 +37,18 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderServiceClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error)
-	PayOrder(ctx context.Context, in *PayOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error)
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error)
 	ListOrders(ctx context.Context, in *ListOrdersRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error)
 	ListAllOrders(ctx context.Context, in *ListAllOrdersRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error)
 	UpdateOrderStatus(ctx context.Context, in *UpdateOrderStatusRequest, opts ...grpc.CallOption) (*OrderResponse, error)
+	PayOrder(ctx context.Context, in *PayOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error)
+	// Promo Codes
+	CreatePromoCode(ctx context.Context, in *CreatePromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error)
+	ListPromos(ctx context.Context, in *ListPromosRequest, opts ...grpc.CallOption) (*ListPromosResponse, error)
+	DeletePromo(ctx context.Context, in *DeletePromoRequest, opts ...grpc.CallOption) (*PromoDeleteResponse, error)
+	CheckPromoCode(ctx context.Context, in *CheckPromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error)
+	// Analytics
+	GetAnalytics(ctx context.Context, in *GetAnalyticsRequest, opts ...grpc.CallOption) (*AnalyticsResponse, error)
 }
 
 type orderServiceClient struct {
@@ -51,16 +63,6 @@ func (c *orderServiceClient) CreateOrder(ctx context.Context, in *CreateOrderReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OrderResponse)
 	err := c.cc.Invoke(ctx, OrderService_CreateOrder_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *orderServiceClient) PayOrder(ctx context.Context, in *PayOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OrderResponse)
-	err := c.cc.Invoke(ctx, OrderService_PayOrder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -107,16 +109,83 @@ func (c *orderServiceClient) UpdateOrderStatus(ctx context.Context, in *UpdateOr
 	return out, nil
 }
 
+func (c *orderServiceClient) PayOrder(ctx context.Context, in *PayOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OrderResponse)
+	err := c.cc.Invoke(ctx, OrderService_PayOrder_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) CreatePromoCode(ctx context.Context, in *CreatePromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PromoCodeResponse)
+	err := c.cc.Invoke(ctx, OrderService_CreatePromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) ListPromos(ctx context.Context, in *ListPromosRequest, opts ...grpc.CallOption) (*ListPromosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPromosResponse)
+	err := c.cc.Invoke(ctx, OrderService_ListPromos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) DeletePromo(ctx context.Context, in *DeletePromoRequest, opts ...grpc.CallOption) (*PromoDeleteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PromoDeleteResponse)
+	err := c.cc.Invoke(ctx, OrderService_DeletePromo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) CheckPromoCode(ctx context.Context, in *CheckPromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PromoCodeResponse)
+	err := c.cc.Invoke(ctx, OrderService_CheckPromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) GetAnalytics(ctx context.Context, in *GetAnalyticsRequest, opts ...grpc.CallOption) (*AnalyticsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AnalyticsResponse)
+	err := c.cc.Invoke(ctx, OrderService_GetAnalytics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
 type OrderServiceServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*OrderResponse, error)
-	PayOrder(context.Context, *PayOrderRequest) (*OrderResponse, error)
 	GetOrder(context.Context, *GetOrderRequest) (*OrderResponse, error)
 	ListOrders(context.Context, *ListOrdersRequest) (*ListOrdersResponse, error)
 	ListAllOrders(context.Context, *ListAllOrdersRequest) (*ListOrdersResponse, error)
 	UpdateOrderStatus(context.Context, *UpdateOrderStatusRequest) (*OrderResponse, error)
+	PayOrder(context.Context, *PayOrderRequest) (*OrderResponse, error)
+	// Promo Codes
+	CreatePromoCode(context.Context, *CreatePromoCodeRequest) (*PromoCodeResponse, error)
+	ListPromos(context.Context, *ListPromosRequest) (*ListPromosResponse, error)
+	DeletePromo(context.Context, *DeletePromoRequest) (*PromoDeleteResponse, error)
+	CheckPromoCode(context.Context, *CheckPromoCodeRequest) (*PromoCodeResponse, error)
+	// Analytics
+	GetAnalytics(context.Context, *GetAnalyticsRequest) (*AnalyticsResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -130,9 +199,6 @@ type UnimplementedOrderServiceServer struct{}
 func (UnimplementedOrderServiceServer) CreateOrder(context.Context, *CreateOrderRequest) (*OrderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) PayOrder(context.Context, *PayOrderRequest) (*OrderResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method PayOrder not implemented")
-}
 func (UnimplementedOrderServiceServer) GetOrder(context.Context, *GetOrderRequest) (*OrderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrder not implemented")
 }
@@ -144,6 +210,24 @@ func (UnimplementedOrderServiceServer) ListAllOrders(context.Context, *ListAllOr
 }
 func (UnimplementedOrderServiceServer) UpdateOrderStatus(context.Context, *UpdateOrderStatusRequest) (*OrderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateOrderStatus not implemented")
+}
+func (UnimplementedOrderServiceServer) PayOrder(context.Context, *PayOrderRequest) (*OrderResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PayOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) CreatePromoCode(context.Context, *CreatePromoCodeRequest) (*PromoCodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePromoCode not implemented")
+}
+func (UnimplementedOrderServiceServer) ListPromos(context.Context, *ListPromosRequest) (*ListPromosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPromos not implemented")
+}
+func (UnimplementedOrderServiceServer) DeletePromo(context.Context, *DeletePromoRequest) (*PromoDeleteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeletePromo not implemented")
+}
+func (UnimplementedOrderServiceServer) CheckPromoCode(context.Context, *CheckPromoCodeRequest) (*PromoCodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CheckPromoCode not implemented")
+}
+func (UnimplementedOrderServiceServer) GetAnalytics(context.Context, *GetAnalyticsRequest) (*AnalyticsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAnalytics not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 func (UnimplementedOrderServiceServer) testEmbeddedByValue()                      {}
@@ -180,24 +264,6 @@ func _OrderService_CreateOrder_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrderServiceServer).CreateOrder(ctx, req.(*CreateOrderRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _OrderService_PayOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PayOrderRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrderServiceServer).PayOrder(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrderService_PayOrder_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).PayOrder(ctx, req.(*PayOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -274,6 +340,114 @@ func _OrderService_UpdateOrderStatus_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_PayOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PayOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).PayOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_PayOrder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).PayOrder(ctx, req.(*PayOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_CreatePromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePromoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).CreatePromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_CreatePromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).CreatePromoCode(ctx, req.(*CreatePromoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_ListPromos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPromosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).ListPromos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_ListPromos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).ListPromos(ctx, req.(*ListPromosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_DeletePromo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePromoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).DeletePromo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_DeletePromo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).DeletePromo(ctx, req.(*DeletePromoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_CheckPromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckPromoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).CheckPromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_CheckPromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).CheckPromoCode(ctx, req.(*CheckPromoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_GetAnalytics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAnalyticsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).GetAnalytics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_GetAnalytics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).GetAnalytics(ctx, req.(*GetAnalyticsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -284,10 +458,6 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateOrder",
 			Handler:    _OrderService_CreateOrder_Handler,
-		},
-		{
-			MethodName: "PayOrder",
-			Handler:    _OrderService_PayOrder_Handler,
 		},
 		{
 			MethodName: "GetOrder",
@@ -304,6 +474,30 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateOrderStatus",
 			Handler:    _OrderService_UpdateOrderStatus_Handler,
+		},
+		{
+			MethodName: "PayOrder",
+			Handler:    _OrderService_PayOrder_Handler,
+		},
+		{
+			MethodName: "CreatePromoCode",
+			Handler:    _OrderService_CreatePromoCode_Handler,
+		},
+		{
+			MethodName: "ListPromos",
+			Handler:    _OrderService_ListPromos_Handler,
+		},
+		{
+			MethodName: "DeletePromo",
+			Handler:    _OrderService_DeletePromo_Handler,
+		},
+		{
+			MethodName: "CheckPromoCode",
+			Handler:    _OrderService_CheckPromoCode_Handler,
+		},
+		{
+			MethodName: "GetAnalytics",
+			Handler:    _OrderService_GetAnalytics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

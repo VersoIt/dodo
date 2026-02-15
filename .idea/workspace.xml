@@ -4,7 +4,72 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="" />
+    <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/App.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/App.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/api/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/api/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/components/Navbar.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/components/Navbar.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/components/Navbar.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/components/Navbar.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/main.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/main.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/router/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/router/index.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/store/cart.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/store/cart.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/AboutView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/AboutView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/AboutView.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/AboutView.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/CartView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/CartView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/CartView.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/CartView.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/HomeView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/HomeView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/HomeView.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/HomeView.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/KitchenView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/KitchenView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/LoginView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/LoginView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/LoginView.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/LoginView.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/LogisticsView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/LogisticsView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/ManagerView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ManagerView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/OrderView.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/OrderView.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/RegisterView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/RegisterView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/RegisterView.vue.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/RegisterView.vue.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work" beforeDir="false" afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/order.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/order.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/api/grpc/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/api/grpc/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/usecase/usecase.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/go.sum" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -46,34 +111,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go Build.go build github.com/versoit/diploma/services/analytics/cmd.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Ruslan/GolandProjects/diploma&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go Build.go build github.com/versoit/diploma/services/analytics/cmd.executor": "Run",
+    "Go Build.go build github.com/versoit/diploma/services/orders/cmd.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.GoLinterPluginOnboarding": "true",
+    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "master",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Ruslan/GolandProjects/diploma",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Ruslan\GolandProjects\diploma" />
@@ -82,7 +148,7 @@
       <recent name="C:\Users\Ruslan\GolandProjects\diploma" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Go Build.go build github.com/versoit/diploma/services/orders/cmd">
     <configuration name="go build github.com/versoit/diploma/services/analytics/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="diploma" />
       <working_directory value="$PROJECT_DIR$/services/analytics" />
@@ -92,8 +158,18 @@
       <filePath value="$PROJECT_DIR$/services/analytics/cmd/main.go" />
       <method v="2" />
     </configuration>
+    <configuration name="go build github.com/versoit/diploma/services/orders/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="diploma" />
+      <working_directory value="$PROJECT_DIR$/services/orders" />
+      <kind value="PACKAGE" />
+      <package value="github.com/versoit/diploma/services/orders/cmd" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/services/orders/cmd/main.go" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build github.com/versoit/diploma/services/orders/cmd" />
         <item itemvalue="Go Build.go build github.com/versoit/diploma/services/analytics/cmd" />
       </list>
     </recent_temporary>

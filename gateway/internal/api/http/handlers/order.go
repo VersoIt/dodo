@@ -15,145 +15,121 @@ type OrderHandler struct {
 }
 
 func NewOrderHandler(log *slog.Logger, client orders_pb.OrderServiceClient) *OrderHandler {
-	return &OrderHandler{
-		log:    log,
-		client: client,
-	}
+	return &OrderHandler{log: log, client: client}
 }
 
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
-	
 	var req struct {
-		Items []struct {
-			ProductID string `json:"product_id"`
-			Quantity  int    `json:"quantity"`
-		} `json:"items"`
-		Address struct {
-			Street string `json:"street"`
-			City   string `json:"city"`
-		} `json:"address"`
+		Items []struct { ProductID string `json:"product_id"`; Quantity int `json:"quantity"` } `json:"items"`
+		Address struct { City string `json:"city"`; Street string `json:"street"`; House string `json:"house"`; Apartment string `json:"apartment"`; Floor string `json:"floor"`; Entrance string `json:"entrance"`; Comment string `json:"comment"` } `json:"address"`
+		PromoCode string `json:"promo_code"`
 	}
-
-	if err := c.BodyParser(&req); err != nil {
-		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request body")
-	}
-
+	if err := c.BodyParser(&req); err != nil { return ErrorResponse(c, fiber.StatusBadRequest, "invalid request") }
 	pbItems := make([]*orders_pb.OrderItem, len(req.Items))
-	for i, item := range req.Items {
-		pbItems[i] = &orders_pb.OrderItem{
-			ProductId: item.ProductID,
-			Quantity:  int32(item.Quantity),
-		}
-	}
-
+	for i, it := range req.Items { pbItems[i] = &orders_pb.OrderItem{ProductId: it.ProductID, Quantity: int32(it.Quantity)} }
+	
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	resp, err := h.client.CreateOrder(ctx, &orders_pb.CreateOrderRequest{
-		CustomerId: userID,
-		Items:      pbItems,
-		Address: &orders_pb.Address{
-			Street: req.Address.Street,
-			City:   req.Address.City,
-		},
+		CustomerId: userID, Items: pbItems,
+		Address: &orders_pb.Address{City: req.Address.City, Street: req.Address.Street, House: req.Address.House, Apartment: req.Address.Apartment, Floor: req.Address.Floor, Entrance: req.Address.Entrance, Comment: req.Address.Comment},
+		PromoCode: req.PromoCode,
 	})
-	if err != nil {
-		return HandleGrpcError(c, h.log, err, "failed to create order")
-	}
-
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to create order") }
 	return SuccessResponse(c, resp)
 }
 
 func (h *OrderHandler) GetOrderStatus(c *fiber.Ctx) error {
 	id := c.Params("id")
-	
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	resp, err := h.client.GetOrder(ctx, &orders_pb.GetOrderRequest{OrderId: id})
-	if err != nil {
-		return HandleGrpcError(c, h.log, err, "failed to get order")
-	}
-
+	if err != nil { return HandleGrpcError(c, h.log, err, "not found") }
 	return SuccessResponse(c, resp)
 }
 
 func (h *OrderHandler) ListOrders(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
-
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	resp, err := h.client.ListOrders(ctx, &orders_pb.ListOrdersRequest{CustomerId: userID})
-	if err != nil {
-		return HandleGrpcError(c, h.log, err, "failed to list orders")
-	}
-
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to list") }
 	return SuccessResponse(c, resp.Orders)
 }
 
 func (h *OrderHandler) ListAllOrders(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	resp, err := h.client.ListAllOrders(ctx, &orders_pb.ListAllOrdersRequest{})
-	if err != nil {
-		return HandleGrpcError(c, h.log, err, "failed to list orders")
-	}
-
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to list") }
 	return SuccessResponse(c, resp.Orders)
 }
 
 func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
-	id := c.Params("id")
-	
-	// GET USER ID FROM LOCALS
-	uID := c.Locals("user_id")
-	userID, ok := uID.(string)
-	if !ok || userID == "" {
-		h.log.Error("CRITICAL: user_id not found in locals in UpdateOrderStatus")
-		return ErrorResponse(c, fiber.StatusUnauthorized, "user identification failed")
-	}
-	
-	type Request struct {
-		Status string `json:"status"`
-	}
-	req := new(Request)
-	if err := c.BodyParser(req); err != nil {
-		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request")
-	}
-
-	h.log.Info("GATEWAY: Updating status", 
-		slog.String("order_id", id), 
-		slog.String("status", req.Status), 
-		slog.String("performer_id", userID))
-
+	id := c.Params("id"); userID := c.Locals("user_id").(string)
+	var req struct { Status string `json:"status"` }
+	if err := c.BodyParser(&req); err != nil { return ErrorResponse(c, fiber.StatusBadRequest, "invalid request") }
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	resp, err := h.client.UpdateOrderStatus(ctx, &orders_pb.UpdateOrderStatusRequest{
-		OrderId:     id,
-		Status:      req.Status,
-		PerformerId: userID,
-	})
-	if err != nil {
-		return HandleGrpcError(c, h.log, err, "failed to update status")
-	}
-
+	resp, err := h.client.UpdateOrderStatus(ctx, &orders_pb.UpdateOrderStatusRequest{OrderId: id, Status: req.Status, PerformerId: userID})
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed update") }
 	return SuccessResponse(c, resp)
 }
 
 func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
-	
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	resp, err := h.client.PayOrder(ctx, &orders_pb.PayOrderRequest{OrderId: id})
-	if err != nil {
-		return HandleGrpcError(c, h.log, err, "payment failed")
-	}
+	if err != nil { return HandleGrpcError(c, h.log, err, "payment failed") }
+	return SuccessResponse(c, resp)
+}
 
+// --- Promo Codes ---
+
+func (h *OrderHandler) CreatePromoCode(c *fiber.Ctx) error {
+	var req struct { Code string `json:"code"`; Type string `json:"type"`; Amount float64 `json:"amount"` }
+	if err := c.BodyParser(&req); err != nil { return ErrorResponse(c, fiber.StatusBadRequest, "invalid request") }
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.CreatePromoCode(ctx, &orders_pb.CreatePromoCodeRequest{Code: req.Code, Type: req.Type, Amount: req.Amount})
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to create promo") }
+	return SuccessResponse(c, resp)
+}
+
+func (h *OrderHandler) ListPromos(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.ListPromos(ctx, &orders_pb.ListPromosRequest{})
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to list promos") }
+	return SuccessResponse(c, resp.Promos)
+}
+
+func (h *OrderHandler) DeletePromo(c *fiber.Ctx) error {
+	id := c.Params("id")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.DeletePromo(ctx, &orders_pb.DeletePromoRequest{Id: id})
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to delete") }
+	return SuccessResponse(c, resp)
+}
+
+func (h *OrderHandler) CheckPromoCode(c *fiber.Ctx) error {
+	code := c.Params("code")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.CheckPromoCode(ctx, &orders_pb.CheckPromoCodeRequest{Code: code})
+	if err != nil { return HandleGrpcError(c, h.log, err, "promo not found") }
+	return SuccessResponse(c, resp)
+}
+
+// --- Analytics ---
+
+func (h *OrderHandler) GetAnalytics(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.GetAnalytics(ctx, &orders_pb.GetAnalyticsRequest{})
+	if err != nil { return HandleGrpcError(c, h.log, err, "failed to get analytics") }
 	return SuccessResponse(c, resp)
 }

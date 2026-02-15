@@ -47,9 +47,19 @@ func SetupRoutes(
 	orders.Post("/", orderHandler.CreateOrder)
 	orders.Get("/my", orderHandler.ListOrders)
 	orders.Get("/all", middleware.RequireRole("chef", "courier", "manager"), orderHandler.ListAllOrders)
+	orders.Get("/analytics", middleware.RequireRole("manager"), orderHandler.GetAnalytics)
 	orders.Get("/:id", orderHandler.GetOrderStatus)
 	orders.Patch("/:id/status", middleware.RequireRole("chef", "courier", "manager"), orderHandler.UpdateOrderStatus)
 	orders.Post("/:id/pay", orderHandler.PayOrder)
+
+	// Public/Client Promo check (Accessible by any authenticated user)
+	protected.Get("/promos/check/:code", orderHandler.CheckPromoCode)
+
+	// Promo Codes (Manager only)
+	promos := protected.Group("/promos", middleware.RequireRole("manager"))
+	promos.Get("/", orderHandler.ListPromos)
+	promos.Post("/", orderHandler.CreatePromoCode)
+	promos.Delete("/:id", orderHandler.DeletePromo)
 
 	// Kitchen (Internal flow for cooks)
 	kitchen := protected.Group("/kitchen", middleware.RequireRole("chef", "manager"))

@@ -16,6 +16,11 @@ export const ordersApi = {
   getOrder: (id: string) => axios.get(`/api/v1/orders/${id}`).then(r => r.data),
   updateStatus: (id: string, status: string) => axios.patch(`/api/v1/orders/${id}/status`, { status }).then(r => r.data),
   payOrder: (id: string) => axios.post(`/api/v1/orders/${id}/pay`).then(r => r.data),
+  getAnalytics: () => axios.get('/api/v1/orders/analytics').then(r => r.data),
+  listPromos: () => axios.get('/api/v1/promos').then(r => r.data),
+  createPromoCode: (data: any) => axios.post('/api/v1/promos', data).then(r => r.data),
+  deletePromo: (id: string) => axios.delete(`/api/v1/promos/${id}`).then(r => r.data),
+  checkPromoCode: (code: string) => axios.get(`/api/v1/promos/check/${code}`).then(r => r.data),
 }
 
 // --- Auth API ---

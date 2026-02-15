@@ -4,31 +4,33 @@ option go_package = "./pb;orders_pb";
 
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
-  rpc PayOrder(PayOrderRequest) returns (OrderResponse);
   rpc GetOrder(GetOrderRequest) returns (OrderResponse);
   rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
   rpc ListAllOrders(ListAllOrdersRequest) returns (ListOrdersResponse);
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
+  rpc PayOrder(PayOrderRequest) returns (OrderResponse);
+
+  // Promo Codes
+  rpc CreatePromoCode(CreatePromoCodeRequest) returns (PromoCodeResponse);
+  rpc ListPromos(ListPromosRequest) returns (ListPromosResponse);
+  rpc DeletePromo(DeletePromoRequest) returns (PromoDeleteResponse);
+  rpc CheckPromoCode(CheckPromoCodeRequest) returns (PromoCodeResponse);
+
+  // Analytics
+  rpc GetAnalytics(GetAnalyticsRequest) returns (AnalyticsResponse);
 }
 
-message ListAllOrdersRequest {}
-
-message UpdateOrderStatusRequest {
-  string order_id = 1;
-  string status = 2;
-  string performer_id = 3;
-}
-
-message GetOrderRequest {
-  string order_id = 1;
-}
-
-message ListOrdersRequest {
+message CreateOrderRequest {
   string customer_id = 1;
+  repeated OrderItem items = 2;
+  Address address = 3;
+  string promo_code = 4;
 }
 
-message ListOrdersResponse {
-  repeated OrderResponse orders = 1;
+message OrderItem {
+  string product_id = 1;
+  int32 quantity = 2;
+  string product_name = 3;
 }
 
 message Address {
@@ -37,23 +39,8 @@ message Address {
   string house = 3;
   string apartment = 4;
   string floor = 5;
-  string comment = 6;
-}
-
-message OrderItem {
-  string product_id = 1;
-  string product_name = 2;
-  int32 quantity = 3;
-}
-
-message CreateOrderRequest {
-  string customer_id = 1;
-  Address address = 2;
-  repeated OrderItem items = 3;
-}
-
-message PayOrderRequest {
-  string order_id = 1;
+  string entrance = 6;
+  string comment = 7;
 }
 
 message OrderResponse {
@@ -65,4 +52,53 @@ message OrderResponse {
   repeated OrderItem items = 6;
   string chef_id = 7;
   string courier_id = 8;
+}
+
+message GetOrderRequest { string order_id = 1; }
+message ListOrdersRequest { string customer_id = 1; }
+message ListAllOrdersRequest {}
+message ListOrdersResponse { repeated OrderResponse orders = 1; }
+
+message UpdateOrderStatusRequest {
+  string order_id = 1;
+  string status = 2;
+  string performer_id = 3;
+}
+
+message PayOrderRequest { string order_id = 1; }
+
+// --- Promo Codes ---
+message CreatePromoCodeRequest {
+  string code = 1;
+  string type = 2;
+  double amount = 3;
+}
+
+message PromoCodeResponse {
+  string id = 1;
+  string code = 2;
+  string type = 3;
+  double amount = 4;
+  bool active = 5;
+}
+
+message ListPromosRequest {}
+message ListPromosResponse { repeated PromoCodeResponse promos = 1; }
+message DeletePromoRequest { string id = 1; }
+message PromoDeleteResponse { bool success = 1; }
+message CheckPromoCodeRequest { string code = 1; }
+
+// --- Analytics ---
+message GetAnalyticsRequest {}
+message AnalyticsResponse {
+  double total_revenue = 1;
+  int32 orders_count = 2;
+  double avg_check = 3;
+  repeated ProductStat top_products = 4;
+}
+
+message ProductStat {
+  string name = 1;
+  int32 count = 2;
+  double revenue = 3;
 }

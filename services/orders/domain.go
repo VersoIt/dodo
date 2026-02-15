@@ -32,6 +32,7 @@ type DeliveryAddress struct {
 	House     string
 	Apartment string
 	Floor     string
+	Entrance  string
 	Comment   string
 }
 
@@ -122,6 +123,37 @@ func (i *OrderItem) Size() float64           { return i.sizeMultiplier }
 func (i *OrderItem) Toppings() []Topping     { return i.toppings }
 
 // --- Aggregate Root ---
+
+type PromoCode struct {
+	id             string
+	code           string
+	discountType   string // "percent", "fixed"
+	discountAmount common.Money
+	isActive       bool
+	expiresAt      time.Time
+}
+
+func (p *PromoCode) CalculateDiscount(basePrice common.Money) common.Money {
+	if !p.isActive || (!p.expiresAt.IsZero() && time.Now().After(p.expiresAt)) {
+		return common.ZeroMoney()
+	}
+
+	if p.discountType == "percent" {
+		discount := basePrice.InexactFloat64() * (p.discountAmount.InexactFloat64() / 100.0)
+		return common.NewMoney(discount)
+	}
+	return p.discountAmount
+}
+
+func (p *PromoCode) ID() string             { return p.id }
+func (p *PromoCode) Code() string           { return p.code }
+func (p *PromoCode) DiscountType() string   { return p.discountType }
+func (p *PromoCode) DiscountAmount() common.Money { return p.discountAmount }
+func (p *PromoCode) IsActive() bool         { return p.isActive }
+
+func NewPromoCode(id, code, dType string, amount common.Money, active bool, expires time.Time) *PromoCode {
+	return &PromoCode{id, code, dType, amount, active, expires}
+}
 
 type Order struct {
 	id          string
@@ -340,6 +372,28 @@ type OrderRepository interface {
 	FindByID(ctx context.Context, id string) (*Order, error)
 	FindByCustomerID(ctx context.Context, customerID string) ([]*Order, error)
 	FindAll(ctx context.Context) ([]*Order, error)
+
+	// Promo codes
+	SavePromo(ctx context.Context, p *PromoCode) error
+	FindPromoByCode(ctx context.Context, code string) (*PromoCode, error)
+	ListPromos(ctx context.Context) ([]*PromoCode, error)
+	DeletePromo(ctx context.Context, id string) error
+
+	// Analytics
+	GetKPIs(ctx context.Context) (*OrderStats, error)
+	GetTopProducts(ctx context.Context, limit int) ([]ProductStat, error)
+}
+
+type OrderStats struct {
+	TotalRevenue float64
+	OrdersCount  int
+	AvgCheck     float64
+}
+
+type ProductStat struct {
+	Name    string
+	Count   int
+	Revenue float64
 }
 
 type ProductInfo struct {
