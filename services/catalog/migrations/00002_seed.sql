@@ -17,13 +17,13 @@ INSERT INTO products (id, name, description, category, base_price, is_available,
 ('019c53e1-4f90-7373-8d00-6472a7dc3113', 'Мясная Халапеньо', 'Бекон, ветчина, говядина и очень много перца халапеньо для любителей поострее.', 3, 720.00, TRUE, 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=800&q=80'),
 
 -- Напитки (Category 4)
-('019c53e1-4f90-7373-8d00-6472a7dc3117', 'Кола Крафт', 'Ремесленная кола на натуральных травах и специях. 0.5л', 4, 150.00, TRUE, 'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=800&q=80'),
+('019c53e1-4f90-7373-8d00-6472a7dc3117', 'Кола Крафт', 'Ремесленная кола на натуральных травах и специях. 0.5л', 4, 150.00, TRUE, 'https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=800&q=80'),
 ('019c53e1-4f90-7373-8d00-6472a7dc3118', 'Домашний Лимонад', 'Свежевыжатые лимоны, мята и капля меда. 0.5л', 4, 180.00, TRUE, 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80'),
 ('019c53e1-4f90-7373-8d00-6472a7dc3119', 'Апельсиновый сок', '100% натуральный сок прямого отжима. 0.3л', 4, 220.00, TRUE, 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=800&q=80'),
 
 -- Десерты (Category 5)
 ('019c53e1-4f90-7373-8d00-6472a7dc3115', 'Чизкейк Нью-Йорк', 'Классический сливочный чизкейк на песочной основе с ягодным конфитюром.', 5, 320.00, TRUE, 'https://images.unsplash.com/photo-1524351199678-941a58a3df50?auto=format&fit=crop&w=800&q=80'),
-('019c53e1-4f90-7373-8d00-6472a7dc3116', 'Шоколадный Брауни', 'Теплый, тягучий брауни с кусочками грецкого ореха и бельгийским шоколадом.', 5, 280.00, TRUE, 'https://images.unsplash.com/photo-1606313564200-e75d5e30476d?auto=format&fit=crop&w=800&q=80');
+('019c53e1-4f90-7373-8d00-6472a7dc3116', 'Шоколадный Брауни', 'Теплый, тягучий брауни с кусочками грецкого ореха и бельгийским шоколадом.', 5, 280.00, TRUE, 'https://images.unsplash.com/photo-1515037893149-de7f840978e2?auto=format&fit=crop&w=800&q=80');
 -- +goose StatementEnd
 
 -- +goose Down
