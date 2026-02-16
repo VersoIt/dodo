@@ -117,7 +117,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
 
 func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	resp, err := h.client.PayOrder(ctx, &orders_pb.PayOrderRequest{OrderId: id})
 	if err != nil { return HandleGrpcError(c, h.log, err, "payment failed") }

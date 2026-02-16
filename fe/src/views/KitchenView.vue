@@ -2,7 +2,7 @@
 import { ref, onMounted, inject, computed, watch } from 'vue'
 import { ChefHat, Clock, CheckCircle2, Play, User, AlertCircle } from 'lucide-vue-next'
 import { useAuthStore } from '../store/auth'
-import { ordersApi } from '../api'
+import { kitchenApi } from '../api'
 import { ORDER_STATUS } from '../constants'
 import { shortId } from '../utils/format'
 import AppModal from '../components/shared/AppModal.vue'
@@ -13,13 +13,22 @@ const authStore = useAuthStore()
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const showConfirmModal = ref(false)
-const pendingAction = ref<{ orderId: string, status: string, title: string, description: string } | null>(null)
+const pendingAction = ref<{ ticketId: string, status: string, title: string, description: string } | null>(null)
 
 const fetchKitchenOrders = async () => {
   try {
     loading.value = true
-    const res = await ordersApi.getAllOrders()
-    if (res.success) orders.value = res.data || []
+    const res = await kitchenApi.listTickets()
+    if (res.success && res.data) {
+      // Map ticket status to ORDER_STATUS if needed, but they are similar
+      // kitchen uses 'queued', 'cooking', 'ready'
+      // we can map 'queued' to ORDER_STATUS.PAID for consistency with UI
+      orders.value = (res.data.tickets || []).map((t: any) => ({
+        ...t,
+        status: t.status === 'queued' ? ORDER_STATUS.PAID : t.status,
+        order_number: t.order_number || `ORD-${t.order_id.split('-').pop()}`
+      }))
+    }
   } catch (err) {
     console.error('Failed to fetch orders:', err)
   } finally {
@@ -28,20 +37,17 @@ const fetchKitchenOrders = async () => {
 }
 
 const filteredOrders = computed(() => {
-  const myId = authStore.user?.id || authStore.user?.user_id
-  if (!myId) return []
+  if (!authStore.user) return []
   return orders.value.filter((o: any) => {
-    const chefId = o.chef_id || o.chefId
-    const isUnassignedPaid = o.status === ORDER_STATUS.PAID && (!chefId || chefId === "")
-    const isMyActiveCooking = o.status === ORDER_STATUS.COOKING && chefId === myId
-    return isUnassignedPaid || isMyActiveCooking
+    // Tickets are already filtered by kitchen service to only pending/active
+    return o.status === ORDER_STATUS.PAID || o.status === ORDER_STATUS.COOKING
   })
 })
 
 const openConfirm = (order: any, nextStatus: string) => {
   const isStart = nextStatus === ORDER_STATUS.COOKING
   pendingAction.value = {
-    orderId: order.order_id, status: nextStatus, title: isStart ? 'Принять заказ?' : 'Завершить готовку?',
+    ticketId: order.id, status: nextStatus, title: isStart ? 'Принять заказ?' : 'Завершить готовку?',
     description: isStart ? `Взять заказ #${order.order_number.split('-').pop()} в работу?` : 'Подтвердите, что пицца готова к выдаче курьеру.'
   }
   showConfirmModal.value = true
@@ -50,8 +56,8 @@ const openConfirm = (order: any, nextStatus: string) => {
 const handleConfirm = async () => {
   if (!pendingAction.value) return
   try {
-    const { orderId, status } = pendingAction.value
-    await ordersApi.updateStatus(orderId, status)
+    const { ticketId, status } = pendingAction.value
+    await kitchenApi.updateStatus(ticketId, status)
     addToast(status === ORDER_STATUS.COOKING ? 'Вы начали готовить' : 'Заказ готов!', 'success')
     showConfirmModal.value = false; pendingAction.value = null; await fetchKitchenOrders()
   } catch (err: any) {

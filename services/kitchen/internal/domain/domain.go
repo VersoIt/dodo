@@ -32,6 +32,7 @@ func (s TicketStatus) String() string {
 type KitchenTicket struct {
 	id               string
 	orderID          string
+	orderNumber      string
 	items            []KitchenItem
 	status           TicketStatus
 	createdAt        time.Time
@@ -47,14 +48,15 @@ type KitchenItem struct {
 	Comment     string
 }
 
-func NewTicket(orderID string, items []KitchenItem) *KitchenTicket {
+func NewTicket(orderID string, orderNumber string, items []KitchenItem) *KitchenTicket {
 	id, _ := uuid.NewV7()
 	return &KitchenTicket{
-		id:        id.String(),
-		orderID:   orderID,
-		items:     items,
-		status:    TicketQueued,
-		createdAt: time.Now(),
+		id:          id.String(),
+		orderID:     orderID,
+		orderNumber: orderNumber,
+		items:       items,
+		status:      TicketQueued,
+		createdAt:   time.Now(),
 	}
 }
 
@@ -85,6 +87,7 @@ func (t *KitchenTicket) GetCookingDuration() time.Duration {
 
 func (t *KitchenTicket) ID() string           { return t.id }
 func (t *KitchenTicket) OrderID() string      { return t.orderID }
+func (t *KitchenTicket) OrderNumber() string  { return t.orderNumber }
 func (t *KitchenTicket) Status() TicketStatus { return t.status }
 func (t *KitchenTicket) Items() []KitchenItem { return t.items }
 func (t *KitchenTicket) CreatedAt() time.Time { return t.createdAt }
@@ -92,10 +95,11 @@ func (t *KitchenTicket) StartTime() time.Time { return t.startCookingTime }
 func (t *KitchenTicket) ReadyTime() time.Time { return t.readyTime }
 
 // ReconstructTicket builds a KitchenTicket from storage.
-func ReconstructTicket(id, orderID string, status TicketStatus, createdAt, start, ready time.Time, items []KitchenItem) *KitchenTicket {
+func ReconstructTicket(id, orderID, orderNumber string, status TicketStatus, createdAt, start, ready time.Time, items []KitchenItem) *KitchenTicket {
 	return &KitchenTicket{
 		id:               id,
 		orderID:          orderID,
+		orderNumber:      orderNumber,
 		status:           status,
 		createdAt:        createdAt,
 		startCookingTime: start,
@@ -108,4 +112,5 @@ type TicketRepository interface {
 	Save(ctx context.Context, t *KitchenTicket) error
 	FindPending(ctx context.Context) ([]*KitchenTicket, error)
 	FindByID(ctx context.Context, id string) (*KitchenTicket, error)
+	FindAll(ctx context.Context) ([]*KitchenTicket, error)
 }

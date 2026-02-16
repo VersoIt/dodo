@@ -4,11 +4,59 @@ option go_package = "./pb;logistics_pb";
 
 service DeliveryService {
   rpc CreateDelivery(CreateDeliveryRequest) returns (DeliveryResponse);
+  rpc ListDeliveries(ListDeliveriesRequest) returns (ListDeliveriesResponse);
+  rpc AssignCourier(AssignCourierRequest) returns (DeliveryResponse);
+  rpc UpdateStatus(UpdateDeliveryStatusRequest) returns (DeliveryResponse);
   rpc UpdateLocation(UpdateLocationRequest) returns (DeliveryResponse);
 }
 
 message CreateDeliveryRequest {
   string order_id = 1;
+  string order_number = 2;
+  string city = 3;
+  string street = 4;
+  string house = 5;
+  string apartment = 6;
+  repeated DeliveryItem items = 7;
+}
+
+message DeliveryItem {
+  string product_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+}
+
+message ListDeliveriesRequest {
+  string courier_id = 1;
+}
+
+message UpdateDeliveryStatusRequest {
+  string order_id = 1;
+  string status = 2;
+}
+
+message Delivery {
+  string order_id = 1;
+  string order_number = 7;
+  string courier_id = 2;
+  string status = 3;
+  double lat = 4;
+  double lng = 5;
+  string created_at = 6;
+  string city = 8;
+  string street = 9;
+  string house = 10;
+  string apartment = 11;
+  repeated DeliveryItem items = 12;
+}
+
+message ListDeliveriesResponse {
+  repeated Delivery deliveries = 1;
+}
+
+message AssignCourierRequest {
+  string order_id = 1;
+  string courier_id = 2;
 }
 
 message UpdateLocationRequest {

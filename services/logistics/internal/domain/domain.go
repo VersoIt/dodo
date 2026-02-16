@@ -58,13 +58,26 @@ func (s CourierStatus) String() string {
 
 type Delivery struct {
 	orderID      string
+	orderNumber  string
 	courierID    string
 	status       DeliveryStatus
 	createdAt    time.Time
 	pickupTime   time.Time
 	deliveryTime time.Time
 
+	city      string
+	street    string
+	house     string
+	apartment string
+	items     []DeliveryItem
+
 	location Coordinates
+}
+
+type DeliveryItem struct {
+	ProductID string
+	Name      string
+	Quantity  int
 }
 
 type Courier struct {
@@ -75,11 +88,17 @@ type Courier struct {
 	location Coordinates
 }
 
-func NewDelivery(orderID string) *Delivery {
+func NewDelivery(orderID, orderNumber, city, street, house, apartment string, items []DeliveryItem) *Delivery {
 	return &Delivery{
-		orderID:   orderID,
-		status:    DelStatusPending,
-		createdAt: time.Now(),
+		orderID:     orderID,
+		orderNumber: orderNumber,
+		city:        city,
+		street:      street,
+		house:       house,
+		apartment:   apartment,
+		items:       items,
+		status:      DelStatusPending,
+		createdAt:   time.Now(),
 	}
 }
 
@@ -170,11 +189,18 @@ func (d *Delivery) ID() string {
 }
 
 func (d *Delivery) OrderID() string              { return d.orderID }
+func (d *Delivery) OrderNumber() string          { return d.orderNumber }
 func (d *Delivery) CourierID() string            { return d.courierID }
 func (d *Delivery) Status() DeliveryStatus       { return d.status }
+func (d *Delivery) CreatedAt() time.Time         { return d.createdAt }
 func (d *Delivery) PickupTime() time.Time        { return d.pickupTime }
 func (d *Delivery) DeliveryTime() time.Time      { return d.deliveryTime }
 func (d *Delivery) Location() (lat, lng float64) { return d.location.Lat, d.location.Lng }
+func (d *Delivery) City() string                 { return d.city }
+func (d *Delivery) Street() string               { return d.street }
+func (d *Delivery) House() string                { return d.house }
+func (d *Delivery) Apartment() string            { return d.apartment }
+func (d *Delivery) Items() []DeliveryItem        { return d.items }
 
 func (c *Courier) ID() string                   { return c.id }
 func (c *Courier) Name() string                 { return c.name }
@@ -194,21 +220,28 @@ func ReconstructCourier(id, name, phone string, status CourierStatus, lat, lng f
 }
 
 // ReconstructDelivery builds a Delivery from storage.
-func ReconstructDelivery(orderID, courierID string, status DeliveryStatus, createdAt, pickup, del time.Time, lat, lng float64) *Delivery {
+func ReconstructDelivery(orderID, orderNumber, courierID string, status DeliveryStatus, createdAt, pickup, del time.Time, lat, lng float64, city, street, house, apartment string, items []DeliveryItem) *Delivery {
 	return &Delivery{
 		orderID:      orderID,
+		orderNumber:  orderNumber,
 		courierID:    courierID,
 		status:       status,
 		createdAt:    createdAt,
 		pickupTime:   pickup,
 		deliveryTime: del,
 		location:     Coordinates{Lat: lat, Lng: lng},
+		city:         city,
+		street:       street,
+		house:        house,
+		apartment:    apartment,
+		items:        items,
 	}
 }
 
 type DeliveryRepository interface {
 	Save(ctx context.Context, d *Delivery) error
 	FindByOrderID(ctx context.Context, orderID string) (*Delivery, error)
+	FindAll(ctx context.Context) ([]*Delivery, error)
 }
 
 type CourierRepository interface {

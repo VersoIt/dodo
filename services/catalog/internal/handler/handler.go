@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/versoit/diploma/pkg/common"
 	catalogpb "github.com/versoit/diploma/services/catalog/api/proto/pb"
 	"github.com/versoit/diploma/services/catalog/internal/domain"
 	"github.com/versoit/diploma/services/catalog/internal/usecase"

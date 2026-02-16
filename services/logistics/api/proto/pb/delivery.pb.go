@@ -24,6 +24,12 @@ const (
 type CreateDeliveryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderNumber   string                 `protobuf:"bytes,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	City          string                 `protobuf:"bytes,3,opt,name=city,proto3" json:"city,omitempty"`
+	Street        string                 `protobuf:"bytes,4,opt,name=street,proto3" json:"street,omitempty"`
+	House         string                 `protobuf:"bytes,5,opt,name=house,proto3" json:"house,omitempty"`
+	Apartment     string                 `protobuf:"bytes,6,opt,name=apartment,proto3" json:"apartment,omitempty"`
+	Items         []*DeliveryItem        `protobuf:"bytes,7,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -65,6 +71,432 @@ func (x *CreateDeliveryRequest) GetOrderId() string {
 	return ""
 }
 
+func (x *CreateDeliveryRequest) GetOrderNumber() string {
+	if x != nil {
+		return x.OrderNumber
+	}
+	return ""
+}
+
+func (x *CreateDeliveryRequest) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *CreateDeliveryRequest) GetStreet() string {
+	if x != nil {
+		return x.Street
+	}
+	return ""
+}
+
+func (x *CreateDeliveryRequest) GetHouse() string {
+	if x != nil {
+		return x.House
+	}
+	return ""
+}
+
+func (x *CreateDeliveryRequest) GetApartment() string {
+	if x != nil {
+		return x.Apartment
+	}
+	return ""
+}
+
+func (x *CreateDeliveryRequest) GetItems() []*DeliveryItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type DeliveryItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProductId     string                 `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	ProductName   string                 `protobuf:"bytes,2,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeliveryItem) Reset() {
+	*x = DeliveryItem{}
+	mi := &file_delivery_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeliveryItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeliveryItem) ProtoMessage() {}
+
+func (x *DeliveryItem) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeliveryItem.ProtoReflect.Descriptor instead.
+func (*DeliveryItem) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *DeliveryItem) GetProductId() string {
+	if x != nil {
+		return x.ProductId
+	}
+	return ""
+}
+
+func (x *DeliveryItem) GetProductName() string {
+	if x != nil {
+		return x.ProductName
+	}
+	return ""
+}
+
+func (x *DeliveryItem) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+type ListDeliveriesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CourierId     string                 `protobuf:"bytes,1,opt,name=courier_id,json=courierId,proto3" json:"courier_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeliveriesRequest) Reset() {
+	*x = ListDeliveriesRequest{}
+	mi := &file_delivery_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeliveriesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeliveriesRequest) ProtoMessage() {}
+
+func (x *ListDeliveriesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeliveriesRequest.ProtoReflect.Descriptor instead.
+func (*ListDeliveriesRequest) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListDeliveriesRequest) GetCourierId() string {
+	if x != nil {
+		return x.CourierId
+	}
+	return ""
+}
+
+type UpdateDeliveryStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDeliveryStatusRequest) Reset() {
+	*x = UpdateDeliveryStatusRequest{}
+	mi := &file_delivery_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDeliveryStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDeliveryStatusRequest) ProtoMessage() {}
+
+func (x *UpdateDeliveryStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDeliveryStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDeliveryStatusRequest) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateDeliveryStatusRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *UpdateDeliveryStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type Delivery struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderNumber   string                 `protobuf:"bytes,7,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	CourierId     string                 `protobuf:"bytes,2,opt,name=courier_id,json=courierId,proto3" json:"courier_id,omitempty"`
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Lat           float64                `protobuf:"fixed64,4,opt,name=lat,proto3" json:"lat,omitempty"`
+	Lng           float64                `protobuf:"fixed64,5,opt,name=lng,proto3" json:"lng,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	City          string                 `protobuf:"bytes,8,opt,name=city,proto3" json:"city,omitempty"`
+	Street        string                 `protobuf:"bytes,9,opt,name=street,proto3" json:"street,omitempty"`
+	House         string                 `protobuf:"bytes,10,opt,name=house,proto3" json:"house,omitempty"`
+	Apartment     string                 `protobuf:"bytes,11,opt,name=apartment,proto3" json:"apartment,omitempty"`
+	Items         []*DeliveryItem        `protobuf:"bytes,12,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Delivery) Reset() {
+	*x = Delivery{}
+	mi := &file_delivery_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Delivery) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Delivery) ProtoMessage() {}
+
+func (x *Delivery) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Delivery.ProtoReflect.Descriptor instead.
+func (*Delivery) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Delivery) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *Delivery) GetOrderNumber() string {
+	if x != nil {
+		return x.OrderNumber
+	}
+	return ""
+}
+
+func (x *Delivery) GetCourierId() string {
+	if x != nil {
+		return x.CourierId
+	}
+	return ""
+}
+
+func (x *Delivery) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Delivery) GetLat() float64 {
+	if x != nil {
+		return x.Lat
+	}
+	return 0
+}
+
+func (x *Delivery) GetLng() float64 {
+	if x != nil {
+		return x.Lng
+	}
+	return 0
+}
+
+func (x *Delivery) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Delivery) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *Delivery) GetStreet() string {
+	if x != nil {
+		return x.Street
+	}
+	return ""
+}
+
+func (x *Delivery) GetHouse() string {
+	if x != nil {
+		return x.House
+	}
+	return ""
+}
+
+func (x *Delivery) GetApartment() string {
+	if x != nil {
+		return x.Apartment
+	}
+	return ""
+}
+
+func (x *Delivery) GetItems() []*DeliveryItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ListDeliveriesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Deliveries    []*Delivery            `protobuf:"bytes,1,rep,name=deliveries,proto3" json:"deliveries,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeliveriesResponse) Reset() {
+	*x = ListDeliveriesResponse{}
+	mi := &file_delivery_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeliveriesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeliveriesResponse) ProtoMessage() {}
+
+func (x *ListDeliveriesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeliveriesResponse.ProtoReflect.Descriptor instead.
+func (*ListDeliveriesResponse) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ListDeliveriesResponse) GetDeliveries() []*Delivery {
+	if x != nil {
+		return x.Deliveries
+	}
+	return nil
+}
+
+type AssignCourierRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	CourierId     string                 `protobuf:"bytes,2,opt,name=courier_id,json=courierId,proto3" json:"courier_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AssignCourierRequest) Reset() {
+	*x = AssignCourierRequest{}
+	mi := &file_delivery_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AssignCourierRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignCourierRequest) ProtoMessage() {}
+
+func (x *AssignCourierRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_delivery_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignCourierRequest.ProtoReflect.Descriptor instead.
+func (*AssignCourierRequest) Descriptor() ([]byte, []int) {
+	return file_delivery_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AssignCourierRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *AssignCourierRequest) GetCourierId() string {
+	if x != nil {
+		return x.CourierId
+	}
+	return ""
+}
+
 type UpdateLocationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
@@ -76,7 +508,7 @@ type UpdateLocationRequest struct {
 
 func (x *UpdateLocationRequest) Reset() {
 	*x = UpdateLocationRequest{}
-	mi := &file_delivery_proto_msgTypes[1]
+	mi := &file_delivery_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -88,7 +520,7 @@ func (x *UpdateLocationRequest) String() string {
 func (*UpdateLocationRequest) ProtoMessage() {}
 
 func (x *UpdateLocationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_delivery_proto_msgTypes[1]
+	mi := &file_delivery_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -101,7 +533,7 @@ func (x *UpdateLocationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateLocationRequest.ProtoReflect.Descriptor instead.
 func (*UpdateLocationRequest) Descriptor() ([]byte, []int) {
-	return file_delivery_proto_rawDescGZIP(), []int{1}
+	return file_delivery_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateLocationRequest) GetOrderId() string {
@@ -135,7 +567,7 @@ type DeliveryResponse struct {
 
 func (x *DeliveryResponse) Reset() {
 	*x = DeliveryResponse{}
-	mi := &file_delivery_proto_msgTypes[2]
+	mi := &file_delivery_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +579,7 @@ func (x *DeliveryResponse) String() string {
 func (*DeliveryResponse) ProtoMessage() {}
 
 func (x *DeliveryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_delivery_proto_msgTypes[2]
+	mi := &file_delivery_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +592,7 @@ func (x *DeliveryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeliveryResponse.ProtoReflect.Descriptor instead.
 func (*DeliveryResponse) Descriptor() ([]byte, []int) {
-	return file_delivery_proto_rawDescGZIP(), []int{2}
+	return file_delivery_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeliveryResponse) GetOrderId() string {
@@ -181,18 +613,62 @@ var File_delivery_proto protoreflect.FileDescriptor
 
 const file_delivery_proto_rawDesc = "" +
 	"\n" +
-	"\x0edelivery.proto\x12\flogistics.v1\"2\n" +
+	"\x0edelivery.proto\x12\flogistics.v1\"\xe7\x01\n" +
 	"\x15CreateDeliveryRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\tR\aorderId\"V\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12!\n" +
+	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x12\n" +
+	"\x04city\x18\x03 \x01(\tR\x04city\x12\x16\n" +
+	"\x06street\x18\x04 \x01(\tR\x06street\x12\x14\n" +
+	"\x05house\x18\x05 \x01(\tR\x05house\x12\x1c\n" +
+	"\tapartment\x18\x06 \x01(\tR\tapartment\x120\n" +
+	"\x05items\x18\a \x03(\v2\x1a.logistics.v1.DeliveryItemR\x05items\"l\n" +
+	"\fDeliveryItem\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x01 \x01(\tR\tproductId\x12!\n" +
+	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x05R\bquantity\"6\n" +
+	"\x15ListDeliveriesRequest\x12\x1d\n" +
+	"\n" +
+	"courier_id\x18\x01 \x01(\tR\tcourierId\"P\n" +
+	"\x1bUpdateDeliveryStatusRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"\xd4\x02\n" +
+	"\bDelivery\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12!\n" +
+	"\forder_number\x18\a \x01(\tR\vorderNumber\x12\x1d\n" +
+	"\n" +
+	"courier_id\x18\x02 \x01(\tR\tcourierId\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x10\n" +
+	"\x03lat\x18\x04 \x01(\x01R\x03lat\x12\x10\n" +
+	"\x03lng\x18\x05 \x01(\x01R\x03lng\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x12\n" +
+	"\x04city\x18\b \x01(\tR\x04city\x12\x16\n" +
+	"\x06street\x18\t \x01(\tR\x06street\x12\x14\n" +
+	"\x05house\x18\n" +
+	" \x01(\tR\x05house\x12\x1c\n" +
+	"\tapartment\x18\v \x01(\tR\tapartment\x120\n" +
+	"\x05items\x18\f \x03(\v2\x1a.logistics.v1.DeliveryItemR\x05items\"P\n" +
+	"\x16ListDeliveriesResponse\x126\n" +
+	"\n" +
+	"deliveries\x18\x01 \x03(\v2\x16.logistics.v1.DeliveryR\n" +
+	"deliveries\"P\n" +
+	"\x14AssignCourierRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x1d\n" +
+	"\n" +
+	"courier_id\x18\x02 \x01(\tR\tcourierId\"V\n" +
 	"\x15UpdateLocationRequest\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x10\n" +
 	"\x03lat\x18\x02 \x01(\x01R\x03lat\x12\x10\n" +
 	"\x03lng\x18\x03 \x01(\x01R\x03lng\"E\n" +
 	"\x10DeliveryResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status2\xbf\x01\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status2\xcc\x03\n" +
 	"\x0fDeliveryService\x12U\n" +
-	"\x0eCreateDelivery\x12#.logistics.v1.CreateDeliveryRequest\x1a\x1e.logistics.v1.DeliveryResponse\x12U\n" +
+	"\x0eCreateDelivery\x12#.logistics.v1.CreateDeliveryRequest\x1a\x1e.logistics.v1.DeliveryResponse\x12[\n" +
+	"\x0eListDeliveries\x12#.logistics.v1.ListDeliveriesRequest\x1a$.logistics.v1.ListDeliveriesResponse\x12S\n" +
+	"\rAssignCourier\x12\".logistics.v1.AssignCourierRequest\x1a\x1e.logistics.v1.DeliveryResponse\x12Y\n" +
+	"\fUpdateStatus\x12).logistics.v1.UpdateDeliveryStatusRequest\x1a\x1e.logistics.v1.DeliveryResponse\x12U\n" +
 	"\x0eUpdateLocation\x12#.logistics.v1.UpdateLocationRequest\x1a\x1e.logistics.v1.DeliveryResponseB\x13Z\x11./pb;logistics_pbb\x06proto3"
 
 var (
@@ -207,22 +683,37 @@ func file_delivery_proto_rawDescGZIP() []byte {
 	return file_delivery_proto_rawDescData
 }
 
-var file_delivery_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_delivery_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_delivery_proto_goTypes = []any{
-	(*CreateDeliveryRequest)(nil), // 0: logistics.v1.CreateDeliveryRequest
-	(*UpdateLocationRequest)(nil), // 1: logistics.v1.UpdateLocationRequest
-	(*DeliveryResponse)(nil),      // 2: logistics.v1.DeliveryResponse
+	(*CreateDeliveryRequest)(nil),       // 0: logistics.v1.CreateDeliveryRequest
+	(*DeliveryItem)(nil),                // 1: logistics.v1.DeliveryItem
+	(*ListDeliveriesRequest)(nil),       // 2: logistics.v1.ListDeliveriesRequest
+	(*UpdateDeliveryStatusRequest)(nil), // 3: logistics.v1.UpdateDeliveryStatusRequest
+	(*Delivery)(nil),                    // 4: logistics.v1.Delivery
+	(*ListDeliveriesResponse)(nil),      // 5: logistics.v1.ListDeliveriesResponse
+	(*AssignCourierRequest)(nil),        // 6: logistics.v1.AssignCourierRequest
+	(*UpdateLocationRequest)(nil),       // 7: logistics.v1.UpdateLocationRequest
+	(*DeliveryResponse)(nil),            // 8: logistics.v1.DeliveryResponse
 }
 var file_delivery_proto_depIdxs = []int32{
-	0, // 0: logistics.v1.DeliveryService.CreateDelivery:input_type -> logistics.v1.CreateDeliveryRequest
-	1, // 1: logistics.v1.DeliveryService.UpdateLocation:input_type -> logistics.v1.UpdateLocationRequest
-	2, // 2: logistics.v1.DeliveryService.CreateDelivery:output_type -> logistics.v1.DeliveryResponse
-	2, // 3: logistics.v1.DeliveryService.UpdateLocation:output_type -> logistics.v1.DeliveryResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: logistics.v1.CreateDeliveryRequest.items:type_name -> logistics.v1.DeliveryItem
+	1, // 1: logistics.v1.Delivery.items:type_name -> logistics.v1.DeliveryItem
+	4, // 2: logistics.v1.ListDeliveriesResponse.deliveries:type_name -> logistics.v1.Delivery
+	0, // 3: logistics.v1.DeliveryService.CreateDelivery:input_type -> logistics.v1.CreateDeliveryRequest
+	2, // 4: logistics.v1.DeliveryService.ListDeliveries:input_type -> logistics.v1.ListDeliveriesRequest
+	6, // 5: logistics.v1.DeliveryService.AssignCourier:input_type -> logistics.v1.AssignCourierRequest
+	3, // 6: logistics.v1.DeliveryService.UpdateStatus:input_type -> logistics.v1.UpdateDeliveryStatusRequest
+	7, // 7: logistics.v1.DeliveryService.UpdateLocation:input_type -> logistics.v1.UpdateLocationRequest
+	8, // 8: logistics.v1.DeliveryService.CreateDelivery:output_type -> logistics.v1.DeliveryResponse
+	5, // 9: logistics.v1.DeliveryService.ListDeliveries:output_type -> logistics.v1.ListDeliveriesResponse
+	8, // 10: logistics.v1.DeliveryService.AssignCourier:output_type -> logistics.v1.DeliveryResponse
+	8, // 11: logistics.v1.DeliveryService.UpdateStatus:output_type -> logistics.v1.DeliveryResponse
+	8, // 12: logistics.v1.DeliveryService.UpdateLocation:output_type -> logistics.v1.DeliveryResponse
+	8, // [8:13] is the sub-list for method output_type
+	3, // [3:8] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_delivery_proto_init() }
@@ -236,7 +727,7 @@ func file_delivery_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_delivery_proto_rawDesc), len(file_delivery_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

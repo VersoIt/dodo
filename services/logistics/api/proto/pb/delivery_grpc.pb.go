@@ -20,6 +20,9 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	DeliveryService_CreateDelivery_FullMethodName = "/logistics.v1.DeliveryService/CreateDelivery"
+	DeliveryService_ListDeliveries_FullMethodName = "/logistics.v1.DeliveryService/ListDeliveries"
+	DeliveryService_AssignCourier_FullMethodName  = "/logistics.v1.DeliveryService/AssignCourier"
+	DeliveryService_UpdateStatus_FullMethodName   = "/logistics.v1.DeliveryService/UpdateStatus"
 	DeliveryService_UpdateLocation_FullMethodName = "/logistics.v1.DeliveryService/UpdateLocation"
 )
 
@@ -28,6 +31,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeliveryServiceClient interface {
 	CreateDelivery(ctx context.Context, in *CreateDeliveryRequest, opts ...grpc.CallOption) (*DeliveryResponse, error)
+	ListDeliveries(ctx context.Context, in *ListDeliveriesRequest, opts ...grpc.CallOption) (*ListDeliveriesResponse, error)
+	AssignCourier(ctx context.Context, in *AssignCourierRequest, opts ...grpc.CallOption) (*DeliveryResponse, error)
+	UpdateStatus(ctx context.Context, in *UpdateDeliveryStatusRequest, opts ...grpc.CallOption) (*DeliveryResponse, error)
 	UpdateLocation(ctx context.Context, in *UpdateLocationRequest, opts ...grpc.CallOption) (*DeliveryResponse, error)
 }
 
@@ -49,6 +55,36 @@ func (c *deliveryServiceClient) CreateDelivery(ctx context.Context, in *CreateDe
 	return out, nil
 }
 
+func (c *deliveryServiceClient) ListDeliveries(ctx context.Context, in *ListDeliveriesRequest, opts ...grpc.CallOption) (*ListDeliveriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveriesResponse)
+	err := c.cc.Invoke(ctx, DeliveryService_ListDeliveries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deliveryServiceClient) AssignCourier(ctx context.Context, in *AssignCourierRequest, opts ...grpc.CallOption) (*DeliveryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeliveryResponse)
+	err := c.cc.Invoke(ctx, DeliveryService_AssignCourier_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deliveryServiceClient) UpdateStatus(ctx context.Context, in *UpdateDeliveryStatusRequest, opts ...grpc.CallOption) (*DeliveryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeliveryResponse)
+	err := c.cc.Invoke(ctx, DeliveryService_UpdateStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deliveryServiceClient) UpdateLocation(ctx context.Context, in *UpdateLocationRequest, opts ...grpc.CallOption) (*DeliveryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeliveryResponse)
@@ -64,6 +100,9 @@ func (c *deliveryServiceClient) UpdateLocation(ctx context.Context, in *UpdateLo
 // for forward compatibility.
 type DeliveryServiceServer interface {
 	CreateDelivery(context.Context, *CreateDeliveryRequest) (*DeliveryResponse, error)
+	ListDeliveries(context.Context, *ListDeliveriesRequest) (*ListDeliveriesResponse, error)
+	AssignCourier(context.Context, *AssignCourierRequest) (*DeliveryResponse, error)
+	UpdateStatus(context.Context, *UpdateDeliveryStatusRequest) (*DeliveryResponse, error)
 	UpdateLocation(context.Context, *UpdateLocationRequest) (*DeliveryResponse, error)
 	mustEmbedUnimplementedDeliveryServiceServer()
 }
@@ -77,6 +116,15 @@ type UnimplementedDeliveryServiceServer struct{}
 
 func (UnimplementedDeliveryServiceServer) CreateDelivery(context.Context, *CreateDeliveryRequest) (*DeliveryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateDelivery not implemented")
+}
+func (UnimplementedDeliveryServiceServer) ListDeliveries(context.Context, *ListDeliveriesRequest) (*ListDeliveriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDeliveries not implemented")
+}
+func (UnimplementedDeliveryServiceServer) AssignCourier(context.Context, *AssignCourierRequest) (*DeliveryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AssignCourier not implemented")
+}
+func (UnimplementedDeliveryServiceServer) UpdateStatus(context.Context, *UpdateDeliveryStatusRequest) (*DeliveryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateStatus not implemented")
 }
 func (UnimplementedDeliveryServiceServer) UpdateLocation(context.Context, *UpdateLocationRequest) (*DeliveryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateLocation not implemented")
@@ -120,6 +168,60 @@ func _DeliveryService_CreateDelivery_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeliveryService_ListDeliveries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeliveryServiceServer).ListDeliveries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeliveryService_ListDeliveries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeliveryServiceServer).ListDeliveries(ctx, req.(*ListDeliveriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeliveryService_AssignCourier_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignCourierRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeliveryServiceServer).AssignCourier(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeliveryService_AssignCourier_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeliveryServiceServer).AssignCourier(ctx, req.(*AssignCourierRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeliveryService_UpdateStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeliveryStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeliveryServiceServer).UpdateStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeliveryService_UpdateStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeliveryServiceServer).UpdateStatus(ctx, req.(*UpdateDeliveryStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeliveryService_UpdateLocation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateLocationRequest)
 	if err := dec(in); err != nil {
@@ -148,6 +250,18 @@ var DeliveryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateDelivery",
 			Handler:    _DeliveryService_CreateDelivery_Handler,
+		},
+		{
+			MethodName: "ListDeliveries",
+			Handler:    _DeliveryService_ListDeliveries_Handler,
+		},
+		{
+			MethodName: "AssignCourier",
+			Handler:    _DeliveryService_AssignCourier_Handler,
+		},
+		{
+			MethodName: "UpdateStatus",
+			Handler:    _DeliveryService_UpdateStatus_Handler,
 		},
 		{
 			MethodName: "UpdateLocation",

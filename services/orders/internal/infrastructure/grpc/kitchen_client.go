@@ -35,7 +35,7 @@ func NewKitchenClient(lc fx.Lifecycle) (domain.KitchenService, error) {
 	return &kitchenClient{client: kitchen_pb.NewTicketServiceClient(conn)}, nil
 }
 
-func (c *kitchenClient) CreateTicket(ctx context.Context, orderID string, items []*domain.OrderItem) error {
+func (c *kitchenClient) CreateTicket(ctx context.Context, orderID string, orderNumber string, items []*domain.OrderItem) error {
 	reqItems := make([]*kitchen_pb.KitchenItem, len(items))
 
 	for i, item := range items {
@@ -47,8 +47,9 @@ func (c *kitchenClient) CreateTicket(ctx context.Context, orderID string, items 
 	}
 
 	_, err := c.client.CreateTicket(ctx, &kitchen_pb.CreateTicketRequest{
-		OrderId: orderID,
-		Items:   reqItems,
+		OrderId:     orderID,
+		OrderNumber: orderNumber,
+		Items:       reqItems,
 	})
 	return err
 }

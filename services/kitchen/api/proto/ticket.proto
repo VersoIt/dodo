@@ -4,6 +4,7 @@ option go_package = "./pb;kitchen_pb";
 
 service TicketService {
   rpc CreateTicket(CreateTicketRequest) returns (TicketResponse);
+  rpc ListTickets(ListTicketsRequest) returns (ListTicketsResponse);
   rpc UpdateTicketStatus(UpdateTicketStatusRequest) returns (TicketResponse);
 }
 
@@ -13,17 +14,36 @@ message KitchenItem {
   int32 quantity = 3;
 }
 
+message Ticket {
+  string id = 1;
+  string order_id = 2;
+  string order_number = 6;
+  string status = 3;
+  repeated KitchenItem items = 4;
+  string created_at = 5;
+}
+
 message CreateTicketRequest {
   string order_id = 1;
+  string order_number = 3;
   repeated KitchenItem items = 2;
+}
+
+message ListTicketsRequest {
+  string status = 1; // optional filter
+}
+
+message ListTicketsResponse {
+  repeated Ticket tickets = 1;
 }
 
 message UpdateTicketStatusRequest {
   string ticket_id = 1;
-  int32 status = 2;
+  string status = 2; // changed to string for consistency
 }
 
 message TicketResponse {
   string ticket_id = 1;
-  string status = 2;
+  string order_id = 2;
+  string status = 3;
 }

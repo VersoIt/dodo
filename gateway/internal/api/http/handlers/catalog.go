@@ -63,7 +63,7 @@ func (h *CatalogHandler) CreateProduct(c *fiber.Ctx) error {
 		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request body")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.CreateProduct(ctx, &catalog_pb.CreateProductRequest{

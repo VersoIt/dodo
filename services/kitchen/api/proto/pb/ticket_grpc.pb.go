@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	TicketService_CreateTicket_FullMethodName       = "/kitchen.v1.TicketService/CreateTicket"
+	TicketService_ListTickets_FullMethodName        = "/kitchen.v1.TicketService/ListTickets"
 	TicketService_UpdateTicketStatus_FullMethodName = "/kitchen.v1.TicketService/UpdateTicketStatus"
 )
 
@@ -28,6 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TicketServiceClient interface {
 	CreateTicket(ctx context.Context, in *CreateTicketRequest, opts ...grpc.CallOption) (*TicketResponse, error)
+	ListTickets(ctx context.Context, in *ListTicketsRequest, opts ...grpc.CallOption) (*ListTicketsResponse, error)
 	UpdateTicketStatus(ctx context.Context, in *UpdateTicketStatusRequest, opts ...grpc.CallOption) (*TicketResponse, error)
 }
 
@@ -49,6 +51,16 @@ func (c *ticketServiceClient) CreateTicket(ctx context.Context, in *CreateTicket
 	return out, nil
 }
 
+func (c *ticketServiceClient) ListTickets(ctx context.Context, in *ListTicketsRequest, opts ...grpc.CallOption) (*ListTicketsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTicketsResponse)
+	err := c.cc.Invoke(ctx, TicketService_ListTickets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ticketServiceClient) UpdateTicketStatus(ctx context.Context, in *UpdateTicketStatusRequest, opts ...grpc.CallOption) (*TicketResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TicketResponse)
@@ -64,6 +76,7 @@ func (c *ticketServiceClient) UpdateTicketStatus(ctx context.Context, in *Update
 // for forward compatibility.
 type TicketServiceServer interface {
 	CreateTicket(context.Context, *CreateTicketRequest) (*TicketResponse, error)
+	ListTickets(context.Context, *ListTicketsRequest) (*ListTicketsResponse, error)
 	UpdateTicketStatus(context.Context, *UpdateTicketStatusRequest) (*TicketResponse, error)
 	mustEmbedUnimplementedTicketServiceServer()
 }
@@ -77,6 +90,9 @@ type UnimplementedTicketServiceServer struct{}
 
 func (UnimplementedTicketServiceServer) CreateTicket(context.Context, *CreateTicketRequest) (*TicketResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateTicket not implemented")
+}
+func (UnimplementedTicketServiceServer) ListTickets(context.Context, *ListTicketsRequest) (*ListTicketsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTickets not implemented")
 }
 func (UnimplementedTicketServiceServer) UpdateTicketStatus(context.Context, *UpdateTicketStatusRequest) (*TicketResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateTicketStatus not implemented")
@@ -120,6 +136,24 @@ func _TicketService_CreateTicket_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TicketService_ListTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTicketsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).ListTickets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketService_ListTickets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).ListTickets(ctx, req.(*ListTicketsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TicketService_UpdateTicketStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateTicketStatusRequest)
 	if err := dec(in); err != nil {
@@ -148,6 +182,10 @@ var TicketService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateTicket",
 			Handler:    _TicketService_CreateTicket_Handler,
+		},
+		{
+			MethodName: "ListTickets",
+			Handler:    _TicketService_ListTickets_Handler,
 		},
 		{
 			MethodName: "UpdateTicketStatus",

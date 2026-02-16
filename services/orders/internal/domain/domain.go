@@ -414,11 +414,11 @@ type AnalyticsService interface {
 }
 
 type KitchenService interface {
-	CreateTicket(ctx context.Context, orderID string, items []*OrderItem) error
+	CreateTicket(ctx context.Context, orderID string, orderNumber string, items []*OrderItem) error
 }
 
 type LogisticsService interface {
-	CreateDelivery(ctx context.Context, orderID string) error
+	CreateDelivery(ctx context.Context, orderID string, orderNumber string, address DeliveryAddress, items []*OrderItem) error
 }
 
 type TreasuryService interface {

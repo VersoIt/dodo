@@ -33,8 +33,8 @@ func NewTicketRepository(pool *pgxpool.Pool, log *slog.Logger) domain.TicketRepo
 func (r *ticketRepo) Save(ctx context.Context, t *domain.KitchenTicket) error {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Insert("kitchen_tickets").
-		Columns("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
-		Values(t.ID(), t.OrderID(), t.Status(), t.CreatedAt(), t.StartTime(), t.ReadyTime()).
+		Columns("id", "order_id", "order_number", "status", "created_at", "start_cooking_time", "ready_time").
+		Values(t.ID(), t.OrderID(), t.OrderNumber(), t.Status(), t.CreatedAt(), t.StartTime(), t.ReadyTime()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, start_cooking_time = EXCLUDED.start_cooking_time, ready_time = EXCLUDED.ready_time").
 		ToSql()
 	if err != nil {
@@ -86,7 +86,7 @@ func (r *ticketRepo) Save(ctx context.Context, t *domain.KitchenTicket) error {
 
 func (r *ticketRepo) FindByID(ctx context.Context, id string) (*domain.KitchenTicket, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
-	sqlStr, args, err := r.sb.Select("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "order_number", "status", "created_at", "start_cooking_time", "ready_time").
 		From("kitchen_tickets").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
@@ -99,9 +99,10 @@ func (r *ticketRepo) FindByID(ctx context.Context, id string) (*domain.KitchenTi
 
 func (r *ticketRepo) FindPending(ctx context.Context) ([]*domain.KitchenTicket, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
-	sqlStr, args, err := r.sb.Select("id", "order_id", "status", "created_at", "start_cooking_time", "ready_time").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "order_number", "status", "created_at", "start_cooking_time", "ready_time").
 		From("kitchen_tickets").
-		Where(squirrel.NotEq{"status": domain.TicketReady}).
+		Where(squirrel.LtOrEq{"status": int(domain.TicketCooking)}).
+		OrderBy("created_at ASC").
 		ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("build query: %w", err)
@@ -121,8 +122,32 @@ func (r *ticketRepo) FindPending(ctx context.Context) ([]*domain.KitchenTicket, 
 		}
 		tickets = append(tickets, t)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %w", err)
+	return tickets, nil
+}
+
+func (r *ticketRepo) FindAll(ctx context.Context) ([]*domain.KitchenTicket, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
+	sqlStr, args, err := r.sb.Select("id", "order_id", "order_number", "status", "created_at", "start_cooking_time", "ready_time").
+		From("kitchen_tickets").
+		OrderBy("created_at DESC").
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("build query: %w", err)
+	}
+
+	rows, err := db.Query(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query all: %w", err)
+	}
+	defer rows.Close()
+
+	var tickets []*domain.KitchenTicket
+	for rows.Next() {
+		t, err := r.scanTicket(ctx, rows)
+		if err != nil {
+			return nil, err
+		}
+		tickets = append(tickets, t)
 	}
 	return tickets, nil
 }
@@ -130,13 +155,13 @@ func (r *ticketRepo) FindPending(ctx context.Context) ([]*domain.KitchenTicket, 
 func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*domain.KitchenTicket, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	var (
-		id, oid string
-		status  int
-		cat     time.Time
-		st, rdy *time.Time
+		id, oid, onum string
+		status        int
+		cat           time.Time
+		st, rdy       *time.Time
 	)
 
-	if err := row.Scan(&id, &oid, &status, &cat, &st, &rdy); err != nil {
+	if err := row.Scan(&id, &oid, &onum, &status, &cat, &st, &rdy); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("ticket not found")
 		}
@@ -164,22 +189,31 @@ func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*domain.Kitch
 	if err != nil {
 		return nil, fmt.Errorf("query items: %w", err)
 	}
-	defer irows.Close()
 
-	var items []domain.KitchenItem
+	type tempItem struct {
+		itemID   int64
+		pid      string
+		name     string
+		comm     string
+		qty      int
+	}
+	var tempItems []tempItem
+
 	for irows.Next() {
-		var (
-			itemID          int64
-			pid, name, comm string
-			qty             int
-		)
-		if err := irows.Scan(&itemID, &pid, &name, &qty, &comm); err != nil {
+		var t tempItem
+		if err := irows.Scan(&t.itemID, &t.pid, &t.name, &t.qty, &t.comm); err != nil {
+			irows.Close()
 			return nil, fmt.Errorf("scan item: %w", err)
 		}
+		tempItems = append(tempItems, t)
+	}
+	irows.Close()
 
+	var items []domain.KitchenItem
+	for _, t := range tempItems {
 		ingSql, ingArgs, err := r.sb.Select("ingredient_name").
 			From("kitchen_item_ingredients").
-			Where(squirrel.Eq{"kitchen_item_id": itemID}).
+			Where(squirrel.Eq{"kitchen_item_id": t.itemID}).
 			ToSql()
 		if err != nil {
 			return nil, fmt.Errorf("build ingredients query: %w", err)
@@ -202,15 +236,12 @@ func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*domain.Kitch
 		ingRows.Close()
 
 		items = append(items, domain.KitchenItem{
-			ProductID:   pid,
-			Name:        name,
+			ProductID:   t.pid,
+			Name:        t.name,
 			Ingredients: ingredients,
-			Quantity:    qty,
-			Comment:     comm,
+			Quantity:    t.qty,
+			Comment:     t.comm,
 		})
-	}
-	if err := irows.Err(); err != nil {
-		return nil, fmt.Errorf("items rows error: %w", err)
 	}
 
 	var stVal, rdyVal time.Time
@@ -221,5 +252,5 @@ func (r *ticketRepo) scanTicket(ctx context.Context, row pgx.Row) (*domain.Kitch
 		rdyVal = *rdy
 	}
 
-	return domain.ReconstructTicket(id, oid, domain.TicketStatus(status), cat, stVal, rdyVal, items), nil
+	return domain.ReconstructTicket(id, oid, onum, domain.TicketStatus(status), cat, stVal, rdyVal, items), nil
 }

@@ -35,9 +35,24 @@ func NewLogisticsClient(lc fx.Lifecycle) (domain.LogisticsService, error) {
 	return &logisticsClient{client: logistics_pb.NewDeliveryServiceClient(conn)}, nil
 }
 
-func (c *logisticsClient) CreateDelivery(ctx context.Context, orderID string) error {
+func (c *logisticsClient) CreateDelivery(ctx context.Context, orderID string, orderNumber string, address domain.DeliveryAddress, items []*domain.OrderItem) error {
+	reqItems := make([]*logistics_pb.DeliveryItem, len(items))
+	for i, item := range items {
+		reqItems[i] = &logistics_pb.DeliveryItem{
+			ProductId:   item.ProductID(),
+			ProductName: item.ProductName(),
+			Quantity:    int32(item.Quantity()),
+		}
+	}
+
 	_, err := c.client.CreateDelivery(ctx, &logistics_pb.CreateDeliveryRequest{
-		OrderId: orderID,
+		OrderId:     orderID,
+		OrderNumber: orderNumber,
+		City:        address.City,
+		Street:      address.Street,
+		House:       address.House,
+		Apartment:   address.Apartment,
+		Items:       reqItems,
 	})
 	return err
 }

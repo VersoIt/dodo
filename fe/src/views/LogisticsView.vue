@@ -2,7 +2,7 @@
 import { ref, onMounted, inject, computed, watch } from 'vue'
 import { Truck, MapPin, CheckCircle2, Package, User, AlertCircle } from 'lucide-vue-next'
 import { useAuthStore } from '../store/auth'
-import { ordersApi } from '../api'
+import { logisticsApi } from '../api'
 import { ORDER_STATUS } from '../constants'
 import { shortId } from '../utils/format'
 import AppModal from '../components/shared/AppModal.vue'
@@ -18,8 +18,25 @@ const pendingAction = ref<{ orderId: string, status: string, title: string, desc
 const fetchLogisticsOrders = async () => {
   try {
     loading.value = true
-    const res = await ordersApi.getAllOrders()
-    if (res.success) orders.value = res.data || []
+    const res = await logisticsApi.listDeliveries()
+    if (res.success && res.data) {
+      orders.value = (res.data.deliveries || []).map((d: any) => ({
+        ...d,
+        // Map logistics status to ORDER_STATUS
+        // pending -> READY
+        // on_way -> DELIVERING
+        // delivered -> COMPLETED
+        status: d.status === 'pending' || d.status === 'assigned' ? ORDER_STATUS.READY : 
+                d.status === 'on_way' ? ORDER_STATUS.DELIVERING : 
+                d.status === 'delivered' ? ORDER_STATUS.COMPLETED : d.status,
+        address: {
+          city: d.city,
+          street: d.street,
+          house: d.house,
+          apartment: d.apartment
+        }
+      }))
+    }
   } catch (err) { console.error('Failed to fetch orders:', err) } finally { loading.value = false }
 }
 
@@ -45,9 +62,20 @@ const openConfirm = (order: any, nextStatus: string) => {
 
 const handleConfirm = async () => {
   if (!pendingAction.value) return
+  const myId = authStore.user?.id || authStore.user?.user_id
+  if (!myId) return
+
   try {
     const { orderId, status } = pendingAction.value
-    await ordersApi.updateStatus(orderId, status)
+    
+    if (status === ORDER_STATUS.DELIVERING) {
+      // First assign, then start delivery (on_way)
+      await logisticsApi.assignCourier(orderId, myId)
+      await logisticsApi.updateStatus(orderId, 'delivering')
+    } else if (status === ORDER_STATUS.COMPLETED) {
+      await logisticsApi.updateStatus(orderId, 'completed')
+    }
+    
     addToast(status === ORDER_STATUS.DELIVERING ? 'Удачной дороги!' : 'Заказ доставлен!', 'success')
     showConfirmModal.value = false; pendingAction.value = null; await fetchLogisticsOrders()
   } catch (err: any) { addToast(err.response?.data?.error || 'Ошибка обновления', 'error'); showConfirmModal.value = false }

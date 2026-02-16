@@ -50,6 +50,25 @@ export const ordersApi = {
   checkPromoCode: (code: string): Promise<ApiResponse<PromoCode>> => client.get(`/api/v1/promos/check/${code}`),
 }
 
+// --- Kitchen API ---
+export const kitchenApi = {
+  listTickets: (): Promise<ApiResponse<{ tickets: any[] }>> => client.get('/api/v1/kitchen/tickets'),
+  updateStatus: (id: string, status: string): Promise<ApiResponse<any>> => client.patch(`/api/v1/kitchen/tickets/${id}/status`, { status }),
+}
+
+// --- Logistics API ---
+export const logisticsApi = {
+  listDeliveries: (): Promise<ApiResponse<{ deliveries: any[] }>> => client.get('/api/v1/logistics/deliveries'),
+  assignCourier: (id: string, courierId: string): Promise<ApiResponse<any>> => client.post(`/api/v1/logistics/orders/${id}/assign`, { courier_id: courierId }),
+  updateStatus: (id: string, status: string): Promise<ApiResponse<any>> => client.patch(`/api/v1/logistics/orders/${id}/status`, { status }),
+  updateLocation: (id: string, lat: number, lng: number): Promise<ApiResponse<any>> => client.post(`/api/v1/logistics/orders/${id}/location`, { lat, lng }),
+}
+
+// --- Analytics API ---
+export const analyticsApi = {
+  getManagerKpi: (managerId: string): Promise<ApiResponse<any>> => client.get(`/api/v1/analytics/manager/${managerId}`),
+}
+
 // --- Auth API ---
 export const authApi = {
   login: (credentials: any): Promise<ApiResponse<{ token: string, user: User }>> => client.post('/api/v1/auth/login', credentials),

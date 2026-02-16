@@ -63,10 +63,13 @@ func SetupRoutes(
 
 	// Kitchen (Internal flow for cooks)
 	kitchen := protected.Group("/kitchen", middleware.RequireRole("chef", "manager"))
+	kitchen.Get("/tickets", kitchenHandler.ListTickets)
 	kitchen.Patch("/tickets/:id/status", kitchenHandler.UpdateStatus)
 	
 	// Logistics (Courier flow)
 	logistics := protected.Group("/logistics", middleware.RequireRole("courier", "manager"))
+	logistics.Get("/deliveries", logisticsHandler.ListDeliveries)
+	logistics.Patch("/orders/:id/status", logisticsHandler.UpdateStatus)
 	logistics.Post("/orders/:id/assign", logisticsHandler.AssignCourier)
 	logistics.Post("/orders/:id/location", logisticsHandler.UpdateLocation)
 

@@ -19,14 +19,15 @@ var (
 )
 
 type OrderUseCase struct {
-	repo            domain.OrderRepository
-	catalogService  domain.CatalogService
-	kitchenService  domain.KitchenService
-	logisticService domain.LogisticsService
-	treasuryService domain.TreasuryService
-	notifyService   domain.NotificationService
-	tm              trm.Manager
-	log             *slog.Logger
+	repo             domain.OrderRepository
+	catalogService   domain.CatalogService
+	kitchenService   domain.KitchenService
+	logisticService  domain.LogisticsService
+	treasuryService  domain.TreasuryService
+	notifyService    domain.NotificationService
+	analyticsService domain.AnalyticsService
+	tm               trm.Manager
+	log              *slog.Logger
 }
 
 func NewOrderUseCase(
@@ -36,18 +37,20 @@ func NewOrderUseCase(
 	logistic domain.LogisticsService,
 	treasury domain.TreasuryService,
 	notify domain.NotificationService,
+	analytics domain.AnalyticsService,
 	tm trm.Manager,
 	log *slog.Logger,
 ) *OrderUseCase {
 	return &OrderUseCase{
-		repo:            repo,
-		catalogService:  catalog,
-		kitchenService:  kitchen,
-		logisticService: logistic,
-		treasuryService: treasury,
-		notifyService:   notify,
-		tm:              tm,
-		log:             log,
+		repo:             repo,
+		catalogService:   catalog,
+		kitchenService:   kitchen,
+		logisticService:  logistic,
+		treasuryService:  treasury,
+		notifyService:    notify,
+		analyticsService: analytics,
+		tm:               tm,
+		log:              log,
 	}
 }
 
@@ -182,8 +185,14 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 	}
 
 	// 3. Create ticket in Kitchen - NOW OUTSIDE TX
-	if err := uc.kitchenService.CreateTicket(ctx, finalOrder.ID(), finalOrder.Items()); err != nil {
+	if err := uc.kitchenService.CreateTicket(ctx, finalOrder.ID(), finalOrder.OrderNumber(), finalOrder.Items()); err != nil {
 		uc.log.Error("failed to create kitchen ticket", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
+	}
+
+	// 3a. Report to Analytics
+	// Use Nil UUID for general store sales to avoid UUID parsing errors in analytics service
+	if err := uc.analyticsService.ReportSale(ctx, uuid.Nil.String(), finalOrder.FinalPrice().InexactFloat64()); err != nil {
+		uc.log.Warn("failed to report sale to analytics", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
 	}
 
 	// 4. Notify user - NOW OUTSIDE TX
@@ -237,8 +246,8 @@ func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, status
 	}
 
 	// Trigger external actions outside of transaction
-	if status == domain.StatusDelivering {
-		if err := uc.logisticService.CreateDelivery(ctx, order.ID()); err != nil {
+	if status == domain.StatusReady {
+		if err := uc.logisticService.CreateDelivery(ctx, order.ID(), order.OrderNumber(), order.Address(), order.Items()); err != nil {
 			uc.log.Error("failed to create delivery", slog.String("order_id", order.ID()), slog.Any("error", err))
 		}
 	}

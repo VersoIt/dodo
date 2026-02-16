@@ -6,23 +6,47 @@
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/types/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/views/HomeView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/HomeView.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ProfileView.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/auth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/api/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/api/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/KitchenView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/KitchenView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/LogisticsView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/LogisticsView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/catalog.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/catalog.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/kitchen.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/kitchen.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/logistics.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/logistics.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/handlers/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/gateway/internal/api/http/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/api/proto/pb/kpi.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/api/proto/pb/kpi.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/analytics/api/proto/pb/kpi_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/api/proto/pb/kpi_grpc.pb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/analytics/internal/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/analytics/internal/usecase/usecase.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/internal/domain/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/internal/domain/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/notification/internal/repository/notification_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/internal/repository/notification_repo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/api/proto/pb/user.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/pb/user.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/api/proto/pb/user_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/api/proto/pb/user_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/auth/internal/domain/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/auth/internal/domain/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/api/proto/pb/product.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/api/proto/pb/product.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/api/proto/pb/product_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/api/proto/pb/product_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/catalog/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/catalog/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/api/proto/pb/ticket.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/api/proto/pb/ticket.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/api/proto/pb/ticket_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/api/proto/pb/ticket_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/api/proto/ticket.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/api/proto/ticket.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/internal/domain/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/internal/domain/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/internal/repository/ticket_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/internal/repository/ticket_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/kitchen/internal/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/kitchen/internal/usecase/usecase.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/api/proto/delivery.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/api/proto/delivery.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/api/proto/pb/delivery.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/api/proto/pb/delivery.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/api/proto/pb/delivery_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/api/proto/pb/delivery_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/internal/domain/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/internal/domain/domain.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/internal/repository/logistics_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/internal/repository/logistics_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/logistics/internal/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/logistics/internal/usecase/usecase.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/api/proto/pb/notification.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/api/proto/pb/notification.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/notification/api/proto/pb/notification_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/notification/api/proto/pb/notification_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order_grpc.pb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/orders/internal/domain/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/domain/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/analytics_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/analytics_client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/catalog_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/catalog_client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/repository/order_repo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/kitchen_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/kitchen_client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/logistics_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/infrastructure/grpc/logistics_client.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/services/orders/internal/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/usecase/usecase.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/treasury/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/api/proto/pb/payment.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/api/proto/pb/payment.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/treasury/api/proto/pb/payment_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/treasury/api/proto/pb/payment_grpc.pb.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

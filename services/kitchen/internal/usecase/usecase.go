@@ -28,7 +28,7 @@ func NewKitchenUseCase(repo domain.TicketRepository, tm trm.Manager, log *slog.L
 	}
 }
 
-func (uc *KitchenUseCase) AcceptOrder(ctx context.Context, orderID string, items []domain.KitchenItem) (*domain.KitchenTicket, error) {
+func (uc *KitchenUseCase) AcceptOrder(ctx context.Context, orderID string, orderNumber string, items []domain.KitchenItem) (*domain.KitchenTicket, error) {
 	if orderID == "" {
 		return nil, fmt.Errorf("%w: order ID is required", ErrInvalidInput)
 	}
@@ -38,9 +38,9 @@ func (uc *KitchenUseCase) AcceptOrder(ctx context.Context, orderID string, items
 
 	var ticket *domain.KitchenTicket
 	err := uc.tm.Do(ctx, func(ctx context.Context) error {
-		ticket = domain.NewTicket(orderID, items)
+		ticket = domain.NewTicket(orderID, orderNumber, items)
 
-		uc.log.Info("accepting order in kitchen", slog.String("order_id", orderID), slog.String("ticket_id", ticket.ID()))
+		uc.log.Info("accepting order in kitchen", slog.String("order_id", orderID), slog.String("order_number", orderNumber), slog.String("ticket_id", ticket.ID()))
 
 		if err := uc.repo.Save(ctx, ticket); err != nil {
 			return fmt.Errorf("failed to create kitchen ticket: %w", err)
@@ -55,12 +55,21 @@ func (uc *KitchenUseCase) AcceptOrder(ctx context.Context, orderID string, items
 	return ticket, nil
 }
 
-func (uc *KitchenUseCase) StartCooking(ctx context.Context, ticketID string) error {
+func (uc *KitchenUseCase) ListTickets(ctx context.Context) ([]*domain.KitchenTicket, error) {
+	tickets, err := uc.repo.FindAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list kitchen tickets: %w", err)
+	}
+	return tickets, nil
+}
+
+func (uc *KitchenUseCase) StartCooking(ctx context.Context, ticketID string) (string, error) {
 	if ticketID == "" {
-		return fmt.Errorf("%w: ticket ID is required", ErrInvalidInput)
+		return "", fmt.Errorf("%w: ticket ID is required", ErrInvalidInput)
 	}
 
-	return uc.tm.Do(ctx, func(ctx context.Context) error {
+	var orderID string
+	err := uc.tm.Do(ctx, func(ctx context.Context) error {
 		ticket, err := uc.repo.FindByID(ctx, ticketID)
 		if err != nil {
 			return fmt.Errorf("find kitchen ticket %s: %w", ticketID, err)
@@ -74,17 +83,21 @@ func (uc *KitchenUseCase) StartCooking(ctx context.Context, ticketID string) err
 			return fmt.Errorf("update ticket status to cooking: %w", err)
 		}
 
-		uc.log.Info("started cooking", slog.String("ticket_id", ticketID), slog.String("order_id", ticket.OrderID()))
+		orderID = ticket.OrderID()
+		uc.log.Info("started cooking", slog.String("ticket_id", ticketID), slog.String("order_id", orderID))
 		return nil
 	})
+
+	return orderID, err
 }
 
-func (uc *KitchenUseCase) MarkReady(ctx context.Context, ticketID string) error {
+func (uc *KitchenUseCase) MarkReady(ctx context.Context, ticketID string) (string, error) {
 	if ticketID == "" {
-		return fmt.Errorf("%w: ticket ID is required", ErrInvalidInput)
+		return "", fmt.Errorf("%w: ticket ID is required", ErrInvalidInput)
 	}
 
-	return uc.tm.Do(ctx, func(ctx context.Context) error {
+	var orderID string
+	err := uc.tm.Do(ctx, func(ctx context.Context) error {
 		ticket, err := uc.repo.FindByID(ctx, ticketID)
 		if err != nil {
 			return fmt.Errorf("find kitchen ticket %s: %w", ticketID, err)
@@ -98,7 +111,10 @@ func (uc *KitchenUseCase) MarkReady(ctx context.Context, ticketID string) error 
 			return fmt.Errorf("update ticket status to ready: %w", err)
 		}
 
-		uc.log.Info("ticket ready", slog.String("ticket_id", ticketID), slog.String("order_id", ticket.OrderID()))
+		orderID = ticket.OrderID()
+		uc.log.Info("ticket ready", slog.String("ticket_id", ticketID), slog.String("order_id", orderID))
 		return nil
 	})
+
+	return orderID, err
 }

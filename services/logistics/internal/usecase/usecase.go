@@ -30,40 +30,87 @@ func NewLogisticsUseCase(dr domain.DeliveryRepository, cr domain.CourierReposito
 	}
 }
 
-func (uc *LogisticsUseCase) AssignCourierToDelivery(ctx context.Context, orderID string, courierID string) error {
-	if orderID == "" || courierID == "" {
-		return fmt.Errorf("%w: order ID and courier ID are required", ErrInvalidInput)
+func (uc *LogisticsUseCase) CreateDelivery(ctx context.Context, orderID, orderNumber, city, street, house, apartment string, items []domain.DeliveryItem) error {
+	if orderID == "" {
+		return fmt.Errorf("%w: order ID is required", ErrInvalidInput)
 	}
 
-	uc.log.Info("assigning courier", slog.String("order_id", orderID), slog.String("courier_id", courierID))
-
 	return uc.tm.Do(ctx, func(ctx context.Context) error {
-		delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
-		if err != nil {
-			delivery = domain.NewDelivery(orderID)
-		}
+		delivery := domain.NewDelivery(orderID, orderNumber, city, street, house, apartment, items)
 
-		courier, err := uc.courierRepo.FindByID(ctx, courierID)
-		if err != nil {
-			return fmt.Errorf("locate courier %s: %w", courierID, err)
-		}
+		uc.log.Info("creating delivery", slog.String("order_id", orderID), slog.String("order_number", orderNumber))
 
-		if err := courier.TakeOrder(); err != nil {
-			return fmt.Errorf("courier %s take order: %w", courierID, err)
-		}
-
-		if err := delivery.AssignCourier(courier.ID()); err != nil {
-			return fmt.Errorf("delivery assignment: %w", err)
-		}
-
-		if err := uc.courierRepo.Save(ctx, courier); err != nil {
-			return fmt.Errorf("save courier: %w", err)
-		}
 		if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
-			return fmt.Errorf("save delivery: %w", err)
+			return fmt.Errorf("failed to create delivery: %w", err)
 		}
 		return nil
 	})
+}
+
+func (uc *LogisticsUseCase) AssignCourierToDelivery(ctx context.Context, orderID string, courierID string) error {
+	return uc.tm.Do(ctx, func(ctx context.Context) error {
+		// Ensure courier exists (simple sync for prototype)
+		if _, err := uc.courierRepo.FindByID(ctx, courierID); err != nil {
+			stubCourier := domain.ReconstructCourier(courierID, "Unknown Courier", "N/A", domain.CourierFree, 0, 0)
+			if err := uc.courierRepo.Save(ctx, stubCourier); err != nil {
+				return fmt.Errorf("failed to sync courier: %w", err)
+			}
+		}
+
+		delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
+		if err != nil {
+			return fmt.Errorf("find delivery %s: %w", orderID, err)
+		}
+
+		if err := delivery.AssignCourier(courierID); err != nil {
+			return fmt.Errorf("assign courier: %w", err)
+		}
+
+		if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
+			return fmt.Errorf("persist delivery: %w", err)
+		}
+		return nil
+	})
+}
+
+func (uc *LogisticsUseCase) StartDelivery(ctx context.Context, orderID string) error {
+	return uc.tm.Do(ctx, func(ctx context.Context) error {
+		delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
+		if err != nil {
+			return fmt.Errorf("find delivery %s: %w", orderID, err)
+		}
+
+		if err := delivery.Pickup(); err != nil {
+			return fmt.Errorf("pickup delivery: %w", err)
+		}
+
+		if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
+			return fmt.Errorf("persist delivery: %w", err)
+		}
+		return nil
+	})
+}
+
+func (uc *LogisticsUseCase) CompleteDelivery(ctx context.Context, orderID string) error {
+	return uc.tm.Do(ctx, func(ctx context.Context) error {
+		delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
+		if err != nil {
+			return fmt.Errorf("find delivery %s: %w", orderID, err)
+		}
+
+		if err := delivery.Complete(); err != nil {
+			return fmt.Errorf("complete delivery: %w", err)
+		}
+
+		if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
+			return fmt.Errorf("persist delivery: %w", err)
+		}
+		return nil
+	})
+}
+
+func (uc *LogisticsUseCase) ListDeliveries(ctx context.Context) ([]*domain.Delivery, error) {
+	return uc.deliveryRepo.FindAll(ctx)
 }
 
 func (uc *LogisticsUseCase) UpdateLocation(ctx context.Context, orderID string, lat, lng float64) error {
