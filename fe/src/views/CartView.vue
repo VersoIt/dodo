@@ -134,14 +134,22 @@ const confirmPayment = async () => {
           </div>
           <div class="card-body p-10 space-y-8">
             <div class="form-control w-full">
-              <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Улица</span></label>
+              <label class="label">
+                <span class="label-text font-black uppercase text-[10px] opacity-40">
+                  Улица <span class="text-error">*</span>
+                </span>
+              </label>
               <div class="relative"><MapPin class="absolute left-4 top-3.5 w-5 h-5 opacity-20" />
                 <input v-model="address.street" type="text" placeholder="пр. Ленина" class="input input-bordered w-full pl-12 rounded-2xl h-12 font-bold" />
               </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div class="form-control">
-                <label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Дом</span></label>
+                <label class="label">
+                  <span class="label-text font-black uppercase text-[10px] opacity-40">
+                    Дом <span class="text-error">*</span>
+                  </span>
+                </label>
                 <div class="relative"><Building2 class="absolute left-4 top-3.5 w-5 h-5 opacity-20" /><input v-model="address.house" type="text" class="input input-bordered w-full pl-12 rounded-2xl h-12 font-bold" /></div>
               </div>
               <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Кв/Офис</span></label><input v-model="address.apartment" type="text" class="input input-bordered w-full px-6 rounded-2xl h-12 font-bold" /></div>

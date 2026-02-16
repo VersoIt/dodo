@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, inject } from 'vue'
+import { ref, onMounted, inject, computed } from 'vue'
 import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign } from 'lucide-vue-next'
 import { ordersApi } from '../api'
 import type { PromoCode, Analytics } from '../types'
+import AppModal from '../components/shared/AppModal.vue'
 
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
@@ -12,6 +13,10 @@ const analytics = ref<Analytics | null>(null)
 
 const showAddPromoModal = ref(false)
 const newPromo = ref<{ code: string, amount: number, type: 'percent' | 'fixed' }>({ code: '', amount: 0, type: 'percent' })
+
+const isPromoValid = computed(() => {
+  return newPromo.value.code.trim().length > 0 && newPromo.value.amount > 0
+})
 
 const fetchData = async () => {
   try {
@@ -26,6 +31,10 @@ const fetchData = async () => {
 }
 
 const handleAddPromo = async () => {
+  if (!isPromoValid.value) {
+    addToast('Заполните все поля корректно', 'error')
+    return
+  }
   try {
     const res = await ordersApi.createPromoCode(newPromo.value)
     if (res.success) {
@@ -140,12 +149,12 @@ onMounted(fetchData)
 
     <AppModal :show="showAddPromoModal" title="Новый промокод" @close="showAddPromoModal = false">
       <div class="p-10 space-y-6">
-        <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Код купона</span></label><input v-model="newPromo.code" type="text" placeholder="SUMMER2026" class="input input-bordered h-14 w-full rounded-2xl font-mono font-black uppercase" /></div>
+        <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Код купона <span class="text-error">*</span></span></label><input v-model="newPromo.code" type="text" placeholder="SUMMER2026" class="input input-bordered h-14 w-full rounded-2xl font-mono font-black uppercase" /></div>
         <div class="grid grid-cols-2 gap-6">
           <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Тип</span></label><select v-model="newPromo.type" class="select select-bordered w-full rounded-2xl h-14 font-bold"><option value="percent">Процент (%)</option><option value="fixed">Сумма (₽)</option></select></div>
-          <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Значение</span></label><input v-model="newPromo.amount" type="number" class="input input-bordered w-full rounded-2xl h-14 font-bold" /></div>
+          <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Значение <span class="text-error">*</span></span></label><input v-model="newPromo.amount" type="number" class="input input-bordered w-full rounded-2xl h-14 font-bold" /></div>
         </div>
-        <button @click="handleAddPromo" class="btn btn-secondary btn-block h-16 rounded-2xl font-black uppercase shadow-xl shadow-secondary/20 mt-4">Создать промокод</button>
+        <button @click="handleAddPromo" :disabled="!isPromoValid" class="btn btn-secondary btn-block h-16 rounded-2xl font-black uppercase shadow-xl shadow-secondary/20 mt-4">Создать промокод</button>
       </div>
     </AppModal>
   </div>
