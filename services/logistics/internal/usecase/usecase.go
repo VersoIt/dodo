@@ -71,15 +71,18 @@ func (uc *LogisticsUseCase) UpdateLocation(ctx context.Context, orderID string, 
 		return fmt.Errorf("%w: order ID is required", ErrInvalidInput)
 	}
 
+	coords, err := domain.NewCoordinates(lat, lng)
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrInvalidInput, err)
+	}
+
 	return uc.tm.Do(ctx, func(ctx context.Context) error {
 		delivery, err := uc.deliveryRepo.FindByOrderID(ctx, orderID)
 		if err != nil {
 			return fmt.Errorf("find delivery %s: %w", orderID, err)
 		}
 
-		if err := delivery.UpdateLocation(lat, lng); err != nil {
-			return fmt.Errorf("update location: %w", err)
-		}
+		delivery.UpdateLocation(coords)
 
 		if err := uc.deliveryRepo.Save(ctx, delivery); err != nil {
 			return fmt.Errorf("persist location: %w", err)

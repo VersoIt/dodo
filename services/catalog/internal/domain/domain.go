@@ -36,10 +36,10 @@ type IngredientRef struct {
 
 type Product struct {
 	id          string
-	name        string
+	name        ProductName
 	description string
 	category    CategoryType
-	basePrice   common.Money
+	basePrice   Price
 	ingredients []IngredientRef
 	imageUrl    string
 	isAvailable bool
@@ -53,14 +53,7 @@ var (
 	ErrProductNotFound = errors.New("product not found")
 )
 
-func NewProduct(name, desc string, cat CategoryType, basePrice common.Money, imageUrl string) (*Product, error) {
-	if name == "" {
-		return nil, ErrInvalidDetails
-	}
-	if basePrice.IsNegative() {
-		return nil, ErrNegativePrice
-	}
-
+func NewProduct(name ProductName, desc string, cat CategoryType, basePrice Price, imageUrl string) (*Product, error) {
 	id, _ := uuid.NewV7()
 	return &Product{
 		id:          id.String(),
@@ -87,39 +80,28 @@ func (p *Product) AddIngredient(ingID string, qty float64, removable bool) error
 	return nil
 }
 
-func (p *Product) UpdatePrice(newPrice common.Money) error {
-	if newPrice.IsNegative() {
-		return ErrNegativePrice
-	}
+func (p *Product) UpdatePrice(newPrice Price) {
 	p.basePrice = newPrice
-	return nil
 }
 
 func (p *Product) SetAvailability(available bool) {
 	p.isAvailable = available
 }
 
-func (p *Product) Update(name, desc string, cat CategoryType, price common.Money, img string, isAvail bool) error {
-	if name == "" {
-		return ErrInvalidDetails
-	}
-	if price.IsNegative() {
-		return ErrNegativePrice
-	}
+func (p *Product) Update(name ProductName, desc string, cat CategoryType, price Price, img string, isAvail bool) {
 	p.name = name
 	p.description = desc
 	p.category = cat
 	p.basePrice = price
 	p.imageUrl = img
 	p.isAvailable = isAvail
-	return nil
 }
 
 func (p *Product) ID() string              { return p.id }
-func (p *Product) Name() string            { return p.name }
+func (p *Product) Name() string            { return p.name.String() }
 func (p *Product) Description() string     { return p.description }
 func (p *Product) Category() CategoryType  { return p.category }
-func (p *Product) BasePrice() common.Money { return p.basePrice }
+func (p *Product) BasePrice() common.Money { return p.basePrice.Money() }
 func (p *Product) ImageURL() string        { return p.imageUrl }
 func (p *Product) IsAvailable() bool       { return p.isAvailable }
 
@@ -131,12 +113,18 @@ func (p *Product) Ingredients() []IngredientRef {
 
 // ReconstructProduct is used by repositories to rebuild a Product from storage.
 func ReconstructProduct(id, name, desc string, cat CategoryType, price float64, img string, isAvail bool, ingredients []IngredientRef) *Product {
+	// For reconstruction, we can assume valid state or handle error. 
+	// To keep signature simple, we might suppress error or panic if DB data is corrupted.
+	// Here, assuming valid data.
+	n, _ := NewProductName(name)
+	pr, _ := NewPrice(price)
+	
 	return &Product{
 		id:          id,
-		name:        name,
+		name:        n,
 		description: desc,
 		category:    cat,
-		basePrice:   common.NewMoney(price),
+		basePrice:   pr,
 		imageUrl:    img,
 		isAvailable: isAvail,
 		ingredients: ingredients,

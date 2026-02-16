@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
-	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/services/catalog/internal/domain"
 )
 
@@ -29,9 +28,13 @@ func NewCatalogUseCase(repo domain.ProductRepository, tm trm.Manager, log *slog.
 	}
 }
 
-func (uc *CatalogUseCase) UpdatePrice(ctx context.Context, productID string, newPrice common.Money) error {
+func (uc *CatalogUseCase) UpdatePrice(ctx context.Context, productID string, newPrice float64) error {
 	if productID == "" {
 		return fmt.Errorf("%w: product ID is required", ErrInvalidInput)
+	}
+	priceVO, err := domain.NewPrice(newPrice)
+	if err != nil {
+		return fmt.Errorf("%w: invalid price: %v", ErrInvalidInput, err)
 	}
 
 	return uc.tm.Do(ctx, func(ctx context.Context) error {
@@ -40,15 +43,13 @@ func (uc *CatalogUseCase) UpdatePrice(ctx context.Context, productID string, new
 			return fmt.Errorf("failed to find product %s: %w", productID, err)
 		}
 
-		if err = product.UpdatePrice(newPrice); err != nil {
-			return fmt.Errorf("invalid price update: %w", err)
-		}
+		product.UpdatePrice(priceVO)
 
 		if err = uc.repo.Save(ctx, product); err != nil {
 			return fmt.Errorf("failed to persist price update: %w", err)
 		}
 
-		uc.log.Info("product price updated", slog.String("product_id", productID), slog.Float64("new_price", newPrice.InexactFloat64()))
+		uc.log.Info("product price updated", slog.String("product_id", productID), slog.Float64("new_price", newPrice))
 		return nil
 	})
 }
@@ -75,16 +76,21 @@ func (uc *CatalogUseCase) SetAvailability(ctx context.Context, productID string,
 	})
 }
 
-func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, cat domain.CategoryType, price common.Money, imageUrl string) (*domain.Product, error) {
-	if name == "" {
-		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
+func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, cat domain.CategoryType, price float64, imageUrl string) (*domain.Product, error) {
+	nameVO, err := domain.NewProductName(name)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid name: %v", ErrInvalidInput, err)
+	}
+	priceVO, err := domain.NewPrice(price)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid price: %v", ErrInvalidInput, err)
 	}
 
 	var product *domain.Product
-	err := uc.tm.Do(ctx, func(ctx context.Context) error {
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
 		var err error
 
-		product, err = domain.NewProduct(name, desc, cat, price, imageUrl)
+		product, err = domain.NewProduct(nameVO, desc, cat, priceVO, imageUrl)
 		if err != nil {
 			return fmt.Errorf("failed to initialize product: %w", err)
 		}
@@ -103,9 +109,18 @@ func (uc *CatalogUseCase) CreateProduct(ctx context.Context, name, desc string, 
 	return product, nil
 }
 
-func (uc *CatalogUseCase) UpdateProduct(ctx context.Context, id, name, desc string, cat domain.CategoryType, price common.Money, imageUrl string, isAvailable bool) (*domain.Product, error) {
+func (uc *CatalogUseCase) UpdateProduct(ctx context.Context, id, name, desc string, cat domain.CategoryType, price float64, imageUrl string, isAvailable bool) (*domain.Product, error) {
+	nameVO, err := domain.NewProductName(name)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid name: %v", ErrInvalidInput, err)
+	}
+	priceVO, err := domain.NewPrice(price)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid price: %v", ErrInvalidInput, err)
+	}
+
 	var product *domain.Product
-	err := uc.tm.Do(ctx, func(ctx context.Context) error {
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
 		var err error
 
 		product, err = uc.repo.FindByID(ctx, id)
@@ -113,9 +128,7 @@ func (uc *CatalogUseCase) UpdateProduct(ctx context.Context, id, name, desc stri
 			return fmt.Errorf("find product: %w", err)
 		}
 
-		if err = product.Update(name, desc, cat, price, imageUrl, isAvailable); err != nil {
-			return fmt.Errorf("update product: %w", err)
-		}
+		product.Update(nameVO, desc, cat, priceVO, imageUrl, isAvailable)
 
 		if err = uc.repo.Save(ctx, product); err != nil {
 			return fmt.Errorf("save product: %w", err)

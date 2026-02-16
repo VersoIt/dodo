@@ -64,17 +64,15 @@ type Delivery struct {
 	pickupTime   time.Time
 	deliveryTime time.Time
 
-	currentLat float64
-	currentLng float64
+	location Coordinates
 }
 
 type Courier struct {
-	id         string
-	name       string
-	phone      string
-	status     CourierStatus
-	currentLat float64
-	currentLng float64
+	id       string
+	name     string
+	phone    string
+	status   CourierStatus
+	location Coordinates
 }
 
 func NewDelivery(orderID string) *Delivery {
@@ -130,22 +128,12 @@ var (
 	ErrInvalidCoordinates = errors.New("invalid coordinates")
 )
 
-func (d *Delivery) UpdateLocation(lat, lng float64) error {
-	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
-		return ErrInvalidCoordinates
-	}
-	d.currentLat = lat
-	d.currentLng = lng
-	return nil
+func (d *Delivery) UpdateLocation(coords Coordinates) {
+	d.location = coords
 }
 
-func (c *Courier) UpdateLocation(lat, lng float64) error {
-	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
-		return ErrInvalidCoordinates
-	}
-	c.currentLat = lat
-	c.currentLng = lng
-	return nil
+func (c *Courier) UpdateLocation(coords Coordinates) {
+	c.location = coords
 }
 
 func (c *Courier) GoOnline() {
@@ -186,23 +174,22 @@ func (d *Delivery) CourierID() string            { return d.courierID }
 func (d *Delivery) Status() DeliveryStatus       { return d.status }
 func (d *Delivery) PickupTime() time.Time        { return d.pickupTime }
 func (d *Delivery) DeliveryTime() time.Time      { return d.deliveryTime }
-func (d *Delivery) Location() (lat, lng float64) { return d.currentLat, d.currentLng }
+func (d *Delivery) Location() (lat, lng float64) { return d.location.Lat, d.location.Lng }
 
 func (c *Courier) ID() string                   { return c.id }
 func (c *Courier) Name() string                 { return c.name }
 func (c *Courier) Phone() string                { return c.phone }
 func (c *Courier) Status() CourierStatus        { return c.status }
-func (c *Courier) Location() (lat, lng float64) { return c.currentLat, c.currentLng }
+func (c *Courier) Location() (lat, lng float64) { return c.location.Lat, c.location.Lng }
 
 // ReconstructCourier builds a Courier from storage.
 func ReconstructCourier(id, name, phone string, status CourierStatus, lat, lng float64) *Courier {
 	return &Courier{
-		id:         id,
-		name:       name,
-		phone:      phone,
-		status:     status,
-		currentLat: lat,
-		currentLng: lng,
+		id:       id,
+		name:     name,
+		phone:    phone,
+		status:   status,
+		location: Coordinates{Lat: lat, Lng: lng},
 	}
 }
 
@@ -215,8 +202,7 @@ func ReconstructDelivery(orderID, courierID string, status DeliveryStatus, creat
 		createdAt:    createdAt,
 		pickupTime:   pickup,
 		deliveryTime: del,
-		currentLat:   lat,
-		currentLng:   lng,
+		location:     Coordinates{Lat: lat, Lng: lng},
 	}
 }
 

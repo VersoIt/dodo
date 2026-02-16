@@ -89,7 +89,7 @@ type OrderItem struct {
 	id             string
 	productID      string
 	productName    string
-	quantity       int
+	quantity       Quantity
 	basePrice      common.Money
 	sizeMultiplier float64
 	toppings       []Topping
@@ -112,12 +112,12 @@ func (i *OrderItem) CalculateTotal() common.Money {
 	}
 
 	unitPrice := sizedPrice.Add(toppingsPrice)
-	return unitPrice.Mul(decimal.NewFromInt(int64(i.quantity)))
+	return unitPrice.Mul(decimal.NewFromInt(int64(i.quantity.Int())))
 }
 
 func (i *OrderItem) ProductID() string       { return i.productID }
 func (i *OrderItem) ProductName() string     { return i.productName }
-func (i *OrderItem) Quantity() int           { return i.quantity }
+func (i *OrderItem) Quantity() int           { return i.quantity.Int() }
 func (i *OrderItem) BasePrice() common.Money { return i.basePrice }
 func (i *OrderItem) Size() float64           { return i.sizeMultiplier }
 func (i *OrderItem) Toppings() []Topping     { return i.toppings }
@@ -210,12 +210,9 @@ var (
 
 // --- Business Logic ---
 
-func (o *Order) AddItem(productID, name string, qty int, productBasePrice common.Money, sizeMult float64, toppings []Topping) error {
+func (o *Order) AddItem(productID, name string, qty Quantity, productBasePrice common.Money, sizeMult float64, toppings []Topping) error {
 	if o.status != StatusCreated {
 		return ErrOrderLocked
-	}
-	if qty <= 0 {
-		return ErrInvalidQty
 	}
 
 	toppingsCopy := make([]Topping, len(toppings))
@@ -354,11 +351,13 @@ func ReconstructOrder(id, number, custID string, status OrderStatus, createdAt t
 
 // ReconstructOrderItem builds an OrderItem from storage.
 func ReconstructOrderItem(id, prodID, name string, qty int, base common.Money, size float64, toppings []Topping) *OrderItem {
+	// Trust DB data for reconstruction
+	q, _ := NewQuantity(qty)
 	return &OrderItem{
 		id:             id,
 		productID:      prodID,
 		productName:    name,
-		quantity:       qty,
+		quantity:       q,
 		basePrice:      base,
 		sizeMultiplier: size,
 		toppings:       toppings,

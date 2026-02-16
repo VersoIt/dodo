@@ -64,7 +64,7 @@ var (
 
 type User struct {
 	id           string
-	email        string
+	email        Email
 	passwordHash string
 	role         Role
 	createdAt    time.Time
@@ -72,25 +72,19 @@ type User struct {
 
 	isClient    bool
 	name        string
-	phone       string
+	phone       Phone
 	bonusPoints int
 }
 
 // --- Factory ---
 
-func NewUser(email, password, name string, role Role) (*User, error) {
-	if email == "" || !strings.Contains(email, "@") {
-		return nil, ErrInvalidEmail
-	}
-	if len(password) < 6 {
-		return nil, ErrWeakPassword
-	}
-
+func NewUser(email Email, password Password, name string, role Role, phone Phone) (*User, error) {
 	id, _ := uuid.NewV7()
 	u := &User{
 		id:        id.String(),
 		email:     email,
 		name:      name,
+		phone:     phone,
 		role:      role,
 		createdAt: time.Now(),
 		updatedAt: time.Now(),
@@ -105,25 +99,24 @@ func NewUser(email, password, name string, role Role) (*User, error) {
 
 // ReconstructUser is used by repositories to rebuild a User from storage.
 func ReconstructUser(id, email, pwdHash string, role Role, isClient bool, name, phone string, bonus int) *User {
+	// For reconstruction, we assume data in DB is valid, or we could re-validate.
+	// Here we bypass validation to avoid reconstruction errors on legacy data.
 	return &User{
 		id:           id,
-		email:        email,
+		email:        Email{value: email},
 		passwordHash: pwdHash,
 		role:         role,
 		isClient:     isClient,
 		name:         name,
-		phone:        phone,
+		phone:        Phone{value: phone},
 		bonusPoints:  bonus,
 	}
 }
 
 // --- Behavior ---
 
-func (u *User) SetPassword(plainPassword string) error {
-	if len(plainPassword) < 6 {
-		return ErrWeakPassword
-	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
+func (u *User) SetPassword(plainPassword Password) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(plainPassword.String()), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
@@ -142,7 +135,7 @@ func (u *User) ChangeRole(newRole Role) {
 	u.updatedAt = time.Now()
 }
 
-func (u *User) UpdateProfile(name, phone string) {
+func (u *User) UpdateProfile(name string, phone Phone) {
 	u.name = name
 	u.phone = phone
 	u.updatedAt = time.Now()
@@ -166,13 +159,13 @@ func (u *User) SpendBonuses(amount int) error {
 }
 
 func (u *User) ID() string             { return u.id }
-func (u *User) Email() string          { return u.email }
+func (u *User) Email() string          { return u.email.String() }
 func (u *User) Role() Role             { return u.role }
 func (u *User) HashedPassword() string { return u.passwordHash }
 func (u *User) IsClient() bool         { return u.isClient }
 func (u *User) BonusPoints() int       { return u.bonusPoints }
 func (u *User) Name() string           { return u.name }
-func (u *User) Phone() string          { return u.phone }
+func (u *User) Phone() string          { return u.phone.String() }
 
 type UserRepository interface {
 	Save(ctx context.Context, u *User) error

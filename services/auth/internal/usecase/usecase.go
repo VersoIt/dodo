@@ -31,24 +31,33 @@ func NewAuthUseCase(repo domain.UserRepository, tm trm.Manager, log *slog.Logger
 }
 
 func (uc *AuthUseCase) Register(ctx context.Context, email, password, name string, role domain.Role) (*domain.User, error) {
-	if email == "" || password == "" {
-		return nil, fmt.Errorf("%w: email and password are required", ErrInvalidInput)
+	// Value Object validation
+	emailVO, err := domain.NewEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, err)
 	}
+	passwordVO, err := domain.NewPassword(password)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, err)
+	}
+	// Phone is optional/empty initially in Register? Or maybe add phone to input?
+	// Assuming empty phone for now as per current signature
+	phoneVO, _ := domain.NewPhone("") 
 
-	uc.log.Info("registering user", slog.String("email", email), slog.String("name", name), slog.String("role", role.String()))
+	uc.log.Info("registering user", slog.String("email", emailVO.String()), slog.String("name", name), slog.String("role", role.String()))
 
 	var user *domain.User
-	err := uc.tm.Do(ctx, func(ctx context.Context) error {
-		existing, err := uc.repo.FindByEmail(ctx, email)
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
+		existing, err := uc.repo.FindByEmail(ctx, emailVO.String())
 		if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
 			return fmt.Errorf("failed to check existing user: %w", err)
 		}
 		if existing != nil {
-			uc.log.Warn("registration failed: user already exists", slog.String("email", email))
+			uc.log.Warn("registration failed: user already exists", slog.String("email", emailVO.String()))
 			return ErrUserExists
 		}
 
-		user, err = domain.NewUser(email, password, name, role)
+		user, err = domain.NewUser(emailVO, passwordVO, name, role, phoneVO)
 		if err != nil {
 			return fmt.Errorf("domain validation failed: %w", err)
 		}
@@ -68,13 +77,17 @@ func (uc *AuthUseCase) Register(ctx context.Context, email, password, name strin
 }
 
 func (uc *AuthUseCase) Login(ctx context.Context, email, password string) (*domain.User, error) {
-	if email == "" || password == "" {
-		return nil, fmt.Errorf("%w: credentials required", ErrInvalidInput)
+	if password == "" {
+		return nil, fmt.Errorf("%w: password required", ErrInvalidInput)
+	}
+	emailVO, err := domain.NewEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid email", ErrInvalidInput)
 	}
 
-	uc.log.Info("login attempt", slog.String("email", email))
+	uc.log.Info("login attempt", slog.String("email", emailVO.String()))
 
-	user, err := uc.repo.FindByEmail(ctx, email)
+	user, err := uc.repo.FindByEmail(ctx, emailVO.String())
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			uc.log.Warn("login failed: user not found", slog.String("email", email))
@@ -113,15 +126,20 @@ func (uc *AuthUseCase) UpdateUser(ctx context.Context, id, name, phone string) (
 		return nil, fmt.Errorf("%w: user ID is required", ErrInvalidInput)
 	}
 
+	phoneVO, err := domain.NewPhone(phone)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid phone: %v", ErrInvalidInput, err)
+	}
+
 	var user *domain.User
-	err := uc.tm.Do(ctx, func(ctx context.Context) error {
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
 		var err error
 		user, err = uc.repo.FindByID(ctx, id)
 		if err != nil {
 			return fmt.Errorf("find user: %w", err)
 		}
 
-		user.UpdateProfile(name, phone)
+		user.UpdateProfile(name, phoneVO)
 
 		if err := uc.repo.Save(ctx, user); err != nil {
 			return fmt.Errorf("save updated user: %w", err)

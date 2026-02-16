@@ -34,7 +34,7 @@ func (h *CatalogHandler) Register(server *grpc.Server) {
 func (h *CatalogHandler) CreateProduct(ctx context.Context, req *catalogpb.CreateProductRequest) (*catalogpb.ProductResponse, error) {
 	h.log.Info("Creating product", slog.String("name", req.Name))
 
-	p, err := h.uc.CreateProduct(ctx, req.Name, req.Description, domain.CategoryType(req.CategoryId), common.NewMoney(req.Price), req.ImageUrl)
+	p, err := h.uc.CreateProduct(ctx, req.Name, req.Description, domain.CategoryType(req.CategoryId), req.Price, req.ImageUrl)
 	if err != nil {
 		h.log.Error("Failed to create product", slog.String("name", req.Name), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "create product: %v", err)
@@ -52,7 +52,7 @@ func (h *CatalogHandler) UpdateProduct(ctx context.Context, req *catalogpb.Updat
 		req.Name,
 		req.Description,
 		domain.CategoryType(req.CategoryId),
-		common.NewMoney(req.Price),
+		req.Price,
 		req.ImageUrl,
 		req.IsAvailable,
 	)

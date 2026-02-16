@@ -65,17 +65,37 @@ type CreateOrderInput struct {
 }
 
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput) (*domain.Order, error) {
+	// Validate Address using VO
+	addr, err := domain.NewDeliveryAddress(
+		input.Address.City,
+		input.Address.Street,
+		input.Address.House,
+		input.Address.Apartment,
+		input.Address.Floor,
+		input.Address.Entrance,
+		input.Address.Comment,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid address: %v", ErrInvalidInput, err)
+	}
+
 	var order *domain.Order
-	err := uc.tm.Do(ctx, func(ctx context.Context) error {
-		order = domain.NewOrder(input.CustomerID, input.Address)
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
+		order = domain.NewOrder(input.CustomerID, addr)
 
 		for _, item := range input.Items {
+			// Validate Quantity using VO
+			qty, err := domain.NewQuantity(item.Quantity)
+			if err != nil {
+				return fmt.Errorf("%w: product %s invalid quantity: %v", ErrInvalidInput, item.ProductID, err)
+			}
+
 			product, err := uc.catalogService.GetProduct(ctx, item.ProductID)
 			if err != nil {
 				return fmt.Errorf("failed to fetch product %s from catalog: %w", item.ProductID, err)
 			}
 
-			if err := order.AddItem(product.ID, product.Name, item.Quantity, product.BasePrice, item.SizeMult, nil); err != nil {
+			if err := order.AddItem(product.ID, product.Name, qty, product.BasePrice, item.SizeMult, nil); err != nil {
 				return fmt.Errorf("failed to add item to order: %w", err)
 			}
 		}
