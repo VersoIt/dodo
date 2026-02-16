@@ -962,171 +962,6 @@ func (x *CheckPromoCodeRequest) GetCode() string {
 	return ""
 }
 
-// --- Analytics ---
-type GetAnalyticsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetAnalyticsRequest) Reset() {
-	*x = GetAnalyticsRequest{}
-	mi := &file_order_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAnalyticsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAnalyticsRequest) ProtoMessage() {}
-
-func (x *GetAnalyticsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_order_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAnalyticsRequest.ProtoReflect.Descriptor instead.
-func (*GetAnalyticsRequest) Descriptor() ([]byte, []int) {
-	return file_order_proto_rawDescGZIP(), []int{17}
-}
-
-type AnalyticsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TotalRevenue  float64                `protobuf:"fixed64,1,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	OrdersCount   int32                  `protobuf:"varint,2,opt,name=orders_count,json=ordersCount,proto3" json:"orders_count,omitempty"`
-	AvgCheck      float64                `protobuf:"fixed64,3,opt,name=avg_check,json=avgCheck,proto3" json:"avg_check,omitempty"`
-	TopProducts   []*ProductStat         `protobuf:"bytes,4,rep,name=top_products,json=topProducts,proto3" json:"top_products,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AnalyticsResponse) Reset() {
-	*x = AnalyticsResponse{}
-	mi := &file_order_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AnalyticsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AnalyticsResponse) ProtoMessage() {}
-
-func (x *AnalyticsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_order_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AnalyticsResponse.ProtoReflect.Descriptor instead.
-func (*AnalyticsResponse) Descriptor() ([]byte, []int) {
-	return file_order_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *AnalyticsResponse) GetTotalRevenue() float64 {
-	if x != nil {
-		return x.TotalRevenue
-	}
-	return 0
-}
-
-func (x *AnalyticsResponse) GetOrdersCount() int32 {
-	if x != nil {
-		return x.OrdersCount
-	}
-	return 0
-}
-
-func (x *AnalyticsResponse) GetAvgCheck() float64 {
-	if x != nil {
-		return x.AvgCheck
-	}
-	return 0
-}
-
-func (x *AnalyticsResponse) GetTopProducts() []*ProductStat {
-	if x != nil {
-		return x.TopProducts
-	}
-	return nil
-}
-
-type ProductStat struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
-	Revenue       float64                `protobuf:"fixed64,3,opt,name=revenue,proto3" json:"revenue,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ProductStat) Reset() {
-	*x = ProductStat{}
-	mi := &file_order_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProductStat) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProductStat) ProtoMessage() {}
-
-func (x *ProductStat) ProtoReflect() protoreflect.Message {
-	mi := &file_order_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProductStat.ProtoReflect.Descriptor instead.
-func (*ProductStat) Descriptor() ([]byte, []int) {
-	return file_order_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *ProductStat) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ProductStat) GetCount() int32 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
-func (x *ProductStat) GetRevenue() float64 {
-	if x != nil {
-		return x.Revenue
-	}
-	return 0
-}
-
 var File_order_proto protoreflect.FileDescriptor
 
 const file_order_proto_rawDesc = "" +
@@ -1195,17 +1030,7 @@ const file_order_proto_rawDesc = "" +
 	"\x13PromoDeleteResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
 	"\x15CheckPromoCodeRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"\x15\n" +
-	"\x13GetAnalyticsRequest\"\xb3\x01\n" +
-	"\x11AnalyticsResponse\x12#\n" +
-	"\rtotal_revenue\x18\x01 \x01(\x01R\ftotalRevenue\x12!\n" +
-	"\forders_count\x18\x02 \x01(\x05R\vordersCount\x12\x1b\n" +
-	"\tavg_check\x18\x03 \x01(\x01R\bavgCheck\x129\n" +
-	"\ftop_products\x18\x04 \x03(\v2\x16.orders.v1.ProductStatR\vtopProducts\"Q\n" +
-	"\vProductStat\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x18\n" +
-	"\arevenue\x18\x03 \x01(\x01R\arevenue2\xd7\x06\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code2\x89\x06\n" +
 	"\fOrderService\x12F\n" +
 	"\vCreateOrder\x12\x1d.orders.v1.CreateOrderRequest\x1a\x18.orders.v1.OrderResponse\x12@\n" +
 	"\bGetOrder\x12\x1a.orders.v1.GetOrderRequest\x1a\x18.orders.v1.OrderResponse\x12I\n" +
@@ -1218,8 +1043,7 @@ const file_order_proto_rawDesc = "" +
 	"\n" +
 	"ListPromos\x12\x1c.orders.v1.ListPromosRequest\x1a\x1d.orders.v1.ListPromosResponse\x12L\n" +
 	"\vDeletePromo\x12\x1d.orders.v1.DeletePromoRequest\x1a\x1e.orders.v1.PromoDeleteResponse\x12P\n" +
-	"\x0eCheckPromoCode\x12 .orders.v1.CheckPromoCodeRequest\x1a\x1c.orders.v1.PromoCodeResponse\x12L\n" +
-	"\fGetAnalytics\x12\x1e.orders.v1.GetAnalyticsRequest\x1a\x1c.orders.v1.AnalyticsResponseB\x10Z\x0e./pb;orders_pbb\x06proto3"
+	"\x0eCheckPromoCode\x12 .orders.v1.CheckPromoCodeRequest\x1a\x1c.orders.v1.PromoCodeResponseB\x10Z\x0e./pb;orders_pbb\x06proto3"
 
 var (
 	file_order_proto_rawDescOnce sync.Once
@@ -1233,7 +1057,7 @@ func file_order_proto_rawDescGZIP() []byte {
 	return file_order_proto_rawDescData
 }
 
-var file_order_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_order_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_order_proto_goTypes = []any{
 	(*CreateOrderRequest)(nil),       // 0: orders.v1.CreateOrderRequest
 	(*OrderItem)(nil),                // 1: orders.v1.OrderItem
@@ -1252,9 +1076,6 @@ var file_order_proto_goTypes = []any{
 	(*DeletePromoRequest)(nil),       // 14: orders.v1.DeletePromoRequest
 	(*PromoDeleteResponse)(nil),      // 15: orders.v1.PromoDeleteResponse
 	(*CheckPromoCodeRequest)(nil),    // 16: orders.v1.CheckPromoCodeRequest
-	(*GetAnalyticsRequest)(nil),      // 17: orders.v1.GetAnalyticsRequest
-	(*AnalyticsResponse)(nil),        // 18: orders.v1.AnalyticsResponse
-	(*ProductStat)(nil),              // 19: orders.v1.ProductStat
 }
 var file_order_proto_depIdxs = []int32{
 	1,  // 0: orders.v1.CreateOrderRequest.items:type_name -> orders.v1.OrderItem
@@ -1263,34 +1084,31 @@ var file_order_proto_depIdxs = []int32{
 	1,  // 3: orders.v1.OrderResponse.items:type_name -> orders.v1.OrderItem
 	3,  // 4: orders.v1.ListOrdersResponse.orders:type_name -> orders.v1.OrderResponse
 	11, // 5: orders.v1.ListPromosResponse.promos:type_name -> orders.v1.PromoCodeResponse
-	19, // 6: orders.v1.AnalyticsResponse.top_products:type_name -> orders.v1.ProductStat
-	0,  // 7: orders.v1.OrderService.CreateOrder:input_type -> orders.v1.CreateOrderRequest
-	4,  // 8: orders.v1.OrderService.GetOrder:input_type -> orders.v1.GetOrderRequest
-	5,  // 9: orders.v1.OrderService.ListOrders:input_type -> orders.v1.ListOrdersRequest
-	6,  // 10: orders.v1.OrderService.ListAllOrders:input_type -> orders.v1.ListAllOrdersRequest
-	8,  // 11: orders.v1.OrderService.UpdateOrderStatus:input_type -> orders.v1.UpdateOrderStatusRequest
-	9,  // 12: orders.v1.OrderService.PayOrder:input_type -> orders.v1.PayOrderRequest
-	10, // 13: orders.v1.OrderService.CreatePromoCode:input_type -> orders.v1.CreatePromoCodeRequest
-	12, // 14: orders.v1.OrderService.ListPromos:input_type -> orders.v1.ListPromosRequest
-	14, // 15: orders.v1.OrderService.DeletePromo:input_type -> orders.v1.DeletePromoRequest
-	16, // 16: orders.v1.OrderService.CheckPromoCode:input_type -> orders.v1.CheckPromoCodeRequest
-	17, // 17: orders.v1.OrderService.GetAnalytics:input_type -> orders.v1.GetAnalyticsRequest
-	3,  // 18: orders.v1.OrderService.CreateOrder:output_type -> orders.v1.OrderResponse
-	3,  // 19: orders.v1.OrderService.GetOrder:output_type -> orders.v1.OrderResponse
-	7,  // 20: orders.v1.OrderService.ListOrders:output_type -> orders.v1.ListOrdersResponse
-	7,  // 21: orders.v1.OrderService.ListAllOrders:output_type -> orders.v1.ListOrdersResponse
-	3,  // 22: orders.v1.OrderService.UpdateOrderStatus:output_type -> orders.v1.OrderResponse
-	3,  // 23: orders.v1.OrderService.PayOrder:output_type -> orders.v1.OrderResponse
-	11, // 24: orders.v1.OrderService.CreatePromoCode:output_type -> orders.v1.PromoCodeResponse
-	13, // 25: orders.v1.OrderService.ListPromos:output_type -> orders.v1.ListPromosResponse
-	15, // 26: orders.v1.OrderService.DeletePromo:output_type -> orders.v1.PromoDeleteResponse
-	11, // 27: orders.v1.OrderService.CheckPromoCode:output_type -> orders.v1.PromoCodeResponse
-	18, // 28: orders.v1.OrderService.GetAnalytics:output_type -> orders.v1.AnalyticsResponse
-	18, // [18:29] is the sub-list for method output_type
-	7,  // [7:18] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	0,  // 6: orders.v1.OrderService.CreateOrder:input_type -> orders.v1.CreateOrderRequest
+	4,  // 7: orders.v1.OrderService.GetOrder:input_type -> orders.v1.GetOrderRequest
+	5,  // 8: orders.v1.OrderService.ListOrders:input_type -> orders.v1.ListOrdersRequest
+	6,  // 9: orders.v1.OrderService.ListAllOrders:input_type -> orders.v1.ListAllOrdersRequest
+	8,  // 10: orders.v1.OrderService.UpdateOrderStatus:input_type -> orders.v1.UpdateOrderStatusRequest
+	9,  // 11: orders.v1.OrderService.PayOrder:input_type -> orders.v1.PayOrderRequest
+	10, // 12: orders.v1.OrderService.CreatePromoCode:input_type -> orders.v1.CreatePromoCodeRequest
+	12, // 13: orders.v1.OrderService.ListPromos:input_type -> orders.v1.ListPromosRequest
+	14, // 14: orders.v1.OrderService.DeletePromo:input_type -> orders.v1.DeletePromoRequest
+	16, // 15: orders.v1.OrderService.CheckPromoCode:input_type -> orders.v1.CheckPromoCodeRequest
+	3,  // 16: orders.v1.OrderService.CreateOrder:output_type -> orders.v1.OrderResponse
+	3,  // 17: orders.v1.OrderService.GetOrder:output_type -> orders.v1.OrderResponse
+	7,  // 18: orders.v1.OrderService.ListOrders:output_type -> orders.v1.ListOrdersResponse
+	7,  // 19: orders.v1.OrderService.ListAllOrders:output_type -> orders.v1.ListOrdersResponse
+	3,  // 20: orders.v1.OrderService.UpdateOrderStatus:output_type -> orders.v1.OrderResponse
+	3,  // 21: orders.v1.OrderService.PayOrder:output_type -> orders.v1.OrderResponse
+	11, // 22: orders.v1.OrderService.CreatePromoCode:output_type -> orders.v1.PromoCodeResponse
+	13, // 23: orders.v1.OrderService.ListPromos:output_type -> orders.v1.ListPromosResponse
+	15, // 24: orders.v1.OrderService.DeletePromo:output_type -> orders.v1.PromoDeleteResponse
+	11, // 25: orders.v1.OrderService.CheckPromoCode:output_type -> orders.v1.PromoCodeResponse
+	16, // [16:26] is the sub-list for method output_type
+	6,  // [6:16] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_order_proto_init() }
@@ -1304,7 +1122,7 @@ func file_order_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_order_proto_rawDesc), len(file_order_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

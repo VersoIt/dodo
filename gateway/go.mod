@@ -6,8 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.11
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
-	github.com/versoit/diploma/pkg v0.0.0-20260209221312-cf1acef61820
-	github.com/versoit/diploma/services/analytics v0.0.0-20260214122137-9cedc0313251
+	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
 	github.com/versoit/diploma/services/auth v0.0.0-20260208211213-389e778a5129
 	github.com/versoit/diploma/services/catalog v0.0.0-20260208211213-389e778a5129
 	github.com/versoit/diploma/services/kitchen v0.0.0-20260208211213-389e778a5129
@@ -16,6 +15,13 @@ require (
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.78.0
 )
+
+replace github.com/versoit/diploma/pkg => ../pkg
+replace github.com/versoit/diploma/services/auth => ../services/auth
+replace github.com/versoit/diploma/services/catalog => ../services/catalog
+replace github.com/versoit/diploma/services/kitchen => ../services/kitchen
+replace github.com/versoit/diploma/services/logistics => ../services/logistics
+replace github.com/versoit/diploma/services/orders => ../services/orders
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect

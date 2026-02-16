@@ -87,10 +87,4 @@ Test-Step "Kitchen: Update Status" {
     Write-Host " (Skipping Kitchen manual step - internal process)" -ForegroundColor Yellow
 }
 
-# 8. Analytics
-Test-Step "Check Analytics" {
-    # Check for a generic manager or system-manager
-    Invoke-RestMethod -Uri "$BaseUrl/analytics/manager/019c53ee-74af-72b9-afe6-103c1466ae0e" -Method Get
-}
-
 Write-Host "`nAll Tests Passed!" -ForegroundColor Green

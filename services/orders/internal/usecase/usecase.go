@@ -25,7 +25,6 @@ type OrderUseCase struct {
 	logisticService  domain.LogisticsService
 	treasuryService  domain.TreasuryService
 	notifyService    domain.NotificationService
-	analyticsService domain.AnalyticsService
 	tm               trm.Manager
 	log              *slog.Logger
 }
@@ -37,7 +36,6 @@ func NewOrderUseCase(
 	logistic domain.LogisticsService,
 	treasury domain.TreasuryService,
 	notify domain.NotificationService,
-	analytics domain.AnalyticsService,
 	tm trm.Manager,
 	log *slog.Logger,
 ) *OrderUseCase {
@@ -48,7 +46,6 @@ func NewOrderUseCase(
 		logisticService:  logistic,
 		treasuryService:  treasury,
 		notifyService:    notify,
-		analyticsService: analytics,
 		tm:               tm,
 		log:              log,
 	}
@@ -189,12 +186,6 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 		uc.log.Error("failed to create kitchen ticket", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
 	}
 
-	// 3a. Report to Analytics
-	// Use Nil UUID for general store sales to avoid UUID parsing errors in analytics service
-	if err := uc.analyticsService.ReportSale(ctx, uuid.Nil.String(), finalOrder.FinalPrice().InexactFloat64()); err != nil {
-		uc.log.Warn("failed to report sale to analytics", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
-	}
-
 	// 4. Notify user - NOW OUTSIDE TX
 	if err := uc.notifyService.NotifyStatusChanged(ctx, finalOrder.CustomerID(), finalOrder.ID(), domain.StatusPaid); err != nil {
 		uc.log.Warn("failed to send notification", slog.Any("error", err))
@@ -297,18 +288,4 @@ func (uc *OrderUseCase) GetPromoByCode(ctx context.Context, code string) (*domai
 		return nil, fmt.Errorf("find promo by code: %w", err)
 	}
 	return promo, nil
-}
-
-func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*domain.OrderStats, []domain.ProductStat, error) {
-	kpis, err := uc.repo.GetKPIs(ctx)
-	if err != nil {
-		return nil, nil, fmt.Errorf("get kpis: %w", err)
-	}
-
-	top, err := uc.repo.GetTopProducts(ctx, 5)
-	if err != nil {
-		return kpis, nil, fmt.Errorf("get top products: %w", err)
-	}
-
-	return kpis, top, nil
 }

@@ -9,7 +9,6 @@ COPY go.mod go.sum* ./
 
 # Copy ALL module files for workspace sync
 COPY pkg/go.mod pkg/go.sum* ./pkg/
-COPY services/analytics/go.mod services/analytics/go.sum* ./services/analytics/
 COPY services/auth/go.mod services/auth/go.sum* ./services/auth/
 COPY services/catalog/go.mod services/catalog/go.sum* ./services/catalog/
 COPY services/kitchen/go.mod services/kitchen/go.sum* ./services/kitchen/

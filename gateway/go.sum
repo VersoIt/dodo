@@ -51,10 +51,7 @@ github.com/valyala/fasthttp v1.51.0 h1:8b30A5JlZ6C7AS81RsWjYMQmrZG6feChmgAolCl1S
 github.com/valyala/fasthttp v1.51.0/go.mod h1:oI2XroL+lI7vdXyYoQk03bXBThfFl2cVdIA3Xl7cH8g=
 github.com/valyala/tcplisten v1.0.0 h1:rBHj/Xf+E1tRGZyWIWwJDiRY0zc1Js+CV5DqwacVSA8=
 github.com/valyala/tcplisten v1.0.0/go.mod h1:T0xQ8SeCZGxckz9qRXTfG43PvQ/mcWh7FwZEA7Ioqkc=
-github.com/versoit/diploma/pkg v0.0.0-20260209221312-cf1acef61820 h1:uAHj0UG8Q11medEiDlB/uB/yoc8iffpQoRrfOS2qtvc=
-github.com/versoit/diploma/pkg v0.0.0-20260209221312-cf1acef61820/go.mod h1:Um+BuuzvjGK6uQpNh53xhd3v7afwjJN3CwkVFpqNYsQ=
-github.com/versoit/diploma/services/analytics v0.0.0-20260214122137-9cedc0313251 h1:YX2a0D6TpZiiIllqr5exoMYuw5kDHHIq9JcWS+wx4GA=
-github.com/versoit/diploma/services/analytics v0.0.0-20260214122137-9cedc0313251/go.mod h1:ySeI96AWKS5Lsxh4AFddlzjBoWRFzJE7WgIXVTWWN3Y=
+github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251 h1:JRglUbOJBov+8HvppNcr5y41KZLOJzRC9Nvyma0SaUw=
 github.com/versoit/diploma/services/auth v0.0.0-20260208211213-389e778a5129 h1:1tWfKRCm3qS9W0spn+qahSL3DaC1j1xp//DD9jeY4PU=
 github.com/versoit/diploma/services/auth v0.0.0-20260208211213-389e778a5129/go.mod h1:QeHMhSEwOzfYKDITNMFT7LL/ErYtE/coV6RJFTHO4ss=
 github.com/versoit/diploma/services/catalog v0.0.0-20260208211213-389e778a5129 h1:FVF3gfZwUeFENGPOzcN5hxJT/aZ+I8bFH8XhPoUvghk=

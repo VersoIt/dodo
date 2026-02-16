@@ -381,22 +381,6 @@ type OrderRepository interface {
 	FindPromoByCode(ctx context.Context, code string) (*PromoCode, error)
 	ListPromos(ctx context.Context) ([]*PromoCode, error)
 	DeletePromo(ctx context.Context, id string) error
-
-	// Analytics
-	GetKPIs(ctx context.Context) (*OrderStats, error)
-	GetTopProducts(ctx context.Context, limit int) ([]ProductStat, error)
-}
-
-type OrderStats struct {
-	TotalRevenue float64
-	OrdersCount  int
-	AvgCheck     float64
-}
-
-type ProductStat struct {
-	Name    string
-	Count   int
-	Revenue float64
 }
 
 type ProductInfo struct {
@@ -407,10 +391,6 @@ type ProductInfo struct {
 
 type CatalogService interface {
 	GetProduct(ctx context.Context, id string) (*ProductInfo, error)
-}
-
-type AnalyticsService interface {
-	ReportSale(ctx context.Context, managerID string, amount float64) error
 }
 
 type KitchenService interface {

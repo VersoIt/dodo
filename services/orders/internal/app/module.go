@@ -20,7 +20,6 @@ var Module = fx.Options(
 		common.NewTransactionManager,
 		repository.NewOrderRepository,
 		infrastructure.NewCatalogClient,
-		infrastructure.NewAnalyticsClient,
 		infrastructure.NewKitchenClient,
 		infrastructure.NewLogisticsClient,
 		infrastructure.NewTreasuryClient,

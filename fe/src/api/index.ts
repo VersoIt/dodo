@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import type { ApiResponse, Product, Order, PromoCode, Analytics, User } from '../types'
+import type { ApiResponse, Product, Order, PromoCode, User } from '../types'
 
 const client: AxiosInstance = axios.create({
   baseURL: '',
@@ -43,7 +43,6 @@ export const ordersApi = {
   getOrder: (id: string): Promise<ApiResponse<Order>> => client.get(`/api/v1/orders/${id}`),
   updateStatus: (id: string, status: string): Promise<ApiResponse<Order>> => client.patch(`/api/v1/orders/${id}/status`, { status }),
   payOrder: (id: string): Promise<ApiResponse<any>> => client.post(`/api/v1/orders/${id}/pay`),
-  getAnalytics: (): Promise<ApiResponse<Analytics>> => client.get('/api/v1/orders/analytics'),
   listPromos: (): Promise<ApiResponse<PromoCode[]>> => client.get('/api/v1/promos'),
   createPromoCode: (data: Partial<PromoCode>): Promise<ApiResponse<PromoCode>> => client.post('/api/v1/promos', data),
   deletePromo: (id: string): Promise<ApiResponse<any>> => client.delete(`/api/v1/promos/${id}`),
@@ -62,11 +61,6 @@ export const logisticsApi = {
   assignCourier: (id: string, courierId: string): Promise<ApiResponse<any>> => client.post(`/api/v1/logistics/orders/${id}/assign`, { courier_id: courierId }),
   updateStatus: (id: string, status: string): Promise<ApiResponse<any>> => client.patch(`/api/v1/logistics/orders/${id}/status`, { status }),
   updateLocation: (id: string, lat: number, lng: number): Promise<ApiResponse<any>> => client.post(`/api/v1/logistics/orders/${id}/location`, { lat, lng }),
-}
-
-// --- Analytics API ---
-export const analyticsApi = {
-  getManagerKpi: (managerId: string): Promise<ApiResponse<any>> => client.get(`/api/v1/analytics/manager/${managerId}`),
 }
 
 // --- Auth API ---

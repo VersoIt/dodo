@@ -9,7 +9,6 @@ import (
 	kitchen_pb "github.com/versoit/diploma/services/kitchen/api/proto/pb"
 	logistics_pb "github.com/versoit/diploma/services/logistics/api/proto/pb"
 	orders_pb "github.com/versoit/diploma/services/orders/api/proto/pb"
-	analytics_pb "github.com/versoit/diploma/services/analytics/api/proto/pb"
 	"go.uber.org/fx"
 	"log/slog"
 	"google.golang.org/grpc"
@@ -22,7 +21,6 @@ var Module = fx.Provide(
 	NewOrdersClient,
 	NewKitchenClient,
 	NewLogisticsClient,
-	NewAnalyticsClient,
 )
 
 func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (auth_pb.UserServiceClient, error) {
@@ -63,14 +61,6 @@ func NewLogisticsClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (
 		return nil, err
 	}
 	return logistics_pb.NewDeliveryServiceClient(conn), nil
-}
-
-func NewAnalyticsClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (analytics_pb.KpiServiceClient, error) {
-	conn, err := dial(lc, cfg.AnalyticsService)
-	if err != nil {
-		return nil, err
-	}
-	return analytics_pb.NewKpiServiceClient(conn), nil
 }
 
 func dial(lc fx.Lifecycle, addr string) (*grpc.ClientConn, error) {

@@ -132,11 +132,9 @@ Write-Host "Status -> Delivering" -ForegroundColor Green
 Invoke-PizzaRequest -Method PATCH -Uri "/logistics/orders/$orderId/status" -Body @{ status="completed" } -Token $tokens["courier"] | Out-Null
 Write-Host "Status -> Completed" -ForegroundColor Green
 
-# 7. Check Analytics (Manager)
-Write-Host "`n7. Checking Analytics..." -ForegroundColor Yellow
-# Since we used "GENERAL_STORE" in the code for now, we might not see per-manager KPI yet, 
-# but let's check order status or general analytics if available.
-# Actually, let's verify the order is completed in the system.
+# 7. Verify Final Order Status (Manager)
+Write-Host "`n7. Verifying Final Order Status..." -ForegroundColor Yellow
+# Let's verify the order is completed in the system.
 $finalOrder = Invoke-PizzaRequest -Method GET -Uri "/orders/$orderId" -Token $tokens["manager"]
 if ($finalOrder.data.status -eq "completed") {
     Write-Host "Final Order Status Verified: COMPLETED" -ForegroundColor Green

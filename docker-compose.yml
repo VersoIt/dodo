@@ -29,7 +29,7 @@ services:
       - sh
       - -c
       - |
-        for service in analytics auth catalog kitchen logistics notification orders treasury; do
+        for service in auth catalog kitchen logistics notification orders treasury; do
           dir="services/$$service/migrations"
           if [ -d "$$dir" ]; then
             echo "Running migrations for $$service in $$dir..."
@@ -53,7 +53,6 @@ services:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
       LOG_LEVEL: debug
       CATALOG_SERVICE_ADDR: catalog:8080
-      ANALYTICS_SERVICE_ADDR: analytics:8080
       KITCHEN_SERVICE_ADDR: kitchen:8080
       LOGISTICS_SERVICE_ADDR: logistics:8080
       TREASURY_SERVICE_ADDR: treasury:8080
@@ -148,26 +147,6 @@ services:
         limits:
           memory: 128M
 
-  analytics:
-    build:
-      context: .
-      dockerfile: services/analytics/Dockerfile
-    container_name: analytics-service
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
-    environment:
-      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
-    ports:
-      - "8086:8080"
-    networks:
-      - pizza-network
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-
   notification:
     build:
       context: .
@@ -226,7 +205,6 @@ services:
       - ORDERS_SERVICE_ADDR=orders:8080
       - KITCHEN_SERVICE_ADDR=kitchen:8080
       - LOGISTICS_SERVICE_ADDR=logistics:8080
-      - ANALYTICS_SERVICE_ADDR=analytics:8080
     ports:
       - "8080:8080"
     networks:

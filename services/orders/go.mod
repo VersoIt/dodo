@@ -9,13 +9,18 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/shopspring/decimal v1.4.0
-	github.com/versoit/diploma/pkg v0.0.0-20260208180837-dd484a9f2455
-	github.com/versoit/diploma/services/analytics v0.0.0-20260209221312-cf1acef61820
+	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
 	github.com/versoit/diploma/services/catalog v0.0.0-20260209221312-cf1acef61820
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
+
+replace github.com/versoit/diploma/pkg => ../../pkg
+replace github.com/versoit/diploma/services/catalog => ../catalog
+replace github.com/versoit/diploma/services/kitchen => ../kitchen
+replace github.com/versoit/diploma/services/logistics => ../logistics
+replace github.com/versoit/diploma/services/auth => ../auth
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect

@@ -15,9 +15,6 @@ service OrderService {
   rpc ListPromos(ListPromosRequest) returns (ListPromosResponse);
   rpc DeletePromo(DeletePromoRequest) returns (PromoDeleteResponse);
   rpc CheckPromoCode(CheckPromoCodeRequest) returns (PromoCodeResponse);
-
-  // Analytics
-  rpc GetAnalytics(GetAnalyticsRequest) returns (AnalyticsResponse);
 }
 
 message CreateOrderRequest {
@@ -87,18 +84,3 @@ message ListPromosResponse { repeated PromoCodeResponse promos = 1; }
 message DeletePromoRequest { string id = 1; }
 message PromoDeleteResponse { bool success = 1; }
 message CheckPromoCodeRequest { string code = 1; }
-
-// --- Analytics ---
-message GetAnalyticsRequest {}
-message AnalyticsResponse {
-  double total_revenue = 1;
-  int32 orders_count = 2;
-  double avg_check = 3;
-  repeated ProductStat top_products = 4;
-}
-
-message ProductStat {
-  string name = 1;
-  int32 count = 2;
-  double revenue = 3;
-}

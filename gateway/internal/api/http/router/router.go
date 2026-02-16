@@ -16,7 +16,6 @@ func SetupRoutes(
 	orderHandler *handlers.OrderHandler,
 	kitchenHandler *handlers.KitchenHandler,
 	logisticsHandler *handlers.LogisticsHandler,
-	analyticsHandler *handlers.AnalyticsHandler,
 ) {
 	app.Use(middleware.NewRequestIDMiddleware())
 	app.Use(middleware.NewLoggerMiddleware(log))
@@ -47,7 +46,6 @@ func SetupRoutes(
 	orders.Post("/", orderHandler.CreateOrder)
 	orders.Get("/my", orderHandler.ListOrders)
 	orders.Get("/all", middleware.RequireRole("chef", "courier", "manager"), orderHandler.ListAllOrders)
-	orders.Get("/analytics", middleware.RequireRole("manager"), orderHandler.GetAnalytics)
 	orders.Get("/:id", orderHandler.GetOrderStatus)
 	orders.Patch("/:id/status", middleware.RequireRole("chef", "courier", "manager"), orderHandler.UpdateOrderStatus)
 	orders.Post("/:id/pay", orderHandler.PayOrder)
@@ -72,8 +70,4 @@ func SetupRoutes(
 	logistics.Patch("/orders/:id/status", logisticsHandler.UpdateStatus)
 	logistics.Post("/orders/:id/assign", logisticsHandler.AssignCourier)
 	logistics.Post("/orders/:id/location", logisticsHandler.UpdateLocation)
-
-	// Analytics
-	analytics := protected.Group("/analytics")
-	analytics.Get("/manager/:id", analyticsHandler.GetManagerKPI)
 }

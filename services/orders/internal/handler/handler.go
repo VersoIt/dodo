@@ -144,28 +144,6 @@ func (h *OrdersHandler) CheckPromoCode(ctx context.Context, req *orderspb.CheckP
 	return &orderspb.PromoCodeResponse{Id: p.ID(), Code: p.Code(), Type: p.DiscountType(), Amount: p.DiscountAmount().InexactFloat64(), Active: p.IsActive()}, nil
 }
 
-// --- Analytics ---
-
-func (h *OrdersHandler) GetAnalytics(ctx context.Context, _ *orderspb.GetAnalyticsRequest) (*orderspb.AnalyticsResponse, error) {
-	kpis, top, err := h.uc.GetAnalytics(ctx)
-	if err != nil {
-		h.log.Error("failed to get analytics", slog.Any("error", err))
-		return nil, status.Errorf(codes.Internal, "failed to get analytics: %v", err)
-	}
-
-	pbTop := make([]*orderspb.ProductStat, len(top))
-	for i, s := range top {
-		pbTop[i] = &orderspb.ProductStat{Name: s.Name, Count: int32(s.Count), Revenue: s.Revenue}
-	}
-
-	return &orderspb.AnalyticsResponse{
-		TotalRevenue: kpis.TotalRevenue,
-		OrdersCount:  int32(kpis.OrdersCount),
-		AvgCheck:     kpis.AvgCheck,
-		TopProducts:  pbTop,
-	}, nil
-}
-
 func (h *OrdersHandler) mapOrder(o *domain.Order) *orderspb.OrderResponse {
 	addr := o.Address()
 	pbItems := make([]*orderspb.OrderItem, len(o.Items()))
