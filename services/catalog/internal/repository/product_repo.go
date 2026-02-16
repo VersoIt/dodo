@@ -3,43 +3,49 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"log/slog"
 
-	"github.com/versoit/diploma/services/catalog"
+	"github.com/Masterminds/squirrel"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/Masterminds/squirrel"
+	"github.com/versoit/diploma/services/catalog/internal/domain"
 )
 
 type productRepo struct {
-	pool *pgxpool.Pool
-	sb   squirrel.StatementBuilderType
-	log  *slog.Logger
+	pool   *pgxpool.Pool
+	getter *trmpgx.CtxGetter
+	sb     squirrel.StatementBuilderType
+	log    *slog.Logger
 }
 
-func NewProductRepository(pool *pgxpool.Pool, log *slog.Logger) catalog.ProductRepository {
+func NewProductRepository(pool *pgxpool.Pool, log *slog.Logger) domain.ProductRepository {
 	return &productRepo{
-		pool: pool,
-		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
-		log:  log,
+		pool:   pool,
+		getter: trmpgx.DefaultCtxGetter,
+		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:    log,
 	}
 }
 
-func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
+func (r *productRepo) FindAll(ctx context.Context) ([]*domain.Product, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "image_url", "is_available").
 		From("products").
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.pool.Query(ctx, sqlStr, args...)
+	rows, err := db.Query(ctx, sqlStr, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query all: %w", err)
 	}
 	defer rows.Close()
 
-	var products []*catalog.Product
+	var products []*domain.Product
 	for rows.Next() {
 		var (
 			pid, name string
@@ -49,130 +55,129 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*catalog.Product, error) {
 			isAvail   bool
 		)
 		if err := rows.Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan product: %w", err)
 		}
 
 		ingredients, err := r.fetchIngredients(ctx, pid)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("fetch ingredients: %w", err)
 		}
 
-		products = append(products, catalog.ReconstructProduct(pid, name, desc.String, catalog.CategoryType(cat), price, img.String, isAvail, ingredients))
+		products = append(products, domain.ReconstructProduct(pid, name, desc.String, domain.CategoryType(cat), price, img.String, isAvail, ingredients))
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
 	}
 	return products, nil
 }
 
-func (r *productRepo) fetchIngredients(ctx context.Context, productID string) ([]catalog.IngredientRef, error) {
+func (r *productRepo) fetchIngredients(ctx context.Context, productID string) ([]domain.IngredientRef, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("ingredient_id", "quantity", "is_removable").
 		From("product_ingredients").
 		Where(squirrel.Eq{"product_id": productID}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.pool.Query(ctx, sqlStr, args...)
+	rows, err := db.Query(ctx, sqlStr, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query ingredients: %w", err)
 	}
 	defer rows.Close()
 
-	var ingredients []catalog.IngredientRef
+	var ingredients []domain.IngredientRef
 	for rows.Next() {
 		var (
-			id   string
-			qty  float64
-			rem  bool
+			id  string
+			qty float64
+			rem bool
 		)
 		if err := rows.Scan(&id, &qty, &rem); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan ingredient: %w", err)
 		}
-		ingredients = append(ingredients, catalog.IngredientRef{
+		ingredients = append(ingredients, domain.IngredientRef{
 			IngredientID: id,
 			Quantity:     qty,
 			IsRemovable:  rem,
 		})
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
 	return ingredients, nil
 }
 
-func (r *productRepo) Save(ctx context.Context, p *catalog.Product) error {
-	tx, err := r.pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = tx.Rollback(ctx)
-	}()
-
+func (r *productRepo) Save(ctx context.Context, p *domain.Product) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Insert("products").
 		Columns("id", "name", "description", "category", "base_price", "image_url", "is_available").
 		Values(p.ID(), p.Name(), p.Description(), p.Category(), p.BasePrice().InexactFloat64(), p.ImageURL(), p.IsAvailable()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, category = EXCLUDED.category, base_price = EXCLUDED.base_price, image_url = EXCLUDED.image_url, is_available = EXCLUDED.is_available").
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
 	r.log.Debug("saving product", slog.String("product_id", p.ID()), slog.String("name", p.Name()))
 
-	_, err = tx.Exec(ctx, sqlStr, args...)
+	_, err = db.Exec(ctx, sqlStr, args...)
 	if err != nil {
-		r.log.Error("failed to save product", slog.Any("error", err), slog.String("product_id", p.ID()))
-		return err
+		return fmt.Errorf("exec save product: %w", err)
 	}
 
-	_, err = tx.Exec(ctx, "DELETE FROM product_ingredients WHERE product_id = $1", p.ID())
+	_, err = db.Exec(ctx, "DELETE FROM product_ingredients WHERE product_id = $1", p.ID())
 	if err != nil {
-		return err
+		return fmt.Errorf("delete ingredients: %w", err)
 	}
 
 	for _, ing := range p.Ingredients() {
-		sqlStr, args, err := r.sb.Insert("product_ingredients").
+		sqlStr, args, err = r.sb.Insert("product_ingredients").
 			Columns("product_id", "ingredient_id", "quantity", "is_removable").
 			Values(p.ID(), ing.IngredientID, ing.Quantity, ing.IsRemovable).
 			ToSql()
 		if err != nil {
-			return err
+			return fmt.Errorf("build ing query: %w", err)
 		}
-		_, err = tx.Exec(ctx, sqlStr, args...)
-		if err != nil {
-			return err
+		if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+			return fmt.Errorf("exec save ingredient: %w", err)
 		}
 	}
 
-	return tx.Commit(ctx)
+	return nil
 }
 
-func (r *productRepo) FindByID(ctx context.Context, id string) (*catalog.Product, error) {
+func (r *productRepo) FindByID(ctx context.Context, id string) (*domain.Product, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("id", "name", "description", "category", "base_price", "image_url", "is_available").
 		From("products").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var (
 		pid, name string
 		desc, img sql.NullString
 		cat       int
-		price     float64 
+		price     float64
 		isAvail   bool
 	)
 
-	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail)
+	err = db.QueryRow(ctx, sqlStr, args...).Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, catalog.ErrProductNotFound
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrProductNotFound
 		}
-		return nil, err
+		return nil, fmt.Errorf("query product: %w", err)
 	}
 
 	ingredients, err := r.fetchIngredients(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fetch ingredients: %w", err)
 	}
 
-	return catalog.ReconstructProduct(pid, name, desc.String, catalog.CategoryType(cat), price, img.String, isAvail, ingredients), nil
+	return domain.ReconstructProduct(pid, name, desc.String, domain.CategoryType(cat), price, img.String, isAvail, ingredients), nil
 }

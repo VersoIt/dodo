@@ -3,57 +3,62 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
-	"time"
 	"log/slog"
+	"time"
 
-	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/treasury"
+	"github.com/Masterminds/squirrel"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/Masterminds/squirrel"
+	"github.com/versoit/diploma/pkg/common"
+	"github.com/versoit/diploma/services/treasury/internal/domain"
 )
 
 type paymentRepo struct {
-	pool *pgxpool.Pool
-	sb   squirrel.StatementBuilderType
-	log  *slog.Logger
+	pool   *pgxpool.Pool
+	getter *trmpgx.CtxGetter
+	sb     squirrel.StatementBuilderType
+	log    *slog.Logger
 }
 
-func NewPaymentRepository(pool *pgxpool.Pool, log *slog.Logger) treasury.PaymentRepository {
+func NewPaymentRepository(pool *pgxpool.Pool, log *slog.Logger) domain.PaymentRepository {
 	return &paymentRepo{
-		pool: pool,
-		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
-		log:  log,
+		pool:   pool,
+		getter: trmpgx.DefaultCtxGetter,
+		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:    log,
 	}
 }
 
-func (r *paymentRepo) Save(ctx context.Context, p *treasury.Payment) error {
+func (r *paymentRepo) Save(ctx context.Context, p *domain.Payment) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Insert("payments").
 		Columns("id", "order_id", "amount", "method", "status", "transaction_id").
 		Values(p.ID(), p.OrderID(), p.Amount(), p.Method(), p.Status(), p.TransactionID()).
 		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, transaction_id = EXCLUDED.transaction_id, updated_at = NOW()").
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
 	r.log.Debug("saving payment", slog.String("payment_id", p.ID()), slog.String("order_id", p.OrderID()), slog.Int("status", int(p.Status())))
 
-	_, err = r.pool.Exec(ctx, sqlStr, args...)
-	if err != nil {
-		r.log.Error("failed to save payment", slog.Any("error", err), slog.String("payment_id", p.ID()))
+	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+		return fmt.Errorf("exec save payment: %w", err)
 	}
-	return err
+	return nil
 }
 
-func (r *paymentRepo) FindByOrderID(ctx context.Context, orderID string) (*treasury.Payment, error) {
+func (r *paymentRepo) FindByOrderID(ctx context.Context, orderID string) (*domain.Payment, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("id", "order_id", "amount", "method", "status", "transaction_id", "created_at").
 		From("payments").
 		Where(squirrel.Eq{"order_id": orderID}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var (
@@ -65,13 +70,13 @@ func (r *paymentRepo) FindByOrderID(ctx context.Context, orderID string) (*treas
 		createdAt time.Time
 	)
 
-	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&id, &oid, &amount, &method, &status, &txid, &createdAt)
+	err = db.QueryRow(ctx, sqlStr, args...).Scan(&id, &oid, &amount, &method, &status, &txid, &createdAt)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("payment not found")
 		}
-		return nil, err
+		return nil, fmt.Errorf("query payment: %w", err)
 	}
 
-	return treasury.ReconstructPayment(id, oid, amount, treasury.PaymentMethod(method), treasury.PaymentStatus(status), txid.String, createdAt), nil
+	return domain.ReconstructPayment(id, oid, amount, domain.PaymentMethod(method), domain.PaymentStatus(status), txid.String, createdAt), nil
 }

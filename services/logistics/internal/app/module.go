@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/logistics/internal/api/grpc"
+	"github.com/versoit/diploma/services/logistics/internal/handler"
 	"github.com/versoit/diploma/services/logistics/internal/repository"
-	"github.com/versoit/diploma/services/logistics/usecase"
+	"github.com/versoit/diploma/services/logistics/internal/usecase"
 	"go.uber.org/fx"
 )
 
@@ -16,9 +16,10 @@ var Module = fx.Options(
 			return context.WithCancel(context.Background())
 		},
 		common.NewPGXPool,
+		common.NewTransactionManager,
 		repository.NewDeliveryRepository,
 		repository.NewCourierRepository,
 		usecase.NewLogisticsUseCase,
-		grpc.NewLogisticsHandler,
+		handler.NewLogisticsHandler,
 	),
 )

@@ -9,10 +9,11 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"go.uber.org/fx"
 )
 
 // NewPGXPool creates a new pgxpool.Pool from DATABASE_URL environment variable.
-func NewPGXPool(ctx context.Context) (*pgxpool.Pool, error) {
+func NewPGXPool(lc fx.Lifecycle, ctx context.Context) (*pgxpool.Pool, error) {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		return nil, fmt.Errorf("DATABASE_URL environment variable is not set")
@@ -31,6 +32,13 @@ func NewPGXPool(ctx context.Context) (*pgxpool.Pool, error) {
 	if err := pool.Ping(ctx); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
+
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			pool.Close()
+			return nil
+		},
+	})
 
 	return pool, nil
 }

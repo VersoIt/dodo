@@ -2,63 +2,68 @@ package repository
 
 import (
 	"context"
-	"time"
+	"fmt"
 	"log/slog"
+	"time"
 
-	"github.com/versoit/diploma/services/notification"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/Masterminds/squirrel"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/versoit/diploma/services/notification/internal/domain"
 )
 
 type notificationRepo struct {
-	pool *pgxpool.Pool
-	sb   squirrel.StatementBuilderType
-	log  *slog.Logger
+	pool   *pgxpool.Pool
+	getter *trmpgx.CtxGetter
+	sb     squirrel.StatementBuilderType
+	log    *slog.Logger
 }
 
-func NewNotificationRepository(pool *pgxpool.Pool, log *slog.Logger) notification.NotificationRepository {
+func NewNotificationRepository(pool *pgxpool.Pool, log *slog.Logger) domain.NotificationRepository {
 	return &notificationRepo{
-		pool: pool,
-		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
-		log:  log,
+		pool:   pool,
+		getter: trmpgx.DefaultCtxGetter,
+		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:    log,
 	}
 }
 
-func (r *notificationRepo) Save(ctx context.Context, n *notification.Notification) error {
+func (r *notificationRepo) Save(ctx context.Context, n *domain.Notification) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Insert("notifications").
 		Columns("id", "user_id", "channel", "title", "message", "status", "sent_at", "error_msg").
 		Values(n.ID(), n.UserID(), string(n.Channel()), n.Title(), n.Message(), n.Status(), n.SentAt(), n.Error()).
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
-	
+
 	r.log.Debug("saving notification", slog.String("id", n.ID()), slog.String("user_id", n.UserID()))
-	
-	_, err = r.pool.Exec(ctx, sqlStr, args...)
-	if err != nil {
-		r.log.Error("failed to save notification", slog.Any("error", err), slog.String("id", n.ID()))
+
+	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+		return fmt.Errorf("exec save notification: %w", err)
 	}
-	return err
+	return nil
 }
 
-func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*notification.Notification, error) {
+func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*domain.Notification, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("id", "user_id", "channel", "title", "message", "status", "sent_at", "error_msg").
 		From("notifications").
 		Where(squirrel.Eq{"user_id": userID}).
 		OrderBy("sent_at DESC").
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.pool.Query(ctx, sqlStr, args...)
+	rows, err := db.Query(ctx, sqlStr, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query notifications: %w", err)
 	}
 	defer rows.Close()
 
-	var notes []*notification.Notification
+	var notes []*domain.Notification
 	for rows.Next() {
 		var (
 			id, uid, ch, title, msg, errStr string
@@ -66,9 +71,12 @@ func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*
 			at                              time.Time
 		)
 		if err := rows.Scan(&id, &uid, &ch, &title, &msg, &status, &at, &errStr); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan notification: %w", err)
 		}
-		notes = append(notes, notification.ReconstructNotification(id, uid, notification.Channel(ch), title, msg, status, at, errStr))
+		notes = append(notes, domain.ReconstructNotification(id, uid, domain.Channel(ch), title, msg, status, at, errStr))
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
 	}
 	return notes, nil
 }

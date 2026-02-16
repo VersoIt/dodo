@@ -2,31 +2,36 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"time"
 	"log/slog"
+	"time"
 
-	"github.com/versoit/diploma/services/logistics"
+	"github.com/Masterminds/squirrel"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/Masterminds/squirrel"
+	"github.com/versoit/diploma/services/logistics/internal/domain"
 )
 
 type deliveryRepo struct {
-	pool *pgxpool.Pool
-	sb   squirrel.StatementBuilderType
-	log  *slog.Logger
+	pool   *pgxpool.Pool
+	getter *trmpgx.CtxGetter
+	sb     squirrel.StatementBuilderType
+	log    *slog.Logger
 }
 
-func NewDeliveryRepository(pool *pgxpool.Pool, log *slog.Logger) logistics.DeliveryRepository {
+func NewDeliveryRepository(pool *pgxpool.Pool, log *slog.Logger) domain.DeliveryRepository {
 	return &deliveryRepo{
-		pool: pool,
-		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
-		log:  log,
+		pool:   pool,
+		getter: trmpgx.DefaultCtxGetter,
+		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:    log,
 	}
 }
 
-func (r *deliveryRepo) Save(ctx context.Context, d *logistics.Delivery) error {
+func (r *deliveryRepo) Save(ctx context.Context, d *domain.Delivery) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	lat, lng := d.Location()
 	sqlStr, args, err := r.sb.Insert("deliveries").
 		Columns("order_id", "courier_id", "status", "current_lat", "current_lng").
@@ -34,69 +39,78 @@ func (r *deliveryRepo) Save(ctx context.Context, d *logistics.Delivery) error {
 		Suffix("ON CONFLICT (order_id) DO UPDATE SET courier_id = EXCLUDED.courier_id, status = EXCLUDED.status, current_lat = EXCLUDED.current_lat, current_lng = EXCLUDED.current_lng, updated_at = NOW()").
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
-	
+
 	r.log.Debug("saving delivery", slog.String("order_id", d.OrderID()), slog.Int("status", int(d.Status())))
-	
-	_, err = r.pool.Exec(ctx, sqlStr, args...)
-	if err != nil {
-		r.log.Error("failed to save delivery", slog.Any("error", err), slog.String("order_id", d.OrderID()))
+
+	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+		return fmt.Errorf("exec save delivery: %w", err)
 	}
-	return err
+	return nil
 }
 
-func (r *deliveryRepo) FindByOrderID(ctx context.Context, orderID string) (*logistics.Delivery, error) {
+func (r *deliveryRepo) FindByOrderID(ctx context.Context, orderID string) (*domain.Delivery, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("order_id", "courier_id", "status", "created_at", "pickup_time", "delivery_time", "current_lat", "current_lng").
 		From("deliveries").
 		Where(squirrel.Eq{"order_id": orderID}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var (
-		oid            string
-		cid            *string
-		status         int
-		ca             time.Time
-		pt, dt         *time.Time
-		lat, lng       float64
+		oid      string
+		cid      *string
+		status   int
+		ca       time.Time
+		pt, dt   *time.Time
+		lat, lng float64
 	)
 
-	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&oid, &cid, &status, &ca, &pt, &dt, &lat, &lng)
+	err = db.QueryRow(ctx, sqlStr, args...).Scan(&oid, &cid, &status, &ca, &pt, &dt, &lat, &lng)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("delivery not found")
 		}
-		return nil, err
+		return nil, fmt.Errorf("query delivery: %w", err)
 	}
 
 	var p, d time.Time
-	if pt != nil { p = *pt }
-	if dt != nil { d = *dt }
+	if pt != nil {
+		p = *pt
+	}
+	if dt != nil {
+		d = *dt
+	}
 
 	courierID := ""
-	if cid != nil { courierID = *cid }
+	if cid != nil {
+		courierID = *cid
+	}
 
-	return logistics.ReconstructDelivery(oid, courierID, logistics.DeliveryStatus(status), ca, p, d, lat, lng), nil
+	return domain.ReconstructDelivery(oid, courierID, domain.DeliveryStatus(status), ca, p, d, lat, lng), nil
 }
 
 type courierRepo struct {
-	pool *pgxpool.Pool
-	sb   squirrel.StatementBuilderType
-	log  *slog.Logger
+	pool   *pgxpool.Pool
+	getter *trmpgx.CtxGetter
+	sb     squirrel.StatementBuilderType
+	log    *slog.Logger
 }
 
-func NewCourierRepository(pool *pgxpool.Pool, log *slog.Logger) logistics.CourierRepository {
+func NewCourierRepository(pool *pgxpool.Pool, log *slog.Logger) domain.CourierRepository {
 	return &courierRepo{
-		pool: pool,
-		sb:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
-		log:  log,
+		pool:   pool,
+		getter: trmpgx.DefaultCtxGetter,
+		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		log:    log,
 	}
 }
 
-func (r *courierRepo) Save(ctx context.Context, c *logistics.Courier) error {
+func (r *courierRepo) Save(ctx context.Context, c *domain.Courier) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	lat, lng := c.Location()
 	sqlStr, args, err := r.sb.Insert("couriers").
 		Columns("id", "name", "phone", "status", "current_lat", "current_lng").
@@ -104,22 +118,25 @@ func (r *courierRepo) Save(ctx context.Context, c *logistics.Courier) error {
 		Suffix("ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, current_lat = EXCLUDED.current_lat, current_lng = EXCLUDED.current_lng, updated_at = NOW()").
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
-	
+
 	r.log.Debug("saving courier", slog.String("courier_id", c.ID()))
-	
-	_, err = r.pool.Exec(ctx, sqlStr, args...)
-	return err
+
+	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+		return fmt.Errorf("exec save courier: %w", err)
+	}
+	return nil
 }
 
-func (r *courierRepo) FindByID(ctx context.Context, id string) (*logistics.Courier, error) {
+func (r *courierRepo) FindByID(ctx context.Context, id string) (*domain.Courier, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("id", "name", "phone", "status", "current_lat", "current_lng").
 		From("couriers").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var (
@@ -128,33 +145,34 @@ func (r *courierRepo) FindByID(ctx context.Context, id string) (*logistics.Couri
 		lat, lng         float64
 	)
 
-	err = r.pool.QueryRow(ctx, sqlStr, args...).Scan(&cid, &name, &phone, &status, &lat, &lng)
+	err = db.QueryRow(ctx, sqlStr, args...).Scan(&cid, &name, &phone, &status, &lat, &lng)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("courier not found")
 		}
-		return nil, err
+		return nil, fmt.Errorf("query courier: %w", err)
 	}
 
-	return logistics.ReconstructCourier(cid, name, phone, logistics.CourierStatus(status), lat, lng), nil
+	return domain.ReconstructCourier(cid, name, phone, domain.CourierStatus(status), lat, lng), nil
 }
 
-func (r *courierRepo) FindAvailable(ctx context.Context) ([]*logistics.Courier, error) {
+func (r *courierRepo) FindAvailable(ctx context.Context) ([]*domain.Courier, error) {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Select("id", "name", "phone", "status", "current_lat", "current_lng").
 		From("couriers").
-		Where(squirrel.Eq{"status": logistics.CourierFree}).
+		Where(squirrel.Eq{"status": domain.CourierFree}).
 		ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.pool.Query(ctx, sqlStr, args...)
+	rows, err := db.Query(ctx, sqlStr, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query available couriers: %w", err)
 	}
 	defer rows.Close()
 
-	var couriers []*logistics.Courier
+	var couriers []*domain.Courier
 	for rows.Next() {
 		var (
 			cid, name, phone string
@@ -162,14 +180,18 @@ func (r *courierRepo) FindAvailable(ctx context.Context) ([]*logistics.Courier, 
 			lat, lng         float64
 		)
 		if err := rows.Scan(&cid, &name, &phone, &status, &lat, &lng); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan courier: %w", err)
 		}
-		couriers = append(couriers, logistics.ReconstructCourier(cid, name, phone, logistics.CourierStatus(status), lat, lng))
+		couriers = append(couriers, domain.ReconstructCourier(cid, name, phone, domain.CourierStatus(status), lat, lng))
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
 	}
 	return couriers, nil
 }
 
 func (r *courierRepo) UpdateLocation(ctx context.Context, id string, lat, lng float64) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	sqlStr, args, err := r.sb.Update("couriers").
 		Set("current_lat", lat).
 		Set("current_lng", lng).
@@ -177,8 +199,10 @@ func (r *courierRepo) UpdateLocation(ctx context.Context, id string, lat, lng fl
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
-	_, err = r.pool.Exec(ctx, sqlStr, args...)
-	return err
+	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+		return fmt.Errorf("exec update location: %w", err)
+	}
+	return nil
 }

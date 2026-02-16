@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/auth/internal/api/grpc"
+	"github.com/versoit/diploma/services/auth/internal/handler"
 	"github.com/versoit/diploma/services/auth/internal/repository"
-	"github.com/versoit/diploma/services/auth/usecase"
+	"github.com/versoit/diploma/services/auth/internal/usecase"
 	"go.uber.org/fx"
 )
 
@@ -16,8 +16,9 @@ var Module = fx.Options(
 			return context.WithCancel(context.Background())
 		},
 		common.NewPGXPool,
+		common.NewTransactionManager,
 		repository.NewUserRepository,
 		usecase.NewAuthUseCase,
-		grpc.NewAuthHandler,
+		handler.NewAuthHandler,
 	),
 )

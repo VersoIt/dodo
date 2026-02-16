@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"net"
 	"log/slog"
+	"net"
 
 	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/treasury/internal/api/grpc"
 	"github.com/versoit/diploma/services/treasury/internal/app"
+	"github.com/versoit/diploma/services/treasury/internal/handler"
 	"go.uber.org/fx"
 	stdgrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -25,7 +25,7 @@ func main() {
 	).Run()
 }
 
-func RunServer(lc fx.Lifecycle, handler *grpc.TreasuryHandler, logger *slog.Logger) {
+func RunServer(lc fx.Lifecycle, handler *handler.TreasuryHandler, logger *slog.Logger) {
 	server := stdgrpc.NewServer()
 	handler.Register(server)
 	reflection.Register(server)

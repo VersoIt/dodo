@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/treasury/internal/api/grpc"
+	"github.com/versoit/diploma/services/treasury/internal/handler"
 	"github.com/versoit/diploma/services/treasury/internal/repository"
-	"github.com/versoit/diploma/services/treasury/usecase"
+	"github.com/versoit/diploma/services/treasury/internal/usecase"
 	"go.uber.org/fx"
 )
 
@@ -16,8 +16,9 @@ var Module = fx.Options(
 			return context.WithCancel(context.Background())
 		},
 		common.NewPGXPool,
+		common.NewTransactionManager,
 		repository.NewPaymentRepository,
 		usecase.NewTreasuryUseCase,
-		grpc.NewTreasuryHandler,
+		handler.NewTreasuryHandler,
 	),
 )

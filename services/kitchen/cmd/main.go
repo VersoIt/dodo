@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"net"
 	"log/slog"
+	"net"
 
 	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/kitchen/internal/api/grpc"
 	"github.com/versoit/diploma/services/kitchen/internal/app"
+	"github.com/versoit/diploma/services/kitchen/internal/handler"
 	"go.uber.org/fx"
 	stdgrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -25,7 +25,7 @@ func main() {
 	).Run()
 }
 
-func RunServer(lc fx.Lifecycle, handler *grpc.KitchenHandler, logger *slog.Logger) {
+func RunServer(lc fx.Lifecycle, handler *handler.KitchenHandler, logger *slog.Logger) {
 	server := stdgrpc.NewServer()
 	handler.Register(server)
 	reflection.Register(server)

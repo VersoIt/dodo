@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/versoit/diploma/pkg/common"
-	"github.com/versoit/diploma/services/kitchen/internal/api/grpc"
+	"github.com/versoit/diploma/services/kitchen/internal/handler"
 	"github.com/versoit/diploma/services/kitchen/internal/repository"
-	"github.com/versoit/diploma/services/kitchen/usecase"
+	"github.com/versoit/diploma/services/kitchen/internal/usecase"
 	"go.uber.org/fx"
 )
 
@@ -16,8 +16,9 @@ var Module = fx.Options(
 			return context.WithCancel(context.Background())
 		},
 		common.NewPGXPool,
+		common.NewTransactionManager,
 		repository.NewTicketRepository,
 		usecase.NewKitchenUseCase,
-		grpc.NewKitchenHandler,
+		handler.NewKitchenHandler,
 	),
 )
