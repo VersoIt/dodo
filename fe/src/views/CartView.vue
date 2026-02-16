@@ -135,22 +135,22 @@ const confirmPayment = async () => {
           <div class="card-body p-10 space-y-8">
             <div class="form-control w-full">
               <label class="label">
-                <span class="label-text font-black uppercase text-[10px] opacity-40">
+                <span class="label-text font-black uppercase text-[10px] opacity-60 text-primary">
                   Улица <span class="text-error">*</span>
                 </span>
               </label>
-              <div class="relative"><MapPin class="absolute left-4 top-3.5 w-5 h-5 opacity-20" />
-                <input v-model="address.street" type="text" placeholder="пр. Ленина" class="input input-bordered w-full pl-12 rounded-2xl h-12 font-bold" />
+              <div class="relative"><MapPin class="absolute left-4 top-3.5 w-5 h-5 text-primary opacity-40" />
+                <input v-model="address.street" type="text" placeholder="пр. Ленина" class="input input-bordered border-primary/30 bg-primary/5 w-full pl-12 rounded-2xl h-12 font-bold focus:border-primary" />
               </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-black uppercase text-[10px] opacity-40">
+                  <span class="label-text font-black uppercase text-[10px] opacity-60 text-primary">
                     Дом <span class="text-error">*</span>
                   </span>
                 </label>
-                <div class="relative"><Building2 class="absolute left-4 top-3.5 w-5 h-5 opacity-20" /><input v-model="address.house" type="text" class="input input-bordered w-full pl-12 rounded-2xl h-12 font-bold" /></div>
+                <div class="relative"><Building2 class="absolute left-4 top-3.5 w-5 h-5 text-primary opacity-40" /><input v-model="address.house" type="text" class="input input-bordered border-primary/30 bg-primary/5 w-full pl-12 rounded-2xl h-12 font-bold focus:border-primary" /></div>
               </div>
               <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Кв/Офис</span></label><input v-model="address.apartment" type="text" class="input input-bordered w-full px-6 rounded-2xl h-12 font-bold" /></div>
               <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Этаж</span></label><input v-model="address.floor" type="text" class="input input-bordered w-full px-6 rounded-2xl h-12 font-bold" /></div>
@@ -189,7 +189,7 @@ const confirmPayment = async () => {
               </div>
             </div>
             <div class="card-actions mt-10">
-              <button @click="handleCheckout" class="btn btn-primary btn-block h-20 rounded-3xl shadow-2xl shadow-primary/30 font-black uppercase text-lg transition-all hover:scale-[1.02]" :disabled="isPlacingOrder || !isAddressValid">
+              <button @click="handleCheckout" class="btn btn-primary btn-block h-20 rounded-3xl shadow-2xl shadow-primary/30 disabled:shadow-none font-black uppercase text-lg transition-all hover:scale-[1.02]" :disabled="isPlacingOrder || !isAddressValid">
                 <template v-if="isPlacingOrder"><span class="loading loading-spinner"></span></template>
                 <template v-else>Оформить заказ</template>
               </button>
@@ -207,7 +207,7 @@ const confirmPayment = async () => {
         <p class="text-base-content/40 text-center mb-10 font-bold uppercase text-[10px] tracking-widest">К оплате: <span class="text-primary ml-1">{{ formatPrice(calculateTotalWithPromo()) }}</span></p>
         <div class="relative bg-white p-10 rounded-[3rem] shadow-inner mb-12 group overflow-hidden border-8 border-base-200 transition-all hover:border-primary/20"><svg viewBox="0 0 100 100" class="w-48 h-48 text-black fill-current relative z-10"><path d="M0 0h35v10H10v25H0V0zM65 0h35v35h-10V10H65V0zM0 65h10v25h25v10H0V65zM90 65h10v35H65v-10h25V65z" /><path d="M20 20h15v15H20V20zM65 20h15v15H65V20zM20 65h15v15H20V65z" /><path d="M42 20h16v16h-16V20zM20 42h16v16h-16V42zM42 42h16v16h-16V42zM64 42h16v16h-16V42zM42 64h16v16h-16V64zM64 64h8v8h-8V64zM72 72h8v8h-8V72z" /></svg></div>
         <div class="flex flex-col w-full gap-4">
-          <button @click="confirmPayment" class="btn btn-primary btn-block h-20 rounded-3xl text-xl font-black uppercase shadow-2xl shadow-primary/30 tracking-tight transition-all hover:scale-[1.02]" :disabled="isPaying">
+          <button @click="confirmPayment" class="btn btn-primary btn-block h-20 rounded-3xl text-xl font-black uppercase shadow-2xl shadow-primary/30 disabled:shadow-none tracking-tight transition-all hover:scale-[1.02]" :disabled="isPaying">
             <span v-if="isPaying" class="loading loading-spinner"></span><span v-else>Я оплатил</span>
           </button>
         </div>

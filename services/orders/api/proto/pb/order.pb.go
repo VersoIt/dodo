@@ -1000,13 +1000,15 @@ func (*GetAnalyticsRequest) Descriptor() ([]byte, []int) {
 }
 
 type AnalyticsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TotalRevenue  float64                `protobuf:"fixed64,1,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	OrdersCount   int32                  `protobuf:"varint,2,opt,name=orders_count,json=ordersCount,proto3" json:"orders_count,omitempty"`
-	AvgCheck      float64                `protobuf:"fixed64,3,opt,name=avg_check,json=avgCheck,proto3" json:"avg_check,omitempty"`
-	TopProducts   []*ProductStat         `protobuf:"bytes,4,rep,name=top_products,json=topProducts,proto3" json:"top_products,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	TotalRevenue    float64                `protobuf:"fixed64,1,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
+	OrdersCount     int32                  `protobuf:"varint,2,opt,name=orders_count,json=ordersCount,proto3" json:"orders_count,omitempty"`
+	AvgCheck        float64                `protobuf:"fixed64,3,opt,name=avg_check,json=avgCheck,proto3" json:"avg_check,omitempty"`
+	TopProducts     []*ProductStat         `protobuf:"bytes,4,rep,name=top_products,json=topProducts,proto3" json:"top_products,omitempty"`
+	CookingCount    int32                  `protobuf:"varint,5,opt,name=cooking_count,json=cookingCount,proto3" json:"cooking_count,omitempty"`
+	DeliveringCount int32                  `protobuf:"varint,6,opt,name=delivering_count,json=deliveringCount,proto3" json:"delivering_count,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *AnalyticsResponse) Reset() {
@@ -1065,6 +1067,20 @@ func (x *AnalyticsResponse) GetTopProducts() []*ProductStat {
 		return x.TopProducts
 	}
 	return nil
+}
+
+func (x *AnalyticsResponse) GetCookingCount() int32 {
+	if x != nil {
+		return x.CookingCount
+	}
+	return 0
+}
+
+func (x *AnalyticsResponse) GetDeliveringCount() int32 {
+	if x != nil {
+		return x.DeliveringCount
+	}
+	return 0
 }
 
 type ProductStat struct {
@@ -1196,12 +1212,14 @@ const file_order_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
 	"\x15CheckPromoCodeRequest\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\"\x15\n" +
-	"\x13GetAnalyticsRequest\"\xb3\x01\n" +
+	"\x13GetAnalyticsRequest\"\x83\x02\n" +
 	"\x11AnalyticsResponse\x12#\n" +
 	"\rtotal_revenue\x18\x01 \x01(\x01R\ftotalRevenue\x12!\n" +
 	"\forders_count\x18\x02 \x01(\x05R\vordersCount\x12\x1b\n" +
 	"\tavg_check\x18\x03 \x01(\x01R\bavgCheck\x129\n" +
-	"\ftop_products\x18\x04 \x03(\v2\x16.orders.v1.ProductStatR\vtopProducts\"Q\n" +
+	"\ftop_products\x18\x04 \x03(\v2\x16.orders.v1.ProductStatR\vtopProducts\x12#\n" +
+	"\rcooking_count\x18\x05 \x01(\x05R\fcookingCount\x12)\n" +
+	"\x10delivering_count\x18\x06 \x01(\x05R\x0fdeliveringCount\"Q\n" +
 	"\vProductStat\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x18\n" +

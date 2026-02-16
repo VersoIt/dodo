@@ -291,10 +291,12 @@ func (uc *OrderUseCase) GetPromoByCode(ctx context.Context, code string) (*domai
 }
 
 type AnalyticsResult struct {
-	TotalRevenue float64
-	OrdersCount  int
-	AvgCheck     float64
-	TopProducts  []ProductStat
+	TotalRevenue    float64
+	OrdersCount     int
+	AvgCheck        float64
+	TopProducts     []ProductStat
+	CookingCount    int
+	DeliveringCount int
 }
 
 type ProductStat struct {
@@ -311,10 +313,21 @@ func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*AnalyticsResult, err
 
 	var totalRevenue float64
 	var completedCount int
+	var cookingCount int
+	var deliveringCount int
 	productStats := make(map[string]*ProductStat)
 
 	for _, o := range orders {
-		if o.Status() == domain.StatusCompleted || o.Status() == domain.StatusPaid || o.Status() == domain.StatusCooking || o.Status() == domain.StatusReady || o.Status() == domain.StatusDelivering {
+		status := o.Status()
+
+		if status == domain.StatusCooking {
+			cookingCount++
+		}
+		if status == domain.StatusDelivering {
+			deliveringCount++
+		}
+
+		if status == domain.StatusCompleted || status == domain.StatusPaid || status == domain.StatusCooking || status == domain.StatusReady || status == domain.StatusDelivering {
 			rev := o.FinalPrice().InexactFloat64()
 			totalRevenue += rev
 			completedCount++
@@ -342,9 +355,11 @@ func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*AnalyticsResult, err
 	}
 
 	return &AnalyticsResult{
-		TotalRevenue: totalRevenue,
-		OrdersCount:  completedCount,
-		AvgCheck:     avgCheck,
-		TopProducts:  topProducts,
+		TotalRevenue:    totalRevenue,
+		OrdersCount:     completedCount,
+		AvgCheck:        avgCheck,
+		TopProducts:     topProducts,
+		CookingCount:    cookingCount,
+		DeliveringCount: deliveringCount,
 	}, nil
 }

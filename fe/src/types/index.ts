@@ -55,6 +55,8 @@ export interface Analytics {
   orders_count: number
   avg_check: number
   top_products: ProductStat[]
+  cooking_count: number
+  delivering_count: number
 }
 
 export interface ProductStat {

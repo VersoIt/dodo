@@ -160,10 +160,12 @@ func (h *OrdersHandler) GetAnalytics(ctx context.Context, _ *orderspb.GetAnalyti
 	}
 
 	return &orderspb.AnalyticsResponse{
-		TotalRevenue: res.TotalRevenue,
-		OrdersCount:  int32(res.OrdersCount),
-		AvgCheck:     res.AvgCheck,
-		TopProducts:  topProducts,
+		TotalRevenue:    res.TotalRevenue,
+		OrdersCount:     int32(res.OrdersCount),
+		AvgCheck:        res.AvgCheck,
+		TopProducts:     topProducts,
+		CookingCount:    int32(res.CookingCount),
+		DeliveringCount: int32(res.DeliveringCount),
 	}, nil
 }
 

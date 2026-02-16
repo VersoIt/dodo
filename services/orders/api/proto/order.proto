@@ -95,6 +95,8 @@ message AnalyticsResponse {
   int32 orders_count = 2;
   double avg_check = 3;
   repeated ProductStat top_products = 4;
+  int32 cooking_count = 5;
+  int32 delivering_count = 6;
 }
 
 message ProductStat {

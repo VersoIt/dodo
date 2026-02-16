@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/fe/src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/types/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fe/src/views/CartView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/CartView.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fe/src/views/ManagerView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ManagerView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/order.proto" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/order.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/api/proto/pb/order.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/orders/internal/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/orders/internal/usecase/usecase.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

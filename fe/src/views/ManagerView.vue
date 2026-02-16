@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, inject, computed } from 'vue'
-import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign } from 'lucide-vue-next'
+import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign, ChefHat, Truck } from 'lucide-vue-next'
 import { ordersApi } from '../api'
 import type { PromoCode, Analytics } from '../types'
 import AppModal from '../components/shared/AppModal.vue'
@@ -57,44 +57,68 @@ onMounted(fetchData)
     <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
       <div>
         <h1 class="text-4xl font-black tracking-tighter uppercase">Панель Управления</h1>
-        <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">Управление промокодами</p>
+        <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">Управление промокодами и аналитика</p>
       </div>
     </div>
 
-    <div v-if="loading" class="flex justify-center py-32"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+    <div v-if="loading" class="flex justify-center py-32">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
 
     <div v-else class="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
       <!-- Analytics Dashboard -->
-      <section v-if="analytics" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section v-if="analytics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <div class="card bg-primary text-primary-content shadow-xl rounded-[2rem]">
-          <div class="card-body">
+          <div class="card-body p-6">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-white/20 rounded-2xl"><DollarSign class="w-6 h-6" /></div>
               <div>
-                <p class="text-[10px] uppercase font-black tracking-widest opacity-70">Общая выручка</p>
-                <h3 class="text-3xl font-black">{{ analytics.total_revenue.toLocaleString() }} ₽</h3>
+                <p class="text-[10px] uppercase font-black tracking-widest opacity-70">Выручка</p>
+                <h3 class="text-2xl font-black">{{ analytics.total_revenue.toLocaleString() }} ₽</h3>
               </div>
             </div>
           </div>
         </div>
         <div class="card bg-base-100 border border-base-200 shadow-xl rounded-[2rem]">
-          <div class="card-body">
+          <div class="card-body p-6">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-secondary/10 text-secondary rounded-2xl"><ShoppingBag class="w-6 h-6" /></div>
               <div>
-                <p class="text-[10px] uppercase font-black tracking-widest opacity-50 text-base-content">Всего заказов</p>
-                <h3 class="text-3xl font-black text-base-content">{{ analytics.orders_count }}</h3>
+                <p class="text-[10px] uppercase font-black tracking-widest opacity-50 text-base-content">Заказов</p>
+                <h3 class="text-2xl font-black text-base-content">{{ analytics.orders_count }}</h3>
               </div>
             </div>
           </div>
         </div>
         <div class="card bg-base-100 border border-base-200 shadow-xl rounded-[2rem]">
-          <div class="card-body">
+          <div class="card-body p-6">
             <div class="flex items-center gap-4">
               <div class="p-3 bg-accent/10 text-accent rounded-2xl"><TrendingUp class="w-6 h-6" /></div>
               <div>
                 <p class="text-[10px] uppercase font-black tracking-widest opacity-50 text-base-content">Средний чек</p>
-                <h3 class="text-3xl font-black text-base-content">{{ Math.round(analytics.avg_check).toLocaleString() }} ₽</h3>
+                <h3 class="text-2xl font-black text-base-content">{{ Math.round(analytics.avg_check).toLocaleString() }} ₽</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-100 border border-base-200 shadow-xl rounded-[2rem]">
+          <div class="card-body p-6">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-warning/10 text-warning rounded-2xl"><ChefHat class="w-6 h-6" /></div>
+              <div>
+                <p class="text-[10px] uppercase font-black tracking-widest opacity-50 text-base-content">На кухне</p>
+                <h3 class="text-2xl font-black text-base-content">{{ analytics.cooking_count }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-100 border border-base-200 shadow-xl rounded-[2rem]">
+          <div class="card-body p-6">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-info/10 text-info rounded-2xl"><Truck class="w-6 h-6" /></div>
+              <div>
+                <p class="text-[10px] uppercase font-black tracking-widest opacity-50 text-base-content">В пути</p>
+                <h3 class="text-2xl font-black text-base-content">{{ analytics.delivering_count }}</h3>
               </div>
             </div>
           </div>
@@ -149,12 +173,12 @@ onMounted(fetchData)
 
     <AppModal :show="showAddPromoModal" title="Новый промокод" @close="showAddPromoModal = false">
       <div class="p-10 space-y-6">
-        <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Код купона <span class="text-error">*</span></span></label><input v-model="newPromo.code" type="text" placeholder="SUMMER2026" class="input input-bordered h-14 w-full rounded-2xl font-mono font-black uppercase" /></div>
+        <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-60 text-secondary">Код купона <span class="text-error">*</span></span></label><input v-model="newPromo.code" type="text" placeholder="SUMMER2026" class="input input-bordered border-secondary/30 bg-secondary/5 h-14 w-full rounded-2xl font-mono font-black uppercase focus:border-secondary" /></div>
         <div class="grid grid-cols-2 gap-6">
           <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Тип</span></label><select v-model="newPromo.type" class="select select-bordered w-full rounded-2xl h-14 font-bold"><option value="percent">Процент (%)</option><option value="fixed">Сумма (₽)</option></select></div>
-          <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-40">Значение <span class="text-error">*</span></span></label><input v-model="newPromo.amount" type="number" class="input input-bordered w-full rounded-2xl h-14 font-bold" /></div>
+          <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-60 text-secondary">Значение <span class="text-error">*</span></span></label><input v-model="newPromo.amount" type="number" class="input input-bordered border-secondary/30 bg-secondary/5 w-full rounded-2xl h-14 font-bold focus:border-secondary" /></div>
         </div>
-        <button @click="handleAddPromo" :disabled="!isPromoValid" class="btn btn-secondary btn-block h-16 rounded-2xl font-black uppercase shadow-xl shadow-secondary/20 mt-4">Создать промокод</button>
+        <button @click="handleAddPromo" :disabled="!isPromoValid" class="btn btn-secondary btn-block h-16 rounded-2xl font-black uppercase shadow-xl shadow-secondary/20 disabled:shadow-none mt-4">Создать промокод</button>
       </div>
     </AppModal>
   </div>
