@@ -50,6 +50,19 @@ export interface PromoCode {
   active: boolean
 }
 
+export interface Analytics {
+  total_revenue: number
+  orders_count: number
+  avg_check: number
+  top_products: ProductStat[]
+}
+
+export interface ProductStat {
+  name: string
+  count: number
+  revenue: number
+}
+
 export interface User {
   id: string
   email: string

@@ -29,6 +29,7 @@ const (
 	OrderService_ListPromos_FullMethodName        = "/orders.v1.OrderService/ListPromos"
 	OrderService_DeletePromo_FullMethodName       = "/orders.v1.OrderService/DeletePromo"
 	OrderService_CheckPromoCode_FullMethodName    = "/orders.v1.OrderService/CheckPromoCode"
+	OrderService_GetAnalytics_FullMethodName      = "/orders.v1.OrderService/GetAnalytics"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -46,6 +47,8 @@ type OrderServiceClient interface {
 	ListPromos(ctx context.Context, in *ListPromosRequest, opts ...grpc.CallOption) (*ListPromosResponse, error)
 	DeletePromo(ctx context.Context, in *DeletePromoRequest, opts ...grpc.CallOption) (*PromoDeleteResponse, error)
 	CheckPromoCode(ctx context.Context, in *CheckPromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error)
+	// Analytics
+	GetAnalytics(ctx context.Context, in *GetAnalyticsRequest, opts ...grpc.CallOption) (*AnalyticsResponse, error)
 }
 
 type orderServiceClient struct {
@@ -156,6 +159,16 @@ func (c *orderServiceClient) CheckPromoCode(ctx context.Context, in *CheckPromoC
 	return out, nil
 }
 
+func (c *orderServiceClient) GetAnalytics(ctx context.Context, in *GetAnalyticsRequest, opts ...grpc.CallOption) (*AnalyticsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AnalyticsResponse)
+	err := c.cc.Invoke(ctx, OrderService_GetAnalytics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
@@ -171,6 +184,8 @@ type OrderServiceServer interface {
 	ListPromos(context.Context, *ListPromosRequest) (*ListPromosResponse, error)
 	DeletePromo(context.Context, *DeletePromoRequest) (*PromoDeleteResponse, error)
 	CheckPromoCode(context.Context, *CheckPromoCodeRequest) (*PromoCodeResponse, error)
+	// Analytics
+	GetAnalytics(context.Context, *GetAnalyticsRequest) (*AnalyticsResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -210,6 +225,9 @@ func (UnimplementedOrderServiceServer) DeletePromo(context.Context, *DeletePromo
 }
 func (UnimplementedOrderServiceServer) CheckPromoCode(context.Context, *CheckPromoCodeRequest) (*PromoCodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckPromoCode not implemented")
+}
+func (UnimplementedOrderServiceServer) GetAnalytics(context.Context, *GetAnalyticsRequest) (*AnalyticsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAnalytics not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 func (UnimplementedOrderServiceServer) testEmbeddedByValue()                      {}
@@ -412,6 +430,24 @@ func _OrderService_CheckPromoCode_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_GetAnalytics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAnalyticsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).GetAnalytics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_GetAnalytics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).GetAnalytics(ctx, req.(*GetAnalyticsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -458,6 +494,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckPromoCode",
 			Handler:    _OrderService_CheckPromoCode_Handler,
+		},
+		{
+			MethodName: "GetAnalytics",
+			Handler:    _OrderService_GetAnalytics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

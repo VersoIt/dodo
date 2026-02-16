@@ -289,3 +289,62 @@ func (uc *OrderUseCase) GetPromoByCode(ctx context.Context, code string) (*domai
 	}
 	return promo, nil
 }
+
+type AnalyticsResult struct {
+	TotalRevenue float64
+	OrdersCount  int
+	AvgCheck     float64
+	TopProducts  []ProductStat
+}
+
+type ProductStat struct {
+	Name    string
+	Count   int
+	Revenue float64
+}
+
+func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*AnalyticsResult, error) {
+	orders, err := uc.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var totalRevenue float64
+	var completedCount int
+	productStats := make(map[string]*ProductStat)
+
+	for _, o := range orders {
+		if o.Status() == domain.StatusCompleted || o.Status() == domain.StatusPaid || o.Status() == domain.StatusCooking || o.Status() == domain.StatusReady || o.Status() == domain.StatusDelivering {
+			rev := o.FinalPrice().InexactFloat64()
+			totalRevenue += rev
+			completedCount++
+
+			for _, item := range o.Items() {
+				stat, ok := productStats[item.ProductName()]
+				if !ok {
+					stat = &ProductStat{Name: item.ProductName()}
+					productStats[item.ProductName()] = stat
+				}
+				stat.Count += item.Quantity()
+				stat.Revenue += item.CalculateTotal().InexactFloat64()
+			}
+		}
+	}
+
+	var avgCheck float64
+	if completedCount > 0 {
+		avgCheck = totalRevenue / float64(completedCount)
+	}
+
+	var topProducts []ProductStat
+	for _, stat := range productStats {
+		topProducts = append(topProducts, *stat)
+	}
+
+	return &AnalyticsResult{
+		TotalRevenue: totalRevenue,
+		OrdersCount:  completedCount,
+		AvgCheck:     avgCheck,
+		TopProducts:  topProducts,
+	}, nil
+}

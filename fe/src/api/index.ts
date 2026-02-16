@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import type { ApiResponse, Product, Order, PromoCode, User } from '../types'
+import type { ApiResponse, Product, Order, PromoCode, Analytics, User } from '../types'
 
 const client: AxiosInstance = axios.create({
   baseURL: '',
@@ -47,6 +47,7 @@ export const ordersApi = {
   createPromoCode: (data: Partial<PromoCode>): Promise<ApiResponse<PromoCode>> => client.post('/api/v1/promos', data),
   deletePromo: (id: string): Promise<ApiResponse<any>> => client.delete(`/api/v1/promos/${id}`),
   checkPromoCode: (code: string): Promise<ApiResponse<PromoCode>> => client.get(`/api/v1/promos/check/${code}`),
+  getAnalytics: (): Promise<ApiResponse<Analytics>> => client.get('/api/v1/orders/analytics'),
 }
 
 // --- Kitchen API ---
