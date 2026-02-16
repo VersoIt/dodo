@@ -66,14 +66,13 @@ func (r *notificationRepo) FindByUserID(ctx context.Context, userID string) ([]*
 	var notes []*domain.Notification
 	for rows.Next() {
 		var (
-			id, uid, ch, title, msg, errStr string
-			status                          bool
-			at                              time.Time
+			id, uid, ch, title, msg, errStr, statusStr string
+			at                                         time.Time
 		)
-		if err := rows.Scan(&id, &uid, &ch, &title, &msg, &status, &at, &errStr); err != nil {
+		if err := rows.Scan(&id, &uid, &ch, &title, &msg, &statusStr, &at, &errStr); err != nil {
 			return nil, fmt.Errorf("scan notification: %w", err)
 		}
-		notes = append(notes, domain.ReconstructNotification(id, uid, domain.Channel(ch), title, msg, status, at, errStr))
+		notes = append(notes, domain.ReconstructNotification(id, uid, domain.Channel(ch), title, msg, statusStr == "sent", at, errStr))
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows error: %w", err)

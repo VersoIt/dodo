@@ -43,7 +43,6 @@ const fetchProducts = async () => {
     if (res.success && Array.isArray(res.data)) {
       products.value = res.data.map((p: any) => ({
         ...p,
-        base_price: p.price,
         image_url: p.image_url || HERO_IMAGE,
         is_available: p.is_available ?? true
       }))
@@ -57,7 +56,7 @@ const handleAddToCart = (product: Product) => {
   cartStore.addToCart({
     id: product.id,
     name: product.name,
-    price: product.base_price,
+    price: product.price,
     imageUrl: product.image_url
   })
   addToast(`${product.name} добавлена в корзину!`, 'success')
@@ -74,7 +73,7 @@ const openEditModal = (product: Product) => {
   productForm.value = { 
     name: product.name, 
     description: product.description, 
-    price: product.base_price, 
+    price: product.price, 
     imageUrl: product.image_url, 
     categoryId: product.category_id, 
     isAvailable: product.is_available 
@@ -123,10 +122,11 @@ onMounted(fetchProducts)
       <div v-else-if="error" class="alert alert-error rounded-3xl">{{ error }}</div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div v-for="product in filteredProducts" :key="product.id" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-500 group rounded-[2rem] border border-base-200 overflow-hidden">
-          <figure class="relative h-56 overflow-hidden">
-            <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="handleImageError" />
-            <div class="absolute top-4 right-4"><span class="badge badge-primary badge-lg font-black shadow-lg">{{ formatPrice(product.base_price) }}</span></div>
-            <div class="absolute top-4 left-4 flex flex-col gap-2"><span class="badge badge-ghost bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase border-none px-3 py-3">{{ CATEGORIES[product.category_id + 1] || 'Классика' }}</span><span v-if="!product.is_available" class="badge badge-error text-[9px] font-black uppercase px-3 py-3">SOLD OUT</span></div>
+                    <figure class="relative h-56 overflow-hidden">
+                      <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="handleImageError" />
+                      <div class="absolute top-4 right-4"><span class="badge badge-primary badge-lg font-black shadow-lg">{{ formatPrice(product.price) }}</span></div>
+                      <div class="absolute top-4 left-4 flex flex-col gap-2">
+          <span class="badge badge-ghost bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase border-none px-3 py-3">{{ CATEGORIES[product.category_id + 1] || 'Классика' }}</span><span v-if="!product.is_available" class="badge badge-error text-[9px] font-black uppercase px-3 py-3">SOLD OUT</span></div>
           </figure>
           <div class="card-body p-8">
             <h3 class="card-title text-2xl font-black tracking-tight leading-tight">{{ product.name }}</h3>

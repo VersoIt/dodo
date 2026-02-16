@@ -10,7 +10,7 @@ export interface Product {
   id: string
   name: string
   description: string
-  base_price: number
+  price: number
   category_id: number
   image_url: string
   is_available: boolean
@@ -66,7 +66,7 @@ export interface ProductStat {
 export interface User {
   id: string
   email: string
-  full_name: string
+  name: string
   role: string
   phone: string
 }

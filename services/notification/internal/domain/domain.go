@@ -50,7 +50,12 @@ func (n *Notification) MarkFailed(errStr string) {
 func (n *Notification) ID() string        { return n.id }
 func (n *Notification) UserID() string    { return n.userID }
 func (n *Notification) Channel() Channel  { return n.channel }
-func (n *Notification) Status() bool      { return n.isSent }
+func (n *Notification) Status() string {
+	if n.isSent {
+		return "sent"
+	}
+	return "failed"
+}
 func (n *Notification) Title() string     { return n.title }
 func (n *Notification) Message() string   { return n.message }
 func (n *Notification) SentAt() time.Time { return n.sentAt }

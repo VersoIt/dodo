@@ -36,7 +36,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 
 	h.log.Info("Registering new user via gRPC", "email", req.Email, "name", req.Name, "role", req.Role)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	resp, err := h.client.CreateUser(ctx, &auth_pb.CreateUserRequest{
@@ -65,7 +65,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	h.log.Info("User login attempt", "email", req.Email)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	resp, err := h.client.Login(ctx, &auth_pb.LoginRequest{
@@ -88,7 +88,7 @@ func (h *AuthHandler) GetMe(c *fiber.Ctx) error {
 		return ErrorResponse(c, fiber.StatusUnauthorized, "unauthorized")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	resp, err := h.client.GetUser(ctx, &auth_pb.GetUserRequest{
@@ -113,7 +113,7 @@ func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
 		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	resp, err := h.client.UpdateUser(ctx, &auth_pb.UpdateUserRequest{

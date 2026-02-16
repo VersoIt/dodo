@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/versoit/diploma/pkg/common"
 	"github.com/versoit/diploma/gateway/internal/config"
@@ -36,7 +38,10 @@ var Module = fx.Options(
 
 func newFiberApp() *fiber.App {
 	return fiber.New(fiber.Config{
-		AppName: "Diploma Gateway v1.0",
+		AppName:      "Diploma Gateway v1.0",
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	})
 }
 

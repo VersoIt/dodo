@@ -122,6 +122,10 @@ func (i *OrderItem) BasePrice() common.Money { return i.basePrice }
 func (i *OrderItem) Size() float64           { return i.sizeMultiplier }
 func (i *OrderItem) Toppings() []Topping     { return i.toppings }
 
+func (i *OrderItem) AddReconstructedTopping(name string, price common.Money) {
+	i.toppings = append(i.toppings, Topping{Name: name, Price: price})
+}
+
 // --- Aggregate Root ---
 
 type PromoCode struct {
@@ -408,4 +412,20 @@ type CatalogService interface {
 
 type AnalyticsService interface {
 	ReportSale(ctx context.Context, managerID string, amount float64) error
+}
+
+type KitchenService interface {
+	CreateTicket(ctx context.Context, orderID string, items []*OrderItem) error
+}
+
+type LogisticsService interface {
+	CreateDelivery(ctx context.Context, orderID string) error
+}
+
+type TreasuryService interface {
+	ProcessPayment(ctx context.Context, orderID string, amount common.Money) error
+}
+
+type NotificationService interface {
+	NotifyStatusChanged(ctx context.Context, customerID string, orderID string, status OrderStatus) error
 }

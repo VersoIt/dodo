@@ -39,8 +39,14 @@ func (h *TreasuryHandler) ProcessPayment(ctx context.Context, req *treasury_pb.P
 		return nil, status.Errorf(codes.Internal, "initiate payment: %v", err)
 	}
 
+	// For demonstration purposes, auto-confirm payment
+	if err := h.uc.ConfirmPayment(ctx, req.OrderId, "demo-tx-id-"+payment.ID()); err != nil {
+		h.log.Error("Failed to confirm payment", slog.String("order_id", req.OrderId), slog.Any("error", err))
+		return nil, status.Errorf(codes.Internal, "confirm payment: %v", err)
+	}
+
 	return &treasury_pb.PaymentResponse{
 		PaymentId: payment.ID(),
-		Status:    payment.Status().String(),
+		Status:    "success",
 	}, nil
 }

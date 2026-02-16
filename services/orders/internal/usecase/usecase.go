@@ -19,18 +19,35 @@ var (
 )
 
 type OrderUseCase struct {
-	repo           domain.OrderRepository
-	catalogService domain.CatalogService
-	tm             trm.Manager
-	log            *slog.Logger
+	repo            domain.OrderRepository
+	catalogService  domain.CatalogService
+	kitchenService  domain.KitchenService
+	logisticService domain.LogisticsService
+	treasuryService domain.TreasuryService
+	notifyService   domain.NotificationService
+	tm              trm.Manager
+	log             *slog.Logger
 }
 
-func NewOrderUseCase(repo domain.OrderRepository, catalog domain.CatalogService, tm trm.Manager, log *slog.Logger) *OrderUseCase {
+func NewOrderUseCase(
+	repo domain.OrderRepository,
+	catalog domain.CatalogService,
+	kitchen domain.KitchenService,
+	logistic domain.LogisticsService,
+	treasury domain.TreasuryService,
+	notify domain.NotificationService,
+	tm trm.Manager,
+	log *slog.Logger,
+) *OrderUseCase {
 	return &OrderUseCase{
-		repo:           repo,
-		catalogService: catalog,
-		tm:             tm,
-		log:            log,
+		repo:            repo,
+		catalogService:  catalog,
+		kitchenService:  kitchen,
+		logisticService: logistic,
+		treasuryService: treasury,
+		notifyService:   notify,
+		tm:              tm,
+		log:             log,
 	}
 }
 
@@ -111,22 +128,50 @@ func (uc *OrderUseCase) ListAllOrders(ctx context.Context) ([]*domain.Order, err
 }
 
 func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
-	return uc.tm.Do(ctx, func(ctx context.Context) error {
-		order, err := uc.repo.FindByID(ctx, orderID)
+	order, err := uc.repo.FindByID(ctx, orderID)
+	if err != nil {
+		return fmt.Errorf("find order: %w", err)
+	}
+
+	if order.Status() != domain.StatusCreated {
+		return fmt.Errorf("order is already paid or canceled")
+	}
+
+	// 1. Process payment via Treasury
+	if err := uc.treasuryService.ProcessPayment(ctx, order.ID(), order.FinalPrice()); err != nil {
+		return fmt.Errorf("process payment: %w", err)
+	}
+
+	// 2. Update order status in DB
+	var finalOrder *domain.Order
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
+		var err error
+		finalOrder, err = uc.repo.FindByID(ctx, orderID) // refetch in tx
 		if err != nil {
-			return fmt.Errorf("find order: %w", err)
+			return err
 		}
 
-		if err = order.MarkPaid(); err != nil {
-			return fmt.Errorf("mark paid: %w", err)
+		if err = finalOrder.MarkPaid(); err != nil {
+			return err
 		}
 
-		if err = uc.repo.Save(ctx, order); err != nil {
-			return fmt.Errorf("save order: %w", err)
-		}
-
-		return nil
+		return uc.repo.Save(ctx, finalOrder)
 	})
+	if err != nil {
+		return fmt.Errorf("save paid status: %w", err)
+	}
+
+	// 3. Create ticket in Kitchen - NOW OUTSIDE TX
+	if err := uc.kitchenService.CreateTicket(ctx, finalOrder.ID(), finalOrder.Items()); err != nil {
+		uc.log.Error("failed to create kitchen ticket", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
+	}
+
+	// 4. Notify user - NOW OUTSIDE TX
+	if err := uc.notifyService.NotifyStatusChanged(ctx, finalOrder.CustomerID(), finalOrder.ID(), domain.StatusPaid); err != nil {
+		uc.log.Warn("failed to send notification", slog.Any("error", err))
+	}
+
+	return nil
 }
 
 func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, statusStr string, performerID string) (*domain.Order, error) {
@@ -170,6 +215,19 @@ func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, status
 	if err != nil {
 		return nil, err
 	}
+
+	// Trigger external actions outside of transaction
+	if status == domain.StatusDelivering {
+		if err := uc.logisticService.CreateDelivery(ctx, order.ID()); err != nil {
+			uc.log.Error("failed to create delivery", slog.String("order_id", order.ID()), slog.Any("error", err))
+		}
+	}
+
+	// Always notify
+	if err := uc.notifyService.NotifyStatusChanged(ctx, order.CustomerID(), order.ID(), status); err != nil {
+		uc.log.Warn("failed to send status notification", slog.String("order_id", order.ID()), slog.Any("error", err))
+	}
+
 	return order, nil
 }
 

@@ -21,6 +21,10 @@ var Module = fx.Options(
 		repository.NewOrderRepository,
 		infrastructure.NewCatalogClient,
 		infrastructure.NewAnalyticsClient,
+		infrastructure.NewKitchenClient,
+		infrastructure.NewLogisticsClient,
+		infrastructure.NewTreasuryClient,
+		infrastructure.NewNotificationClient,
 		usecase.NewOrderUseCase,
 
 		handler.NewOrdersHandler,

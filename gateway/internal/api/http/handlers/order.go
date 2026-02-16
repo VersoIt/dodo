@@ -53,7 +53,7 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(c.Context(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	resp, err := h.client.CreateOrder(ctx, &orders_pb.CreateOrderRequest{
@@ -108,7 +108,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
 	id := c.Params("id"); userID := c.Locals("user_id").(string)
 	var req struct { Status string `json:"status"` }
 	if err := c.BodyParser(&req); err != nil { return ErrorResponse(c, fiber.StatusBadRequest, "invalid request") }
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	resp, err := h.client.UpdateOrderStatus(ctx, &orders_pb.UpdateOrderStatusRequest{OrderId: id, Status: req.Status, PerformerId: userID})
 	if err != nil { return HandleGrpcError(c, h.log, err, "failed update") }
@@ -117,7 +117,7 @@ func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
 
 func (h *OrderHandler) PayOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	resp, err := h.client.PayOrder(ctx, &orders_pb.PayOrderRequest{OrderId: id})
 	if err != nil { return HandleGrpcError(c, h.log, err, "payment failed") }

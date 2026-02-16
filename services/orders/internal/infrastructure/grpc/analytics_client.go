@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/versoit/diploma/services/orders"
+	"github.com/versoit/diploma/services/orders/internal/domain"
 	analytics_pb "github.com/versoit/diploma/services/analytics/api/proto/pb"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
@@ -15,7 +15,7 @@ type analyticsClient struct {
 	client analytics_pb.KpiServiceClient
 }
 
-func NewAnalyticsClient(lc fx.Lifecycle) (orders.AnalyticsService, error) {
+func NewAnalyticsClient(lc fx.Lifecycle) (domain.AnalyticsService, error) {
 	addr := os.Getenv("ANALYTICS_SERVICE_ADDR")
 	if addr == "" {
 		addr = "analytics:8080"

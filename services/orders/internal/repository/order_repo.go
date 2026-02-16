@@ -59,16 +59,22 @@ func (r *orderRepo) Save(ctx context.Context, o *domain.Order) error {
 	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
 		return fmt.Errorf("exec save order: %w", err)
 	}
-	if _, err = db.Exec(ctx, "DELETE FROM order_items WHERE order_id = $1", o.ID()); err != nil {
-		return fmt.Errorf("delete old items: %w", err)
-	}
-
-	for _, item := range o.Items() {
-		itemID := item.ID()
-		sqlStr, args, err = r.sb.Insert("order_items").
-			Columns("id", "order_id", "product_id", "product_name", "quantity", "base_price", "size_multiplier").
-			Values(itemID, o.ID(), item.ProductID(), item.ProductName(), item.Quantity(), item.BasePrice(), item.Size()).
-			ToSql()
+		if _, err = db.Exec(ctx, "DELETE FROM order_items WHERE order_id = $1", o.ID()); err != nil {
+			return fmt.Errorf("delete old items: %w", err)
+		}
+	
+			for _, item := range o.Items() {
+	
+				itemID := item.ID()
+	
+		
+	
+				sqlStr, args, err = r.sb.Insert("order_items").
+	
+		
+				Columns("id", "order_id", "product_id", "product_name", "quantity", "base_price", "size_multiplier").
+				Values(itemID, o.ID(), item.ProductID(), item.ProductName(), item.Quantity(), item.BasePrice(), item.Size()).
+				ToSql()
 		if err != nil {
 			return fmt.Errorf("build item query: %w", err)
 		}
@@ -119,41 +125,50 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*domain.Order, err
 		return nil, fmt.Errorf("query row: %w", err)
 	}
 
-	rows, err := db.Query(ctx, "SELECT id, product_id, product_name, quantity, base_price, size_multiplier FROM order_items WHERE order_id = $1", oid)
+	// Fetch all items for this order
+	itemRows, err := db.Query(ctx, `
+		SELECT i.id, i.product_id, i.product_name, i.quantity, i.base_price, i.size_multiplier,
+		       t.name, t.price
+		FROM order_items i
+		LEFT JOIN order_item_toppings t ON i.id = t.order_item_id
+		WHERE i.order_id = $1
+	`, oid)
 	if err != nil {
-		return nil, fmt.Errorf("query items: %w", err)
+		return nil, fmt.Errorf("query items and toppings: %w", err)
 	}
-	defer rows.Close()
+	defer itemRows.Close()
+
+	itemsMap := make(map[string]*domain.OrderItem)
+	var itemIDs []string // to keep order
+
+	for itemRows.Next() {
+		var (
+			iid, pid, pname string
+			qty             int
+			base            common.Money
+			size            float64
+			tname           sql.NullString
+			tprice          *common.Money
+		)
+		if err := itemRows.Scan(&iid, &pid, &pname, &qty, &base, &size, &tname, &tprice); err != nil {
+			return nil, fmt.Errorf("scan item/topping: %w", err)
+		}
+
+		item, ok := itemsMap[iid]
+		if !ok {
+			item = domain.ReconstructOrderItem(iid, pid, pname, qty, base, size, nil)
+			itemsMap[iid] = item
+			itemIDs = append(itemIDs, iid)
+		}
+
+		if tname.Valid && tprice != nil {
+			item.AddReconstructedTopping(tname.String, *tprice)
+		}
+	}
 
 	var items []*domain.OrderItem
-	for rows.Next() {
-		var (
-			iid, pid, name string
-			qty            int
-			base           common.Money
-			size           float64
-		)
-		if err := rows.Scan(&iid, &pid, &name, &qty, &base, &size); err != nil {
-			continue
-		}
-
-		trows, err := db.Query(ctx, "SELECT name, price FROM order_item_toppings WHERE order_item_id = $1", iid)
-		if err != nil {
-			continue
-		}
-		var toppings []domain.Topping
-		for trows.Next() {
-			var tn string
-			var tp common.Money
-			if err := trows.Scan(&tn, &tp); err == nil {
-				toppings = append(toppings, domain.Topping{Name: tn, Price: tp})
-			}
-		}
-		trows.Close()
-		items = append(items, domain.ReconstructOrderItem(iid, pid, name, qty, base, size, toppings))
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %w", err)
+	for _, id := range itemIDs {
+		items = append(items, itemsMap[id])
 	}
 
 	addr := domain.DeliveryAddress{City: city, Street: street, House: house, Apartment: apartment, Floor: floor, Entrance: entrance, Comment: comment}
