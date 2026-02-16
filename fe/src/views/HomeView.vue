@@ -31,7 +31,10 @@ const productForm = ref({ name: '', description: '', price: 0, imageUrl: '', cat
 const filteredProducts = computed(() => {
   if (selectedCategory.value === 'Все') return products.value
   return products.value.filter(p => {
-    const categoryName = CATEGORIES[p.category_id + 1] || 'Классика'
+    // Protobuf JSON might omit 0 values due to omitempty.
+    // If category_id is missing, it's 0 (Classic).
+    const catId = p.category_id !== undefined ? p.category_id : 0
+    const categoryName = CATEGORIES[catId + 1]
     return categoryName === selectedCategory.value
   })
 })
@@ -43,6 +46,7 @@ const fetchProducts = async () => {
     if (res.success && Array.isArray(res.data)) {
       products.value = res.data.map((p: any) => ({
         ...p,
+        category_id: p.category_id ?? 0,
         image_url: p.image_url || HERO_IMAGE,
         is_available: p.is_available ?? true
       }))
@@ -57,7 +61,7 @@ const handleAddToCart = (product: Product) => {
     id: product.id,
     name: product.name,
     price: product.price,
-    imageUrl: product.image_url
+    imageUrl: product.image_url || HERO_IMAGE
   })
   addToast(`${product.name} добавлена в корзину!`, 'success')
 }
@@ -74,7 +78,7 @@ const openEditModal = (product: Product) => {
     name: product.name, 
     description: product.description, 
     price: product.price, 
-    imageUrl: product.image_url, 
+    imageUrl: product.image_url || '', 
     categoryId: product.category_id, 
     isAvailable: product.is_available 
   }
