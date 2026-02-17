@@ -1,0 +1,365 @@
+package usecase
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"strings"
+	"time"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/google/uuid"
+	"github.com/versoit/diploma/pkg/common"
+	"github.com/versoit/diploma/be/orders/internal/domain"
+)
+
+var (
+	ErrInvalidInput = errors.New("invalid input")
+)
+
+type OrderUseCase struct {
+	repo             domain.OrderRepository
+	catalogService   domain.CatalogService
+	kitchenService   domain.KitchenService
+	logisticService  domain.LogisticsService
+	treasuryService  domain.TreasuryService
+	notifyService    domain.NotificationService
+	tm               trm.Manager
+	log              *slog.Logger
+}
+
+func NewOrderUseCase(
+	repo domain.OrderRepository,
+	catalog domain.CatalogService,
+	kitchen domain.KitchenService,
+	logistic domain.LogisticsService,
+	treasury domain.TreasuryService,
+	notify domain.NotificationService,
+	tm trm.Manager,
+	log *slog.Logger,
+) *OrderUseCase {
+	return &OrderUseCase{
+		repo:             repo,
+		catalogService:   catalog,
+		kitchenService:   kitchen,
+		logisticService:  logistic,
+		treasuryService:  treasury,
+		notifyService:    notify,
+		tm:               tm,
+		log:              log,
+	}
+}
+
+type OrderItemInput struct {
+	ProductID string
+	Quantity  int
+	SizeMult  float64
+}
+
+type CreateOrderInput struct {
+	CustomerID string
+	Address    domain.DeliveryAddress
+	Items      []OrderItemInput
+	PromoCode  string
+}
+
+func (uc *OrderUseCase) CreateOrder(ctx context.Context, input CreateOrderInput) (*domain.Order, error) {
+	// Validate Address using VO
+	addr, err := domain.NewDeliveryAddress(
+		input.Address.City,
+		input.Address.Street,
+		input.Address.House,
+		input.Address.Apartment,
+		input.Address.Floor,
+		input.Address.Entrance,
+		input.Address.Comment,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid address: %v", ErrInvalidInput, err)
+	}
+
+	var order *domain.Order
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
+		order = domain.NewOrder(input.CustomerID, addr)
+
+		for _, item := range input.Items {
+			// Validate Quantity using VO
+			qty, err := domain.NewQuantity(item.Quantity)
+			if err != nil {
+				return fmt.Errorf("%w: product %s invalid quantity: %v", ErrInvalidInput, item.ProductID, err)
+			}
+
+			product, err := uc.catalogService.GetProduct(ctx, item.ProductID)
+			if err != nil {
+				return fmt.Errorf("failed to fetch product %s from catalog: %w", item.ProductID, err)
+			}
+
+			if err := order.AddItem(product.ID, product.Name, qty, product.BasePrice, item.SizeMult, nil); err != nil {
+				return fmt.Errorf("failed to add item to order: %w", err)
+			}
+		}
+
+		if input.PromoCode != "" {
+			promo, err := uc.repo.FindPromoByCode(ctx, input.PromoCode)
+			if err == nil && promo.IsActive() {
+				discount := promo.CalculateDiscount(order.FinalPrice())
+				if err := order.ApplyPromoCode(promo.Code(), discount); err != nil {
+					uc.log.Warn("failed to apply promo code", slog.String("code", input.PromoCode), slog.Any("error", err))
+				}
+			}
+		}
+
+		if err := uc.repo.Save(ctx, order); err != nil {
+			return fmt.Errorf("failed to save order: %w", err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
+func (uc *OrderUseCase) GetOrder(ctx context.Context, id string) (*domain.Order, error) {
+	order, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("find order by id: %w", err)
+	}
+	return order, nil
+}
+
+func (uc *OrderUseCase) ListOrders(ctx context.Context, customerID string) ([]*domain.Order, error) {
+	orders, err := uc.repo.FindByCustomerID(ctx, customerID)
+	if err != nil {
+		return nil, fmt.Errorf("find orders by customer id: %w", err)
+	}
+	return orders, nil
+}
+
+func (uc *OrderUseCase) ListAllOrders(ctx context.Context) ([]*domain.Order, error) {
+	orders, err := uc.repo.FindAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("find all orders: %w", err)
+	}
+	return orders, nil
+}
+
+func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
+	order, err := uc.repo.FindByID(ctx, orderID)
+	if err != nil {
+		return fmt.Errorf("find order: %w", err)
+	}
+
+	if order.Status() != domain.StatusCreated {
+		return fmt.Errorf("order is already paid or canceled")
+	}
+
+	// 1. Process payment via Treasury
+	if err := uc.treasuryService.ProcessPayment(ctx, order.ID(), order.FinalPrice()); err != nil {
+		return fmt.Errorf("process payment: %w", err)
+	}
+
+	// 2. Update order status in DB
+	var finalOrder *domain.Order
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
+		var err error
+		finalOrder, err = uc.repo.FindByID(ctx, orderID) // refetch in tx
+		if err != nil {
+			return err
+		}
+
+		if err = finalOrder.MarkPaid(); err != nil {
+			return err
+		}
+
+		return uc.repo.Save(ctx, finalOrder)
+	})
+	if err != nil {
+		return fmt.Errorf("save paid status: %w", err)
+	}
+
+	// 3. Create ticket in Kitchen - NOW OUTSIDE TX
+	if err := uc.kitchenService.CreateTicket(ctx, finalOrder.ID(), finalOrder.OrderNumber(), finalOrder.Items()); err != nil {
+		uc.log.Error("failed to create kitchen ticket", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
+	}
+
+	// 4. Notify user - NOW OUTSIDE TX
+	if err := uc.notifyService.NotifyStatusChanged(ctx, finalOrder.CustomerID(), finalOrder.ID(), domain.StatusPaid); err != nil {
+		uc.log.Warn("failed to send notification", slog.Any("error", err))
+	}
+
+	return nil
+}
+
+func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, statusStr string, performerID string) (*domain.Order, error) {
+	status, err := domain.ParseStatus(statusStr)
+	if err != nil {
+		return nil, fmt.Errorf("parse status: %w", err)
+	}
+
+	var order *domain.Order
+	err = uc.tm.Do(ctx, func(ctx context.Context) error {
+		var err error
+
+		order, err = uc.repo.FindByID(ctx, orderID)
+		if err != nil {
+			return fmt.Errorf("find order: %w", err)
+		}
+
+		var transitionErr error
+		switch status {
+		case domain.StatusCooking:
+			transitionErr = order.SendToKitchen(performerID)
+		case domain.StatusReady:
+			transitionErr = order.MarkReady()
+		case domain.StatusDelivering:
+			transitionErr = order.ShipToDelivery(performerID)
+		case domain.StatusCompleted:
+			transitionErr = order.CompleteDelivery()
+		default:
+			return fmt.Errorf("invalid transition to status %d", status)
+		}
+
+		if transitionErr != nil {
+			return fmt.Errorf("transition error: %w", transitionErr)
+		}
+		if err := uc.repo.Save(ctx, order); err != nil {
+			return fmt.Errorf("save order: %w", err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Trigger external actions outside of transaction
+	if status == domain.StatusReady {
+		if err := uc.logisticService.CreateDelivery(ctx, order.ID(), order.OrderNumber(), order.Address(), order.Items()); err != nil {
+			uc.log.Error("failed to create delivery", slog.String("order_id", order.ID()), slog.Any("error", err))
+		}
+	}
+
+	// Always notify
+	if err := uc.notifyService.NotifyStatusChanged(ctx, order.CustomerID(), order.ID(), status); err != nil {
+		uc.log.Warn("failed to send status notification", slog.String("order_id", order.ID()), slog.Any("error", err))
+	}
+
+	return order, nil
+}
+
+func (uc *OrderUseCase) CreatePromoCode(ctx context.Context, code, dType string, amount float64) (*domain.PromoCode, error) {
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, fmt.Errorf("generate uuid: %w", err)
+	}
+
+	p := domain.NewPromoCode(id.String(), strings.ToUpper(code), dType, common.NewMoney(amount), true, time.Time{})
+	if err := uc.repo.SavePromo(ctx, p); err != nil {
+		return nil, fmt.Errorf("save promo: %w", err)
+	}
+
+	return p, nil
+}
+
+func (uc *OrderUseCase) ListPromos(ctx context.Context) ([]*domain.PromoCode, error) {
+	promos, err := uc.repo.ListPromos(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list promos: %w", err)
+	}
+
+	return promos, nil
+}
+
+func (uc *OrderUseCase) DeletePromo(ctx context.Context, id string) error {
+	if err := uc.repo.DeletePromo(ctx, id); err != nil {
+		return fmt.Errorf("delete promo: %w", err)
+	}
+
+	return nil
+}
+
+func (uc *OrderUseCase) GetPromoByCode(ctx context.Context, code string) (*domain.PromoCode, error) {
+	promo, err := uc.repo.FindPromoByCode(ctx, strings.ToUpper(code))
+	if err != nil {
+		return nil, fmt.Errorf("find promo by code: %w", err)
+	}
+	return promo, nil
+}
+
+type AnalyticsResult struct {
+	TotalRevenue    float64
+	OrdersCount     int
+	AvgCheck        float64
+	TopProducts     []ProductStat
+	CookingCount    int
+	DeliveringCount int
+}
+
+type ProductStat struct {
+	Name    string
+	Count   int
+	Revenue float64
+}
+
+func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*AnalyticsResult, error) {
+	orders, err := uc.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var totalRevenue float64
+	var completedCount int
+	var cookingCount int
+	var deliveringCount int
+	productStats := make(map[string]*ProductStat)
+
+	for _, o := range orders {
+		status := o.Status()
+
+		if status == domain.StatusCooking {
+			cookingCount++
+		}
+		if status == domain.StatusDelivering {
+			deliveringCount++
+		}
+
+		if status == domain.StatusCompleted || status == domain.StatusPaid || status == domain.StatusCooking || status == domain.StatusReady || status == domain.StatusDelivering {
+			rev := o.FinalPrice().InexactFloat64()
+			totalRevenue += rev
+			completedCount++
+
+			for _, item := range o.Items() {
+				stat, ok := productStats[item.ProductName()]
+				if !ok {
+					stat = &ProductStat{Name: item.ProductName()}
+					productStats[item.ProductName()] = stat
+				}
+				stat.Count += item.Quantity()
+				stat.Revenue += item.CalculateTotal().InexactFloat64()
+			}
+		}
+	}
+
+	var avgCheck float64
+	if completedCount > 0 {
+		avgCheck = totalRevenue / float64(completedCount)
+	}
+
+	var topProducts []ProductStat
+	for _, stat := range productStats {
+		topProducts = append(topProducts, *stat)
+	}
+
+	return &AnalyticsResult{
+		TotalRevenue:    totalRevenue,
+		OrdersCount:     completedCount,
+		AvgCheck:        avgCheck,
+		TopProducts:     topProducts,
+		CookingCount:    cookingCount,
+		DeliveringCount: deliveringCount,
+	}, nil
+}

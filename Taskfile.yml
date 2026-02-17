@@ -15,15 +15,15 @@ tasks:
     desc: Generate Go code into pb subfolders
     cmds:
       # Create pb directories
-      - powershell -Command "New-Item -ItemType Directory -Force services/orders/api/proto/pb, services/catalog/api/proto/pb, services/auth/api/proto/pb, services/kitchen/api/proto/pb, services/logistics/api/proto/pb, services/notification/api/proto/pb, services/treasury/api/proto/pb"
+      - powershell -Command "New-Item -ItemType Directory -Force be/orders/api/proto/pb, be/catalog/api/proto/pb, be/auth/api/proto/pb, be/kitchen/api/proto/pb, be/logistics/api/proto/pb, be/notification/api/proto/pb, be/treasury/api/proto/pb"
       # Generate files
-      - protoc --proto_path=services/orders/api/proto --go_out=services/orders/api/proto --go-grpc_out=services/orders/api/proto services/orders/api/proto/*.proto
-      - protoc --proto_path=services/catalog/api/proto --go_out=services/catalog/api/proto --go-grpc_out=services/catalog/api/proto services/catalog/api/proto/*.proto
-      - protoc --proto_path=services/auth/api/proto --go_out=services/auth/api/proto --go-grpc_out=services/auth/api/proto services/auth/api/proto/*.proto
-      - protoc --proto_path=services/kitchen/api/proto --go_out=services/kitchen/api/proto --go-grpc_out=services/kitchen/api/proto services/kitchen/api/proto/*.proto
-      - protoc --proto_path=services/logistics/api/proto --go_out=services/logistics/api/proto --go-grpc_out=services/logistics/api/proto services/logistics/api/proto/*.proto
-      - protoc --proto_path=services/notification/api/proto --go_out=services/notification/api/proto --go-grpc_out=services/notification/api/proto services/notification/api/proto/*.proto
-      - protoc --proto_path=services/treasury/api/proto --go_out=services/treasury/api/proto --go-grpc_out=services/treasury/api/proto services/treasury/api/proto/*.proto
+      - protoc --proto_path=be/orders/api/proto --go_out=be/orders/api/proto --go-grpc_out=be/orders/api/proto be/orders/api/proto/*.proto
+      - protoc --proto_path=be/catalog/api/proto --go_out=be/catalog/api/proto --go-grpc_out=be/catalog/api/proto be/catalog/api/proto/*.proto
+      - protoc --proto_path=be/auth/api/proto --go_out=be/auth/api/proto --go-grpc_out=be/auth/api/proto be/auth/api/proto/*.proto
+      - protoc --proto_path=be/kitchen/api/proto --go_out=be/kitchen/api/proto --go-grpc_out=be/kitchen/api/proto be/kitchen/api/proto/*.proto
+      - protoc --proto_path=be/logistics/api/proto --go_out=be/logistics/api/proto --go-grpc_out=be/logistics/api/proto be/logistics/api/proto/*.proto
+      - protoc --proto_path=be/notification/api/proto --go_out=be/notification/api/proto --go-grpc_out=be/notification/api/proto be/notification/api/proto/*.proto
+      - protoc --proto_path=be/treasury/api/proto --go_out=be/treasury/api/proto --go-grpc_out=be/treasury/api/proto be/treasury/api/proto/*.proto
 
   docker-up:
     desc: Run infrastructure via docker-compose

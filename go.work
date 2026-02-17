@@ -1,12 +1,12 @@
 go 1.24.0
 
 use (
-	./gateway
-	./services/auth
-	./services/catalog
-	./services/kitchen
-	./services/logistics
-	./services/notification
-	./services/orders
-	./services/treasury
+	./be/auth
+	./be/catalog
+	./be/gateway
+	./be/kitchen
+	./be/logistics
+	./be/notification
+	./be/orders
+	./be/treasury
 )
