@@ -22,7 +22,7 @@ func NewCatalogHandler(log *slog.Logger, client catalog_pb.ProductServiceClient)
 }
 
 func (h *CatalogHandler) ListProducts(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.ListProducts(ctx, &catalog_pb.ListProductsRequest{})
@@ -36,7 +36,7 @@ func (h *CatalogHandler) ListProducts(c *fiber.Ctx) error {
 func (h *CatalogHandler) GetProduct(c *fiber.Ctx) error {
 	id := c.Params("id")
 	
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.GetProduct(ctx, &catalog_pb.GetProductRequest{
@@ -96,7 +96,7 @@ func (h *CatalogHandler) UpdateProduct(c *fiber.Ctx) error {
 		return ErrorResponse(c, fiber.StatusBadRequest, "invalid request body")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := h.client.UpdateProduct(ctx, &catalog_pb.UpdateProductRequest{

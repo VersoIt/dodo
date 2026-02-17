@@ -61,13 +61,13 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
       LOG_LEVEL: debug
-      CATALOG_SERVICE_ADDR: catalog:8080
-      KITCHEN_SERVICE_ADDR: kitchen:8080
-      LOGISTICS_SERVICE_ADDR: logistics:8080
-      TREASURY_SERVICE_ADDR: treasury:8080
-      NOTIFICATION_SERVICE_ADDR: notification:8080
+      CATALOG_SERVICE_ADDR: catalog:9000
+      KITCHEN_SERVICE_ADDR: kitchen:9000
+      LOGISTICS_SERVICE_ADDR: logistics:9000
+      TREASURY_SERVICE_ADDR: treasury:9000
+      NOTIFICATION_SERVICE_ADDR: notification:9000
     ports:
-      - "8081:8080"
+      - "9002:9000"
     networks:
       - pizza-network
     restart: always
@@ -87,7 +87,7 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
-      - "8082:8080"
+      - "9003:9000"
     networks:
       - pizza-network
     restart: always
@@ -107,7 +107,7 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
-      - "8083:8080"
+      - "9004:9000"
     networks:
       - pizza-network
     restart: always
@@ -127,7 +127,7 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
-      - "8084:8080"
+      - "9005:9000"
     networks:
       - pizza-network
     restart: always
@@ -147,7 +147,7 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
-      - "8085:8080"
+      - "9006:9000"
     networks:
       - pizza-network
     restart: always
@@ -167,7 +167,7 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
-      - "8087:8080"
+      - "9007:9000"
     networks:
       - pizza-network
     restart: always
@@ -187,7 +187,7 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
     ports:
-      - "8088:8080"
+      - "9008:9000"
     networks:
       - pizza-network
     restart: always
@@ -209,9 +209,9 @@ services:
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
       NATS_URL: nats://nats:4222
-      APP_PORT: 8080
+      APP_PORT: 9000
     ports:
-      - "8089:8080"
+      - "9009:9000"
     networks:
       - pizza-network
     restart: always
@@ -234,12 +234,12 @@ services:
       - chat
     environment:
       - APP_PORT=8080
-      - AUTH_SERVICE_ADDR=auth:8080
-      - CATALOG_SERVICE_ADDR=catalog:8080
-      - ORDERS_SERVICE_ADDR=orders:8080
-      - KITCHEN_SERVICE_ADDR=kitchen:8080
-      - LOGISTICS_SERVICE_ADDR=logistics:8080
-      - CHAT_SERVICE_ADDR=chat:8080
+      - AUTH_SERVICE_ADDR=auth:9000
+      - CATALOG_SERVICE_ADDR=catalog:9000
+      - ORDERS_SERVICE_ADDR=orders:9000
+      - KITCHEN_SERVICE_ADDR=kitchen:9000
+      - LOGISTICS_SERVICE_ADDR=logistics:9000
+      - CHAT_SERVICE_ADDR=chat:9000
     ports:
       - "8080:8080"
     networks:

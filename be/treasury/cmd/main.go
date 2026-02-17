@@ -32,11 +32,11 @@ func RunServer(lc fx.Lifecycle, handler *handler.TreasuryHandler, logger *slog.L
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			lis, err := net.Listen("tcp", ":8080")
+			lis, err := net.Listen("tcp", ":9000")
 			if err != nil {
 				return err
 			}
-			logger.Info("Starting gRPC server", slog.String("port", "8080"))
+			logger.Info("Starting gRPC server", slog.String("port", "9000"))
 			go func() {
 				if err := server.Serve(lis); err != nil {
 					logger.Error("gRPC server failed", slog.Any("error", err))

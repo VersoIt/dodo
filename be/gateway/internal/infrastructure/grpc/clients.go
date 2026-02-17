@@ -23,6 +23,20 @@ var Module = fx.Provide(
 	NewLogisticsClient,
 )
 
+func dial(lc fx.Lifecycle, addr string) (*grpc.ClientConn, error) {
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			return conn.Close()
+		},
+	})
+	return conn, nil
+}
+
 func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (auth_pb.UserServiceClient, error) {
 	conn, err := dial(lc, cfg.AuthService)
 	if err != nil {
@@ -61,18 +75,4 @@ func NewLogisticsClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (
 		return nil, err
 	}
 	return logistics_pb.NewDeliveryServiceClient(conn), nil
-}
-
-func dial(lc fx.Lifecycle, addr string) (*grpc.ClientConn, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return nil, err
-	}
-	
-	lc.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
-			return conn.Close()
-		},
-	})
-	return conn, nil
 }
