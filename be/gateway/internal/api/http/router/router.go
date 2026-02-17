@@ -2,14 +2,17 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"github.com/versoit/diploma/gateway/internal/api/http/handlers"
 	"github.com/versoit/diploma/gateway/internal/api/http/middleware"
+	"github.com/versoit/diploma/gateway/internal/config"
 	"log/slog"
 )
 
 func SetupRoutes(
 	app *fiber.App,
 	log *slog.Logger,
+	cfg *config.Config,
 	healthHandler *handlers.HealthHandler,
 	authHandler *handlers.AuthHandler,
 	catalogHandler *handlers.CatalogHandler,
@@ -19,10 +22,26 @@ func SetupRoutes(
 ) {
 	app.Use(middleware.NewRequestIDMiddleware())
 	app.Use(middleware.NewLoggerMiddleware(log))
-	
+
 	api := app.Group("/api/v1")
 	// Health
 	api.Get("/health", healthHandler.Check)
+
+	// Chat proxy (HTTP)
+	api.All("/chat/*", func(c *fiber.Ctx) error {
+		path := c.Params("*")
+		queryString := string(c.Context().QueryArgs().QueryString())
+		url := "http://" + cfg.ChatService + "/chat/" + path
+		if queryString != "" {
+			url += "?" + queryString
+		}
+		return proxy.Forward(url)(c)
+	})
+	
+	// Chat WebSocket proxy
+	app.Get("/ws/chat", func(c *fiber.Ctx) error {
+		return proxy.Forward("ws://"+cfg.ChatService+c.OriginalURL())(c)
+	})
 
 	// Auth
 	auth := api.Group("/auth")

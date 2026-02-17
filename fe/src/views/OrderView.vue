@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { CheckCircle2, Clock, Truck, PackageCheck, CreditCard, MapPin, ChefHat } from 'lucide-vue-next'
+import ChatComponent from '../components/ChatComponent.vue'
 
 const route = useRoute()
 const orderId = route.params.id as string
@@ -155,6 +156,8 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
+
+          <ChatComponent :orderId="orderId" />
         </div>
       </div>
     </div>

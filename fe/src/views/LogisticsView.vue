@@ -6,6 +6,7 @@ import { logisticsApi } from '../api'
 import { ORDER_STATUS } from '../constants'
 import { shortId } from '../utils/format'
 import AppModal from '../components/shared/AppModal.vue'
+import ChatComponent from '../components/ChatComponent.vue'
 
 const orders = ref<any[]>([])
 const loading = ref(true)
@@ -13,7 +14,14 @@ const authStore = useAuthStore()
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const showConfirmModal = ref(false)
+const showChatModal = ref(false)
+const activeOrderId = ref<string | null>(null)
 const pendingAction = ref<{ orderId: string, status: string, title: string, description: string } | null>(null)
+
+const openChat = (orderId: string) => {
+  activeOrderId.value = orderId
+  showChatModal.value = true
+}
 
 const fetchLogisticsOrders = async () => {
   try {
@@ -129,10 +137,22 @@ onMounted(fetchLogisticsOrders)
             <p class="text-[10px] font-black uppercase tracking-[0.3em] text-base-content/30 mb-5">Order Content</p>
             <div class="flex flex-wrap gap-3"><span v-for="item in order.items" :key="item.product_id" class="badge badge-lg bg-base-100 border-2 border-base-200 font-black text-sm py-6 px-6 rounded-[1.25rem] group-hover:border-secondary/20 transition-colors"><span class="text-secondary mr-3 font-black text-xl">{{ item.quantity }}x</span> {{ item.product_name }}</span></div>
           </div>
-          <div class="card-actions mt-auto pt-4"><button v-if="order.status === ORDER_STATUS.READY" @click="openConfirm(order, ORDER_STATUS.DELIVERING)" class="btn btn-secondary btn-block h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-secondary/20 text-xl transition-all hover:scale-[1.02]"><Truck class="w-8 h-8" /> Принять заказ</button><button v-if="order.status === ORDER_STATUS.DELIVERING" @click="openConfirm(order, ORDER_STATUS.COMPLETED)" class="btn btn-success btn-block h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-success/20 text-xl transition-all hover:scale-[1.02] text-white"><CheckCircle2 class="w-8 h-8" /> Доставлено</button></div>
+          <div class="card-actions mt-auto pt-4 flex gap-4">
+            <button v-if="order.status === ORDER_STATUS.READY" @click="openConfirm(order, ORDER_STATUS.DELIVERING)" class="btn btn-secondary flex-1 h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-secondary/20 text-xl transition-all hover:scale-[1.02]"><Truck class="w-8 h-8" /> Принять заказ</button>
+            <button v-if="order.status === ORDER_STATUS.DELIVERING" @click="openConfirm(order, ORDER_STATUS.COMPLETED)" class="btn btn-success flex-1 h-20 rounded-3xl gap-4 font-black uppercase shadow-2xl shadow-success/20 text-xl transition-all hover:scale-[1.02] text-white"><CheckCircle2 class="w-8 h-8" /> Доставлено</button>
+            <button @click="openChat(order.order_id)" class="btn btn-ghost w-20 h-20 rounded-3xl flex items-center justify-center border-2 border-base-200">
+               <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <AppModal :show="showChatModal" @close="showChatModal = false">
+      <div class="p-4 h-[600px]">
+        <ChatComponent v-if="activeOrderId" :orderId="activeOrderId" />
+      </div>
+    </AppModal>
 
     <AppModal :show="showConfirmModal" @close="showConfirmModal = false">
       <div class="p-12 text-center">

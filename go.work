@@ -3,10 +3,12 @@ go 1.24.0
 use (
 	./be/auth
 	./be/catalog
+	./be/chat
 	./be/gateway
 	./be/kitchen
 	./be/logistics
 	./be/notification
 	./be/orders
 	./be/treasury
+	./pkg
 )

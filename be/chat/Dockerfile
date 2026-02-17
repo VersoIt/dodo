@@ -11,6 +11,7 @@ COPY pkg/go.mod pkg/go.sum* ./pkg/
 COPY be/auth/go.mod be/auth/go.sum* ./be/auth/
 COPY be/catalog/go.mod be/catalog/go.sum* ./be/catalog/
 COPY be/chat/go.mod be/chat/go.sum* ./be/chat/
+COPY be/chat/go.mod be/chat/go.sum* ./be/chat/
 COPY be/kitchen/go.mod be/kitchen/go.sum* ./be/kitchen/
 COPY be/logistics/go.mod be/logistics/go.sum* ./be/logistics/
 COPY be/notification/go.mod be/notification/go.sum* ./be/notification/
@@ -19,10 +20,9 @@ COPY be/treasury/go.mod be/treasury/go.sum* ./be/treasury/
 COPY be/gateway/go.mod be/gateway/go.sum* ./be/gateway/
 
 ENV GOTOOLCHAIN=local
-ENV GOTOOLCHAIN=local
 RUN go work sync
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/service ./be/logistics/cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/service ./be/chat/cmd/main.go
 
 # Stage 2: Final image
 FROM alpine:latest
@@ -31,6 +31,3 @@ WORKDIR /root/
 COPY --from=builder /app/bin/service .
 EXPOSE 8080
 CMD ["./service"]
-
-
-

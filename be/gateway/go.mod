@@ -6,25 +6,32 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.11
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
-	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
 	github.com/versoit/diploma/be/auth v0.0.0-20260208211213-389e778a5129
-	github.com/versoit/diploma/be/catalog v0.0.0-20260208211213-389e778a5129
+	github.com/versoit/diploma/be/catalog v0.0.0-20260209221312-cf1acef61820
 	github.com/versoit/diploma/be/kitchen v0.0.0-20260208211213-389e778a5129
 	github.com/versoit/diploma/be/logistics v0.0.0-20260208211213-389e778a5129
 	github.com/versoit/diploma/be/orders v0.0.0-20260208211213-389e778a5129
+	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.78.0
 )
 
 replace github.com/versoit/diploma/pkg => ../../pkg
+
 replace github.com/versoit/diploma/be/auth => ../auth
+
 replace github.com/versoit/diploma/be/catalog => ../catalog
+
 replace github.com/versoit/diploma/be/kitchen => ../kitchen
+
 replace github.com/versoit/diploma/be/logistics => ../logistics
+
 replace github.com/versoit/diploma/be/orders => ../orders
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2 v2.0.2 // indirect
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.8.0 // indirect

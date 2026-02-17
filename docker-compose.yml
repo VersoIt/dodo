@@ -16,6 +16,15 @@ services:
       timeout: 5s
       retries: 5
 
+  nats:
+    image: nats:2.10-alpine
+    container_name: pizza-nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - pizza-network
+
   migrations:
     image: gomicro/goose:3.25.0
     container_name: migrations
@@ -29,7 +38,7 @@ services:
       - sh
       - -c
       - |
-        for service in auth catalog kitchen logistics notification orders treasury; do
+        for service in auth catalog chat kitchen logistics notification orders treasury; do
           dir="be/$$service/migrations"
           if [ -d "$$dir" ]; then
             echo "Running migrations for $$service in $$dir..."
@@ -187,6 +196,30 @@ services:
         limits:
           memory: 128M
 
+  chat:
+    build:
+      context: .
+      dockerfile: be/chat/Dockerfile
+    container_name: chat-service
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      nats:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      NATS_URL: nats://nats:4222
+      APP_PORT: 8080
+    ports:
+      - "8089:8080"
+    networks:
+      - pizza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
   gateway:
     build:
       context: .
@@ -198,6 +231,7 @@ services:
       - orders
       - kitchen
       - logistics
+      - chat
     environment:
       - APP_PORT=8080
       - AUTH_SERVICE_ADDR=auth:8080
@@ -205,6 +239,7 @@ services:
       - ORDERS_SERVICE_ADDR=orders:8080
       - KITCHEN_SERVICE_ADDR=kitchen:8080
       - LOGISTICS_SERVICE_ADDR=logistics:8080
+      - CHAT_SERVICE_ADDR=chat:8080
     ports:
       - "8080:8080"
     networks:

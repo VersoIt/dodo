@@ -10,6 +10,7 @@ type Config struct {
 	OrdersService    string
 	KitchenService   string
 	LogisticsService string
+	ChatService      string
 }
 
 func NewConfig() *Config {
@@ -28,5 +29,6 @@ func NewConfig() *Config {
 		OrdersService:    getEnv("ORDERS_SERVICE_ADDR", "localhost:50053"),
 		KitchenService:   getEnv("KITCHEN_SERVICE_ADDR", "localhost:50054"),
 		LogisticsService: getEnv("LOGISTICS_SERVICE_ADDR", "localhost:50055"),
+		ChatService:      getEnv("CHAT_SERVICE_ADDR", "localhost:8089"),
 	}
 }

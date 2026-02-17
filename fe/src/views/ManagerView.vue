@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import { ref, onMounted, inject, computed } from 'vue'
-import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign, ChefHat, Truck } from 'lucide-vue-next'
+import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign, ChefHat, Truck, MessageSquare } from 'lucide-vue-next'
 import { ordersApi } from '../api'
 import type { PromoCode, Analytics } from '../types'
 import AppModal from '../components/shared/AppModal.vue'
+import ChatComponent from '../components/ChatComponent.vue'
 
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const loading = ref(true)
 const promos = ref<PromoCode[]>([])
 const analytics = ref<Analytics | null>(null)
+const activeOrders = ref<any[]>([])
 
 const showAddPromoModal = ref(false)
+const showChatModal = ref(false)
+const activeOrderId = ref<string | null>(null)
 const newPromo = ref<{ code: string, amount: number, type: 'percent' | 'fixed' }>({ code: '', amount: 0, type: 'percent' })
+
+const openChat = (orderId: string) => {
+  activeOrderId.value = orderId
+  showChatModal.value = true
+}
 
 const isPromoValid = computed(() => {
   return newPromo.value.code.trim().length > 0 && newPromo.value.amount > 0
@@ -21,12 +30,16 @@ const isPromoValid = computed(() => {
 const fetchData = async () => {
   try {
     loading.value = true
-    const [promosRes, analyticsRes] = await Promise.all([
+    const [promosRes, analyticsRes, ordersRes] = await Promise.all([
       ordersApi.listPromos(),
-      ordersApi.getAnalytics()
+      ordersApi.getAnalytics(),
+      ordersApi.getAllOrders()
     ])
     if (promosRes.success && promosRes.data) promos.value = promosRes.data
     if (analyticsRes.success && analyticsRes.data) analytics.value = analyticsRes.data
+    if (ordersRes.success && ordersRes.data) {
+       activeOrders.value = ordersRes.data.filter((o: any) => o.status !== 'completed' && o.status !== 'canceled')
+    }
   } catch (err) { console.error('Failed to load manager data') } finally { loading.value = false }
 }
 
@@ -149,6 +162,26 @@ onMounted(fetchData)
         </div>
       </div>
 
+      <!-- Active Orders Section -->
+      <div class="space-y-8">
+        <h2 class="text-2xl font-black uppercase tracking-tight">Активные заказы (Чат)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="order in activeOrders" :key="order.id" class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all rounded-[1.5rem] overflow-hidden">
+            <div class="card-body p-5">
+              <div class="flex justify-between items-start mb-2">
+                <span class="font-black text-sm">#{{ order.order_number.split('-').pop() }}</span>
+                <span class="badge badge-xs font-bold uppercase tracking-tighter">{{ order.status }}</span>
+              </div>
+              <p class="text-xs opacity-50 mb-4 line-clamp-1">{{ order.address?.street }}</p>
+              <button @click="openChat(order.id)" class="btn btn-primary btn-sm btn-block rounded-xl gap-2 font-black">
+                <MessageSquare class="w-4 h-4" /> Чат
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-if="activeOrders.length === 0" class="text-center py-10 bg-base-100 rounded-[2rem] border-2 border-dashed border-base-300 opacity-40 font-black uppercase text-xs">Нет активных заказов</div>
+      </div>
+
       <div class="space-y-8">
         <div class="flex justify-between items-center">
           <h2 class="text-2xl font-black uppercase tracking-tight">Активные промокоды</h2>
@@ -179,6 +212,12 @@ onMounted(fetchData)
           <div class="form-control"><label class="label"><span class="label-text font-black uppercase text-[10px] opacity-60 text-secondary">Значение <span class="text-error">*</span></span></label><input v-model="newPromo.amount" type="number" class="input input-bordered border-secondary/30 bg-secondary/5 w-full rounded-2xl h-14 font-bold focus:border-secondary" /></div>
         </div>
         <button @click="handleAddPromo" :disabled="!isPromoValid" class="btn btn-secondary btn-block h-16 rounded-2xl font-black uppercase shadow-xl shadow-secondary/20 disabled:shadow-none mt-4">Создать промокод</button>
+      </div>
+    </AppModal>
+
+    <AppModal :show="showChatModal" @close="showChatModal = false">
+      <div class="p-4 h-[600px]">
+        <ChatComponent v-if="activeOrderId" :orderId="activeOrderId" />
       </div>
     </AppModal>
   </div>
