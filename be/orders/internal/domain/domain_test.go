@@ -12,16 +12,11 @@ func TestOrder_AddItem_CalculatesPriceCorrectly(t *testing.T) {
 
 	basePrice := common.NewMoney(100.0)
 	sizeMult := 1.2 // +20%
-	qty := 2
+	qty, _ := NewQuantity(2)
 	toppings := []Topping{
 		{Name: "Cheese", Price: common.NewMoney(10.0)},
 		{Name: "Sauce", Price: common.NewMoney(5.0)},
 	}
-	// Unit price calculation:
-	// Sized Price = 100 * 1.2 = 120
-	// Toppings = 10 + 5 = 15
-	// Unit Price = 120 + 15 = 135
-	// Total Item Price = 135 * 2 = 270
 
 	// Act
 	err := order.AddItem("prod-1", "Pizza", qty, basePrice, sizeMult, toppings)
@@ -39,7 +34,8 @@ func TestOrder_AddItem_CalculatesPriceCorrectly(t *testing.T) {
 
 func TestOrder_ApplyPromoCode(t *testing.T) {
 	order := NewOrder("cust-1", DeliveryAddress{})
-	_ = order.AddItem("p1", "Item", 1, common.NewMoney(100), 1.0, nil) // Total 100
+	qty, _ := NewQuantity(1)
+	_ = order.AddItem("p1", "Item", qty, common.NewMoney(100), 1.0, nil) // Total 100
 
 	err := order.ApplyPromoCode("PROMO10", common.NewMoney(10.0))
 	if err != nil {
@@ -64,7 +60,7 @@ func TestOrder_StateTransitions(t *testing.T) {
 	}
 
 	// Paid -> Cooking
-	if err := order.SendToKitchen(); err != nil {
+	if err := order.SendToKitchen("chef-1"); err != nil {
 		t.Errorf("failed to send to kitchen: %v", err)
 	}
 
@@ -74,7 +70,7 @@ func TestOrder_StateTransitions(t *testing.T) {
 	}
 
 	// Ready -> Delivering
-	if err := order.ShipToDelivery(); err != nil {
+	if err := order.ShipToDelivery("courier-1"); err != nil {
 		t.Errorf("failed to ship: %v", err)
 	}
 
@@ -92,7 +88,8 @@ func TestOrder_CannotAddItem_WhenLocked(t *testing.T) {
 	order := NewOrder("c1", DeliveryAddress{})
 	_ = order.MarkPaid() // Lock order
 
-	err := order.AddItem("p1", "Item", 1, common.NewMoney(100), 1, nil)
+	qty, _ := NewQuantity(1)
+	err := order.AddItem("p1", "Item", qty, common.NewMoney(100), 1, nil)
 	if err != ErrOrderLocked {
 		t.Errorf("expected ErrOrderLocked, got %v", err)
 	}

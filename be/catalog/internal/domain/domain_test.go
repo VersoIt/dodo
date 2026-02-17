@@ -1,12 +1,14 @@
 package domain
 
 import (
-	"github.com/versoit/diploma/pkg/common"
+	"github.com/shopspring/decimal"
 	"testing"
 )
 
 func TestNewProduct(t *testing.T) {
-	p, err := NewProduct("Pizza", "Tasty", CatClassic, common.NewMoney(500))
+	name, _ := NewProductName("Pizza")
+	price, _ := NewPrice(500)
+	p, err := NewProduct(name, "Tasty", CatClassic, price, "http://img.jpg")
 	if err != nil {
 		t.Fatalf("failed to create product: %v", err)
 	}
@@ -14,26 +16,32 @@ func TestNewProduct(t *testing.T) {
 	if p.Name() != "Pizza" {
 		t.Errorf("expected Pizza, got %s", p.Name())
 	}
-	if !p.BasePrice().Equal(common.NewMoney(500)) {
+	if !p.BasePrice().Equal(decimal.NewFromInt(500)) {
 		t.Errorf("expected 500, got %v", p.BasePrice())
 	}
 }
 
 func TestProduct_UpdatePrice(t *testing.T) {
-	p, _ := NewProduct("Pizza", "", CatClassic, common.NewMoney(500))
+	name, _ := NewProductName("Pizza")
+	price, _ := NewPrice(500)
+	p, _ := NewProduct(name, "", CatClassic, price, "")
 
-	err := p.UpdatePrice(common.NewMoney(600))
-	if err != nil || !p.BasePrice().Equal(common.NewMoney(600)) {
+	newPrice, _ := NewPrice(600)
+	p.UpdatePrice(newPrice)
+	if !p.BasePrice().Equal(decimal.NewFromInt(600)) {
 		t.Errorf("failed to update price")
 	}
 
-	if err := p.UpdatePrice(common.NewMoney(-1)); err != ErrNegativePrice {
+	_, err := NewPrice(-1)
+	if err != ErrNegativePrice {
 		t.Errorf("expected ErrNegativePrice, got %v", err)
 	}
 }
 
 func TestProduct_AddIngredient(t *testing.T) {
-	p, _ := NewProduct("Pizza", "", CatClassic, common.NewMoney(500))
+	name, _ := NewProductName("Pizza")
+	price, _ := NewPrice(500)
+	p, _ := NewProduct(name, "", CatClassic, price, "")
 	err := p.AddIngredient("ing-1", 10.5, true)
 
 	if err != nil {

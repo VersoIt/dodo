@@ -9,7 +9,7 @@ func TestKitchenTicket_Lifecycle(t *testing.T) {
 	items := []KitchenItem{
 		{ProductID: "p1", Name: "Pizza", Quantity: 1},
 	}
-	ticket := NewTicket("order-123", items)
+	ticket := NewTicket("order-123", "ORD-456", items)
 
 	if ticket.Status() != TicketQueued {
 		t.Errorf("expected Queued status")

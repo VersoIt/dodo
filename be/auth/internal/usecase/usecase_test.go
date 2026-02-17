@@ -2,48 +2,62 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
+	"os"
 	"testing"
 
-	"github.com/versoit/diploma/be/auth"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/versoit/diploma/be/auth/internal/domain"
 )
 
 type MockUserRepo struct {
-	usersByEmail map[string]*auth.User
-	usersByID    map[string]*auth.User
+	usersByEmail map[string]*domain.User
+	usersByID    map[string]*domain.User
 }
 
 func NewMockUserRepo() *MockUserRepo {
 	return &MockUserRepo{
-		usersByEmail: make(map[string]*auth.User),
-		usersByID:    make(map[string]*auth.User),
+		usersByEmail: make(map[string]*domain.User),
+		usersByID:    make(map[string]*domain.User),
 	}
 }
 
-func (m *MockUserRepo) Save(ctx context.Context, u *auth.User) error {
+func (m *MockUserRepo) Save(ctx context.Context, u *domain.User) error {
 	m.usersByEmail[u.Email()] = u
 	m.usersByID[u.ID()] = u
 	return nil
 }
 
-func (m *MockUserRepo) FindByEmail(ctx context.Context, email string) (*auth.User, error) {
+func (m *MockUserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	if u, ok := m.usersByEmail[email]; ok {
 		return u, nil
 	}
-	return nil, auth.ErrUserNotFound
+	return nil, domain.ErrUserNotFound
 }
 
-func (m *MockUserRepo) FindByID(ctx context.Context, id string) (*auth.User, error) {
+func (m *MockUserRepo) FindByID(ctx context.Context, id string) (*domain.User, error) {
 	if u, ok := m.usersByID[id]; ok {
 		return u, nil
 	}
-	return nil, auth.ErrUserNotFound
+	return nil, domain.ErrUserNotFound
+}
+
+type dummyTM struct{}
+
+func (d *dummyTM) Do(ctx context.Context, fn func(ctx context.Context) error) error {
+	return fn(ctx)
+}
+
+func (d *dummyTM) DoWithSettings(ctx context.Context, _ trm.Settings, fn func(ctx context.Context) error) error {
+	return fn(ctx)
 }
 
 func TestAuthUseCase_Register(t *testing.T) {
 	repo := NewMockUserRepo()
-	uc := NewAuthUseCase(repo)
+	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	uc := NewAuthUseCase(repo, &dummyTM{}, log)
 
-	user, err := uc.Register(context.Background(), "test@example.com", "password123", auth.RoleClient)
+	user, err := uc.Register(context.Background(), "test@example.com", "password123", "Test User", domain.RoleClient)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -51,7 +65,7 @@ func TestAuthUseCase_Register(t *testing.T) {
 		t.Errorf("expected email test@example.com, got %s", user.Email())
 	}
 
-	_, err = uc.Register(context.Background(), "test@example.com", "password456", auth.RoleClient)
+	_, err = uc.Register(context.Background(), "test@example.com", "password456", "Test User 2", domain.RoleClient)
 	if err != ErrUserExists {
 		t.Errorf("expected ErrUserExists, got %v", err)
 	}
@@ -59,9 +73,10 @@ func TestAuthUseCase_Register(t *testing.T) {
 
 func TestAuthUseCase_Login(t *testing.T) {
 	repo := NewMockUserRepo()
-	uc := NewAuthUseCase(repo)
+	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	uc := NewAuthUseCase(repo, &dummyTM{}, log)
 
-	if _, err := uc.Register(context.Background(), "user@example.com", "secret123", auth.RoleClient); err != nil {
+	if _, err := uc.Register(context.Background(), "user@example.com", "secret123", "User", domain.RoleClient); err != nil {
 		t.Fatalf("setup failed: failed to register user: %v", err)
 	}
 

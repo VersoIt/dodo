@@ -2,38 +2,56 @@ package usecase
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"log/slog"
+	"os"
 	"testing"
 
-	"github.com/versoit/diploma/be/kitchen"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/versoit/diploma/be/kitchen/internal/domain"
 )
 
 type MockTicketRepo struct {
-	store map[string]*kitchen.KitchenTicket
+	store map[string]*domain.KitchenTicket
 }
 
-func (m *MockTicketRepo) Save(ctx context.Context, t *kitchen.KitchenTicket) error {
+func (m *MockTicketRepo) Save(ctx context.Context, t *domain.KitchenTicket) error {
 	m.store[t.ID()] = t
 	return nil
 }
 
-func (m *MockTicketRepo) FindByID(ctx context.Context, id string) (*kitchen.KitchenTicket, error) {
+func (m *MockTicketRepo) FindByID(ctx context.Context, id string) (*domain.KitchenTicket, error) {
 	if t, ok := m.store[id]; ok {
 		return t, nil
 	}
-	return nil, fmt.Errorf("ticket not found")
+	return nil, errors.New("not found")
 }
 
-func (m *MockTicketRepo) FindPending(ctx context.Context) ([]*kitchen.KitchenTicket, error) {
+func (m *MockTicketRepo) FindPending(ctx context.Context) ([]*domain.KitchenTicket, error) {
 	return nil, nil
 }
 
-func TestKitchenUseCase_AcceptOrder(t *testing.T) {
-	repo := &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
-	uc := NewKitchenUseCase(repo)
+func (m *MockTicketRepo) FindAll(ctx context.Context) ([]*domain.KitchenTicket, error) {
+	return nil, nil
+}
 
-	items := []kitchen.KitchenItem{{Name: "Pizza", Quantity: 1}}
-	ticket, err := uc.AcceptOrder(context.Background(), "order-123", items)
+type dummyTM struct{}
+
+func (d *dummyTM) Do(ctx context.Context, fn func(ctx context.Context) error) error {
+	return fn(ctx)
+}
+
+func (d *dummyTM) DoWithSettings(ctx context.Context, _ trm.Settings, fn func(ctx context.Context) error) error {
+	return fn(ctx)
+}
+
+func TestKitchenUseCase_AcceptOrder(t *testing.T) {
+	repo := &MockTicketRepo{store: make(map[string]*domain.KitchenTicket)}
+	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	uc := NewKitchenUseCase(repo, &dummyTM{}, log)
+
+	items := []domain.KitchenItem{{Name: "Pizza", Quantity: 1}}
+	ticket, err := uc.AcceptOrder(context.Background(), "order-123", "ORD-123", items)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -45,25 +63,23 @@ func TestKitchenUseCase_AcceptOrder(t *testing.T) {
 }
 
 func TestKitchenUseCase_CookingFlow(t *testing.T) {
-	repo := &MockTicketRepo{store: make(map[string]*kitchen.KitchenTicket)}
-	uc := NewKitchenUseCase(repo)
+	repo := &MockTicketRepo{store: make(map[string]*domain.KitchenTicket)}
+	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	uc := NewKitchenUseCase(repo, &dummyTM{}, log)
 
-	ticket, err := uc.AcceptOrder(context.Background(), "ord-1", []kitchen.KitchenItem{{Name: "P"}})
+	ticket, err := uc.AcceptOrder(context.Background(), "ord-1", "N-1", []domain.KitchenItem{{Name: "P", Quantity: 1}})
 	if err != nil {
 		t.Fatalf("setup failed: %v", err)
 	}
 	id := ticket.ID()
 
-	err = uc.StartCooking(context.Background(), id)
+	_, err = uc.StartCooking(context.Background(), id)
 	if err != nil {
 		t.Fatalf("start cooking failed: %v", err)
 	}
 
-	saved, err := repo.FindByID(context.Background(), id)
-	if err != nil {
-		t.Fatalf("failed to find ticket: %v", err)
-	}
-	if saved.Status() != kitchen.TicketCooking {
+	saved, _ := repo.FindByID(context.Background(), id)
+	if saved.Status() != domain.TicketCooking {
 		t.Errorf("expected cooking status, got %v", saved.Status())
 	}
 }

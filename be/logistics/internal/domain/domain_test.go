@@ -24,7 +24,8 @@ func TestCourier_Workflow(t *testing.T) {
 }
 
 func TestDelivery_Lifecycle(t *testing.T) {
-	d := NewDelivery("order-1")
+	items := []DeliveryItem{{ProductID: "p1", Name: "Pizza", Quantity: 1}}
+	d := NewDelivery("order-1", "ORD-1", "City", "Street", "1", "10", items)
 
 	_ = d.AssignCourier("c-1")
 	if d.Status() != DelStatusAssigned {

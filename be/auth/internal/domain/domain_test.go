@@ -5,7 +5,11 @@ import (
 )
 
 func TestNewUser(t *testing.T) {
-	u, err := NewUser("test@example.com", "password123", RoleClient)
+	email, _ := NewEmail("test@example.com")
+	pass, _ := NewPassword("password123")
+	phone, _ := NewPhone("+79991234567")
+	
+	u, err := NewUser(email, pass, "Test User", RoleClient, phone)
 	if err != nil {
 		t.Fatalf("failed to create user: %v", err)
 	}
@@ -20,7 +24,10 @@ func TestNewUser(t *testing.T) {
 }
 
 func TestUser_BonusSystem(t *testing.T) {
-	u, _ := NewUser("test@example.com", "password", RoleClient)
+	email, _ := NewEmail("test@example.com")
+	pass, _ := NewPassword("password")
+	phone, _ := NewPhone("")
+	u, _ := NewUser(email, pass, "Test User", RoleClient, phone)
 
 	u.AccrueBonuses(100)
 	if u.BonusPoints() != 100 {
