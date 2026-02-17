@@ -98,45 +98,62 @@ onMounted(fetchProducts)
 </script>
 
 <template>
-  <div class="space-y-8 pb-20">
-    <section class="hero min-h-[40vh] rounded-[2.5rem] overflow-hidden shadow-2xl" :style="`background-image: url(${HERO_IMAGE});` ">
-      <div class="hero-overlay bg-black bg-opacity-60"></div>
-      <div class="hero-content text-center text-neutral-content">
-        <div class="max-w-md">
-          <h1 class="mb-5 text-5xl font-extrabold uppercase tracking-tighter text-white">
-            {{ authStore.user?.role === 'manager' ? 'Управление Меню' : 'Горячая и Свежая' }}
+  <div class="space-y-12 pb-20">
+    <!-- Premium Hero Section -->
+    <section class="hero min-h-[45vh] rounded-[3rem] overflow-hidden shadow-2xl relative group">
+      <div class="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105" :style="`background-image: url(${HERO_IMAGE});`"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
+      <div class="hero-content text-left text-neutral-content relative z-10 w-full justify-start px-12 md:px-20">
+        <div class="max-w-2xl">
+          <div v-if="authStore.user?.role === 'manager'" class="badge badge-accent mb-6 font-black tracking-widest p-4">ADMIN MODE</div>
+          <h1 class="mb-6 text-6xl md:text-7xl font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">
+            {{ authStore.user?.role === 'manager' ? 'Управление Меню' : 'Горячая. Свежая. Твоя.' }}
           </h1>
-          <p class="mb-5 text-lg text-white/80 font-medium">
-            {{ authStore.user?.role === 'manager' ? 'Обновляйте каталог, добавляйте новинки и управляйте наличием.' : 'Лучшая пицца в городе, доставленная прямо к вашей двери.' }}
+          <p class="mb-8 text-xl text-white/90 font-medium leading-relaxed max-w-lg drop-shadow-md">
+            {{ authStore.user?.role === 'manager' ? 'Обновляйте каталог, добавляйте новинки и управляйте наличием в реальном времени.' : 'Итальянские традиции в каждом кусочке. Быстрая доставка прямо к двери.' }}
           </p>
-          <button v-if="authStore.user?.role !== 'manager'" @click="menuSection?.scrollIntoView({ behavior: 'smooth' })" class="btn btn-primary btn-lg rounded-2xl px-10">Заказать сейчас</button>
-          <button v-else @click="openAddModal" class="btn btn-secondary btn-lg gap-2 rounded-2xl px-10"><Plus class="w-6 h-6" /> Добавить товар</button>
+          <div class="flex gap-4">
+            <button v-if="authStore.user?.role !== 'manager'" @click="menuSection?.scrollIntoView({ behavior: 'smooth' })" class="btn btn-primary btn-lg h-16 rounded-[1.5rem] px-12 font-black uppercase tracking-widest shadow-xl shadow-primary/30 hover:shadow-primary/50 border-none hover:-translate-y-1 transition-all">Заказать сейчас</button>
+            <button v-else @click="openAddModal" class="btn btn-secondary btn-lg h-16 rounded-[1.5rem] px-10 gap-3 font-black uppercase tracking-widest hover:-translate-y-1 transition-all"><Plus class="w-6 h-6" /> Добавить товар</button>
+          </div>
         </div>
       </div>
     </section>
 
-    <section ref="menuSection" class="pt-4">
-      <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-        <div class="flex items-center gap-4"><h2 class="text-4xl font-black uppercase tracking-tighter">Каталог</h2><div v-if="authStore.user?.role === 'manager'" class="badge badge-secondary badge-lg font-bold px-4">ADMIN</div></div>
-        <div class="tabs tabs-boxed bg-base-200 p-1.5 rounded-2xl">
-          <a v-for="cat in CATEGORIES" :key="cat" class="tab rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest px-6" :class="{ 'tab-active bg-primary text-primary-content shadow-lg shadow-primary/20': selectedCategory === cat }" @click="selectedCategory = cat">{{ cat }}</a>
+    <section ref="menuSection" class="pt-8">
+      <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <div class="flex flex-col gap-2">
+          <span class="text-secondary/40 font-bold uppercase tracking-[0.2em] text-xs pl-1">Наше Меню</span>
+          <h2 class="text-5xl font-black uppercase tracking-tighter text-secondary">Каталог</h2>
+        </div>
+        <div class="bg-base-100/50 backdrop-blur-md p-2 rounded-[2rem] shadow-soft border border-white/40 overflow-x-auto max-w-full">
+          <div class="flex gap-2 min-w-max">
+            <a v-for="cat in CATEGORIES" :key="cat" class="btn btn-sm h-10 px-6 rounded-full font-bold uppercase text-[10px] tracking-widest border-none transition-all duration-300" :class="selectedCategory === cat ? 'btn-primary shadow-lg shadow-primary/30 text-white' : 'btn-ghost text-secondary/60 hover:bg-base-200'" @click="selectedCategory = cat">{{ cat }}</a>
+          </div>
         </div>
       </div>
+      
       <div v-if="loading" class="flex justify-center py-32"><span class="loading loading-spinner loading-lg text-primary"></span></div>
-      <div v-else-if="error" class="alert alert-error rounded-3xl">{{ error }}</div>
+      <div v-else-if="error" class="alert alert-error rounded-[2rem] shadow-xl">{{ error }}</div>
+      
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div v-for="product in filteredProducts" :key="product.id" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-500 group rounded-[2rem] border border-base-200 overflow-hidden">
-                    <figure class="relative h-56 overflow-hidden">
-                      <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="handleImageError" />
-                      <div class="absolute top-4 right-4"><span class="badge badge-primary badge-lg font-black shadow-lg">{{ formatPrice(product.price) }}</span></div>
-                      <div class="absolute top-4 left-4 flex flex-col gap-2">
-          <span class="badge badge-ghost bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase border-none px-3 py-3">{{ CATEGORIES[product.category_id + 1] || 'Классика' }}</span><span v-if="!product.is_available" class="badge badge-error text-[9px] font-black uppercase px-3 py-3">SOLD OUT</span></div>
+        <div v-for="product in filteredProducts" :key="product.id" class="card bg-base-100 shadow-soft hover:shadow-glow transition-all duration-500 group rounded-[2.5rem] border border-transparent hover:border-primary/10 overflow-visible h-full hover:-translate-y-2">
+          <figure class="relative h-64 overflow-hidden rounded-t-[2.5rem] m-2 mb-0 mask mask-squircle">
+            <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" @error="handleImageError" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+            <div class="absolute top-4 right-4 z-20"><span class="badge bg-white/90 backdrop-blur text-secondary font-black text-lg p-4 shadow-lg rounded-2xl">{{ formatPrice(product.price) }}</span></div>
+            <div class="absolute bottom-4 left-4 z-20 flex flex-col gap-2 items-start">
+              <span class="badge badge-primary border-none text-white text-[10px] font-black uppercase px-3 py-1 shadow-md">{{ CATEGORIES[product.category_id + 1] || 'Классика' }}</span>
+              <span v-if="!product.is_available" class="badge badge-error text-white text-[10px] font-black uppercase px-3 py-1 shadow-md">SOLD OUT</span>
+            </div>
           </figure>
-          <div class="card-body p-8">
-            <h3 class="card-title text-2xl font-black tracking-tight leading-tight">{{ product.name }}</h3>
-            <p class="text-sm text-base-content/60 line-clamp-2 mt-2 leading-relaxed">{{ product.description }}</p>
-            <div class="card-actions justify-end mt-8">
-              <button v-if="authStore.user?.role !== 'manager'" @click="handleAddToCart(product)" class="btn btn-primary btn-block rounded-2xl gap-3 font-black uppercase shadow-lg shadow-primary/10 h-14" :disabled="!product.is_available"><Plus class="w-5 h-5" /> В корзину</button>
+          <div class="card-body p-8 pt-6 flex flex-col justify-between">
+            <div>
+              <h3 class="card-title text-2xl font-black tracking-tight leading-tight mb-2 group-hover:text-primary transition-colors">{{ product.name }}</h3>
+              <p class="text-sm text-secondary/60 line-clamp-3 leading-relaxed font-medium">{{ product.description }}</p>
+            </div>
+            <div class="card-actions justify-end mt-6">
+              <button v-if="authStore.user?.role !== 'manager'" @click="handleAddToCart(product)" class="btn btn-primary btn-block rounded-2xl gap-3 font-black uppercase shadow-xl shadow-primary/20 h-14 border-none hover:shadow-primary/40 group-hover:scale-[1.02] transition-all" :disabled="!product.is_available"><Plus class="w-5 h-5" /> В корзину</button>
               <button v-else @click="openEditModal(product)" class="btn btn-outline btn-block btn-secondary rounded-2xl gap-3 font-black uppercase h-14"><FileText class="w-5 h-5" /> Изменить</button>
             </div>
           </div>
