@@ -34,7 +34,7 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div class="min-h-[90vh] flex items-center justify-center relative overflow-hidden py-12">
+  <div class="min-h-[90vh] flex items-center justify-center relative py-12">
     <!-- Decorative blobs -->
     <div class="absolute -top-40 -right-40 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] animate-pulse"></div>
     <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse delay-700"></div>

@@ -6,25 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/auth/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/auth/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/catalog/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/catalog/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/catalog/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/catalog/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/chat/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/gateway/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/gateway/internal/api/http/handlers/catalog.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/api/http/handlers/catalog.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/gateway/internal/infrastructure/grpc/clients.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/infrastructure/grpc/clients.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/kitchen/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/kitchen/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/kitchen/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/kitchen/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/logistics/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/logistics/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/logistics/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/logistics/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/notification/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/notification/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/notification/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/notification/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/treasury/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/be/treasury/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/treasury/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/treasury/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/LoginView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/LoginView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/RegisterView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/RegisterView.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

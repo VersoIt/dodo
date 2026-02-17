@@ -29,7 +29,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="min-h-[85vh] flex items-center justify-center relative overflow-hidden">
+  <div class="min-h-[85vh] flex items-center justify-center relative">
     <!-- Decorative blobs -->
     <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse"></div>
     <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-accent/20 rounded-full blur-[100px] animate-pulse delay-1000"></div>
