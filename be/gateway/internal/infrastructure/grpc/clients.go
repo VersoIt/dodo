@@ -3,16 +3,18 @@ package grpc
 import (
 	"context"
 
-	"github.com/versoit/diploma/gateway/internal/config"
 	auth_pb "github.com/versoit/diploma/be/auth/api/proto/pb"
 	catalog_pb "github.com/versoit/diploma/be/catalog/api/proto/pb"
+	chat_pb "github.com/versoit/diploma/be/chat/api/proto/pb"
 	kitchen_pb "github.com/versoit/diploma/be/kitchen/api/proto/pb"
 	logistics_pb "github.com/versoit/diploma/be/logistics/api/proto/pb"
 	orders_pb "github.com/versoit/diploma/be/orders/api/proto/pb"
+	"github.com/versoit/diploma/gateway/internal/config"
 	"go.uber.org/fx"
-	"log/slog"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"log/slog"
 )
 
 var Module = fx.Provide(
@@ -21,10 +23,15 @@ var Module = fx.Provide(
 	NewOrdersClient,
 	NewKitchenClient,
 	NewLogisticsClient,
+	NewChatClient,
 )
 
 func dial(lc fx.Lifecycle, addr string) (*grpc.ClientConn, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		addr, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +45,7 @@ func dial(lc fx.Lifecycle, addr string) (*grpc.ClientConn, error) {
 }
 
 func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (auth_pb.UserServiceClient, error) {
-	conn, err := dial(lc, cfg.AuthService)
+	conn, err := dial(lc, cfg.Services.Auth)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +53,7 @@ func NewAuthClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (auth_
 }
 
 func NewCatalogClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (catalog_pb.ProductServiceClient, error) {
-	conn, err := dial(lc, cfg.CatalogService)
+	conn, err := dial(lc, cfg.Services.Catalog)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +61,7 @@ func NewCatalogClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (ca
 }
 
 func NewOrdersClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (orders_pb.OrderServiceClient, error) {
-	conn, err := dial(lc, cfg.OrdersService)
+	conn, err := dial(lc, cfg.Services.Orders)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +69,7 @@ func NewOrdersClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (ord
 }
 
 func NewKitchenClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (kitchen_pb.TicketServiceClient, error) {
-	conn, err := dial(lc, cfg.KitchenService)
+	conn, err := dial(lc, cfg.Services.Kitchen)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +77,17 @@ func NewKitchenClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (ki
 }
 
 func NewLogisticsClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (logistics_pb.DeliveryServiceClient, error) {
-	conn, err := dial(lc, cfg.LogisticsService)
+	conn, err := dial(lc, cfg.Services.Logistics)
 	if err != nil {
 		return nil, err
 	}
 	return logistics_pb.NewDeliveryServiceClient(conn), nil
+}
+
+func NewChatClient(lc fx.Lifecycle, cfg *config.Config, log *slog.Logger) (chat_pb.ChatServiceClient, error) {
+	conn, err := dial(lc, cfg.Services.Chat)
+	if err != nil {
+		return nil, err
+	}
+	return chat_pb.NewChatServiceClient(conn), nil
 }

@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/versoit/diploma/gateway/internal/api/http/handlers"
 	"github.com/versoit/diploma/gateway/internal/api/http/middleware"
 	"github.com/versoit/diploma/gateway/internal/config"
@@ -19,8 +20,10 @@ func SetupRoutes(
 	orderHandler *handlers.OrderHandler,
 	kitchenHandler *handlers.KitchenHandler,
 	logisticsHandler *handlers.LogisticsHandler,
+	chatHandler *handlers.ChatHandler,
 ) {
 	app.Use(middleware.NewRequestIDMiddleware())
+	app.Use(middleware.NewTraceMiddleware())
 	app.Use(middleware.NewLoggerMiddleware(log))
 
 	api := app.Group("/api/v1")
@@ -28,20 +31,14 @@ func SetupRoutes(
 	api.Get("/health", healthHandler.Check)
 
 	// Chat proxy (HTTP)
+	// TODO: Replace with gRPC calls or keep if HTTP history endpoints exist in Chat Service
 	api.All("/chat/*", func(c *fiber.Ctx) error {
-		path := c.Params("*")
-		queryString := string(c.Context().QueryArgs().QueryString())
-		url := "http://" + cfg.ChatService + "/chat/" + path
-		if queryString != "" {
-			url += "?" + queryString
-		}
-		return proxy.Forward(url)(c)
+		// ... existing HTTP proxy logic if needed
+		return proxy.Forward("http://" + cfg.Services.Chat + "/chat/" + c.Params("*"))(c)
 	})
 	
-	// Chat WebSocket proxy
-	app.Get("/ws/chat", func(c *fiber.Ctx) error {
-		return proxy.Forward("ws://"+cfg.ChatService+c.OriginalURL())(c)
-	})
+	// Chat WebSocket
+	app.Get("/ws/chat", chatHandler.WSUpgrade, websocket.New(chatHandler.HandleWS))
 
 	// Auth
 	auth := api.Group("/auth")

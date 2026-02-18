@@ -1,34 +1,45 @@
 package config
 
-import "os"
+import (
+	"fmt"
+
+	"github.com/ilyakaznacheev/cleanenv"
+)
 
 type Config struct {
-	AppPort          string
-	LogLevel         string
-	AuthService      string
-	CatalogService   string
-	OrdersService    string
-	KitchenService   string
-	LogisticsService string
-	ChatService      string
+	App      AppConfig      `yaml:"app"`
+	HTTP     HTTPConfig     `yaml:"http"`
+	Services ServicesConfig `yaml:"services"`
 }
 
-func NewConfig() *Config {
-	getEnv := func(key, fallback string) string {
-		if value, ok := os.LookupEnv(key); ok {
-			return value
+type AppConfig struct {
+	Name string `yaml:"name" env:"APP_NAME" env-default:"gateway-service"`
+	Env  string `yaml:"env" env:"APP_ENV" env-default:"development"`
+}
+
+type HTTPConfig struct {
+	Port string `yaml:"port" env:"APP_PORT" env-default:"8080"`
+}
+
+type ServicesConfig struct {
+	Auth      string `yaml:"auth" env:"AUTH_SERVICE_ADDR" env-default:"localhost:9000"`
+	Catalog   string `yaml:"catalog" env:"CATALOG_SERVICE_ADDR" env-default:"localhost:9001"`
+	Orders    string `yaml:"orders" env:"ORDERS_SERVICE_ADDR" env-default:"localhost:9002"`
+	Kitchen   string `yaml:"kitchen" env:"KITCHEN_SERVICE_ADDR" env-default:"localhost:9003"`
+	Logistics string `yaml:"logistics" env:"LOGISTICS_SERVICE_ADDR" env-default:"localhost:9004"`
+	Chat      string `yaml:"chat" env:"CHAT_SERVICE_ADDR" env-default:"localhost:8089"`
+}
+
+func NewConfig() (*Config, error) {
+	cfg := &Config{}
+
+	err := cleanenv.ReadConfig("config.yaml", cfg)
+	if err != nil {
+		err = cleanenv.ReadEnv(cfg)
+		if err != nil {
+			return nil, fmt.Errorf("config error: %w", err)
 		}
-		return fallback
 	}
 
-	return &Config{
-		AppPort:          getEnv("APP_PORT", "8080"),
-		LogLevel:         getEnv("LOG_LEVEL", "info"),
-		AuthService:      getEnv("AUTH_SERVICE_ADDR", "localhost:50051"),
-		CatalogService:   getEnv("CATALOG_SERVICE_ADDR", "localhost:50052"),
-		OrdersService:    getEnv("ORDERS_SERVICE_ADDR", "localhost:50053"),
-		KitchenService:   getEnv("KITCHEN_SERVICE_ADDR", "localhost:50054"),
-		LogisticsService: getEnv("LOGISTICS_SERVICE_ADDR", "localhost:50055"),
-		ChatService:      getEnv("CHAT_SERVICE_ADDR", "localhost:8089"),
-	}
+	return cfg, nil
 }

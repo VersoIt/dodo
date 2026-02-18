@@ -2,17 +2,21 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net"
 
-	"github.com/gofiber/contrib/websocket"
-	"github.com/gofiber/fiber/v2"
 	"github.com/nats-io/nats.go"
 	"github.com/versoit/diploma/be/chat/internal/config"
 	"github.com/versoit/diploma/be/chat/internal/handler"
 	"github.com/versoit/diploma/be/chat/internal/repository"
 	"github.com/versoit/diploma/be/chat/internal/service"
 	"github.com/versoit/diploma/pkg/common"
+	"github.com/versoit/diploma/pkg/telemetry"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var Module = fx.Options(
@@ -21,67 +25,67 @@ var Module = fx.Options(
 			return context.WithCancel(context.Background())
 		},
 		config.NewConfig,
-		func() *slog.Logger {
-			return common.NewLogger("chat")
+		func(cfg *config.Config) string {
+			return cfg.Database.URL
+		},
+		func(cfg *config.Config) *slog.Logger {
+			return common.NewLogger(cfg.App.Name)
 		},
 		common.NewPGXPool,
 		common.NewTransactionManager,
+		telemetry.NewTracerProvider,
 
 		NewNatsConn,
 		service.NewHub,
 		repository.NewMessageRepository,
 		service.NewMessageService,
 		handler.NewChatHandler,
-		newFiberApp,
 	),
 	fx.Invoke(
-		setupRoutes,
 		startHub,
-		startServer,
+		startGRPCServer,
 	),
 )
-
-func newFiberApp() *fiber.App {
-	return fiber.New(fiber.Config{
-		AppName: "Pizza Chat Service",
-	})
-}
-
-func setupRoutes(app *fiber.App, h *handler.ChatHandler) {
-	api := app.Group("/chat")
-	api.Get("/history", h.GetHistory)
-	api.Get("/sync", h.GetSync)
-
-	app.Get("/ws/chat", h.WSUpgrade, websocket.New(h.WebSocketHandler))
-}
 
 func startHub(hub *service.Hub) {
 	go hub.Run()
 }
 
-func startServer(lc fx.Lifecycle, app *fiber.App, cfg *config.Config, log *slog.Logger) {
+func startGRPCServer(lc fx.Lifecycle, h *handler.ChatHandler, cfg *config.Config, log *slog.Logger) {
+	server := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+	)
+	h.Register(server)
+	reflection.Register(server)
+
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("Starting chat service server", "port", cfg.AppPort)
+			addr := fmt.Sprintf(":%s", cfg.GRPC.Port)
+			lis, err := net.Listen("tcp", addr)
+			if err != nil {
+				return err
+			}
+			log.Info("Starting gRPC server", slog.String("port", cfg.GRPC.Port))
 			go func() {
-				if err := app.Listen(":" + cfg.AppPort); err != nil {
-					log.Error("Failed to start server", "error", err)
+				if err := server.Serve(lis); err != nil {
+					log.Error("gRPC server failed", slog.Any("error", err))
 				}
 			}()
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			log.Info("Stopping chat service server")
-			return app.Shutdown()
+			log.Info("Stopping gRPC server")
+			server.GracefulStop()
+			return nil
 		},
 	})
 }
 
 func NewNatsConn(cfg *config.Config, log *slog.Logger) (*nats.Conn, error) {
-	nc, err := nats.Connect(cfg.NatsURL)
+	nc, err := nats.Connect(cfg.Nats.URL)
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Connected to NATS", slog.String("url", cfg.NatsURL))
+	log.Info("Connected to NATS", slog.String("url", cfg.Nats.URL))
 	return nc, nil
 }

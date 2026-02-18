@@ -6,8 +6,61 @@
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/views/LoginView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/LoginView.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/views/RegisterView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/RegisterView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/auth/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/auth/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/auth/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/auth/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/auth/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/auth/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/catalog/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/catalog/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/catalog/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/catalog/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/catalog/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/catalog/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/catalog/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/catalog/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/service/hub.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/service/hub.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/gateway/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/gateway/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/gateway/internal/api/http/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/api/http/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/gateway/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/gateway/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/gateway/internal/infrastructure/grpc/clients.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/infrastructure/grpc/clients.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/kitchen/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/kitchen/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/kitchen/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/kitchen/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/kitchen/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/kitchen/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/kitchen/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/kitchen/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/logistics/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/logistics/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/logistics/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/logistics/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/logistics/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/logistics/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/logistics/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/logistics/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/notification/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/notification/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/notification/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/notification/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/notification/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/notification/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/notification/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/notification/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/catalog_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/catalog_client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/kitchen_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/kitchen_client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/logistics_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/logistics_client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/notification_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/notification_client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/treasury_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/infrastructure/grpc/treasury_client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/treasury/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/treasury/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/treasury/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/treasury/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/treasury/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/treasury/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/treasury/internal/app/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/treasury/internal/app/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/fe/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work" beforeDir="false" afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/common/db.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/common/logger.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/common/types.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/common/types_test.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/go.mod" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/go.sum" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

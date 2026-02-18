@@ -50,6 +50,69 @@ services:
     networks:
       - pizza-network
 
+  # Observability Stack
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.104.0
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./deploy/observability/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "8889:8889" # Prometheus exporter metrics
+    networks:
+      - pizza-network
+
+  tempo:
+    image: grafana/tempo:2.5.0
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./deploy/observability/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200" # Tempo HTTP
+      - "4317"      # Otel gRPC
+    networks:
+      - pizza-network
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      - pizza-network
+
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./deploy/observability/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - pizza-network
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_USERS_DEFAULT_THEME=dark
+    volumes:
+      - ./deploy/observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    ports:
+      - "3001:3000"
+    networks:
+      - pizza-network
+
+  # Microservices
   orders:
     build:
       context: .
@@ -58,23 +121,22 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
-      LOG_LEVEL: debug
-      CATALOG_SERVICE_ADDR: catalog:9000
-      KITCHEN_SERVICE_ADDR: kitchen:9000
-      LOGISTICS_SERVICE_ADDR: logistics:9000
-      TREASURY_SERVICE_ADDR: treasury:9000
-      NOTIFICATION_SERVICE_ADDR: notification:9000
+      CATALOG_SERVICE_ADDR: catalog:9001
+      KITCHEN_SERVICE_ADDR: kitchen:9003
+      LOGISTICS_SERVICE_ADDR: logistics:9004
+      TREASURY_SERVICE_ADDR: treasury:9006
+      NOTIFICATION_SERVICE_ADDR: notification:9005
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: orders-service
     ports:
-      - "9002:9000"
+      - "9002:9002"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   auth:
     build:
@@ -84,17 +146,17 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: auth-service
     ports:
-      - "9003:9000"
+      - "9000:9000"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   catalog:
     build:
@@ -104,17 +166,17 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: catalog-service
     ports:
-      - "9004:9000"
+      - "9001:9001"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   kitchen:
     build:
@@ -124,17 +186,17 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: kitchen-service
     ports:
-      - "9005:9000"
+      - "9003:9003"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   logistics:
     build:
@@ -144,17 +206,17 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: logistics-service
     ports:
-      - "9006:9000"
+      - "9004:9004"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   notification:
     build:
@@ -164,17 +226,17 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: notification-service
     ports:
-      - "9007:9000"
+      - "9005:9005"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   treasury:
     build:
@@ -184,17 +246,17 @@ services:
     depends_on:
       migrations:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: treasury-service
     ports:
-      - "9008:9000"
+      - "9006:9006"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   chat:
     build:
@@ -206,19 +268,19 @@ services:
         condition: service_completed_successfully
       nats:
         condition: service_started
+      otel-collector:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
       NATS_URL: nats://nats:4222
-      APP_PORT: 9000
+      GRPC_PORT: 9009
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: chat-service
     ports:
-      - "9009:9000"
+      - "9009:9009"
     networks:
       - pizza-network
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 256M
 
   gateway:
     build:
@@ -232,14 +294,17 @@ services:
       - kitchen
       - logistics
       - chat
+      - otel-collector
     environment:
       - APP_PORT=8080
       - AUTH_SERVICE_ADDR=auth:9000
-      - CATALOG_SERVICE_ADDR=catalog:9000
-      - ORDERS_SERVICE_ADDR=orders:9000
-      - KITCHEN_SERVICE_ADDR=kitchen:9000
-      - LOGISTICS_SERVICE_ADDR=logistics:9000
-      - CHAT_SERVICE_ADDR=chat:9000
+      - CATALOG_SERVICE_ADDR=catalog:9001
+      - ORDERS_SERVICE_ADDR=orders:9002
+      - KITCHEN_SERVICE_ADDR=kitchen:9003
+      - LOGISTICS_SERVICE_ADDR=logistics:9004
+      - CHAT_SERVICE_ADDR=chat:9009
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=gateway-service
     ports:
       - "8080:8080"
     networks:

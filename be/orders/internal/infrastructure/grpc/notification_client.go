@@ -3,11 +3,12 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"os"
 
 	notification_pb "github.com/versoit/diploma/be/notification/api/proto/pb"
+	"github.com/versoit/diploma/be/orders/internal/config"
 	"github.com/versoit/diploma/be/orders/internal/domain"
 	"go.uber.org/fx"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -16,13 +17,14 @@ type notificationClient struct {
 	client notification_pb.NotificationServiceClient
 }
 
-func NewNotificationClient(lc fx.Lifecycle) (domain.NotificationService, error) {
-	addr := os.Getenv("NOTIFICATION_SERVICE_ADDR")
-	if addr == "" {
-		addr = "notification:8080"
-	}
+func NewNotificationClient(lc fx.Lifecycle, cfg *config.Config) (domain.NotificationService, error) {
+	addr := cfg.Services.Notification
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		addr, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		return nil, err
 	}

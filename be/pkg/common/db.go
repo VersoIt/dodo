@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
@@ -12,11 +11,10 @@ import (
 	"go.uber.org/fx"
 )
 
-// NewPGXPool creates a new pgxpool.Pool from DATABASE_URL environment variable.
-func NewPGXPool(lc fx.Lifecycle, ctx context.Context) (*pgxpool.Pool, error) {
-	dsn := os.Getenv("DATABASE_URL")
+// NewPGXPool creates a new pgxpool.Pool from the provided DSN.
+func NewPGXPool(lc fx.Lifecycle, ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 	if dsn == "" {
-		return nil, fmt.Errorf("DATABASE_URL environment variable is not set")
+		return nil, fmt.Errorf("database DSN is empty")
 	}
 
 	config, err := pgxpool.ParseConfig(dsn)

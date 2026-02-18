@@ -15,7 +15,7 @@ func NewLoggerMiddleware(log *slog.Logger) fiber.Handler {
 		duration := time.Since(start)
 		rid := c.Get("X-Request-ID")
 		
-		log.Info("HTTP Request",
+		log.InfoContext(c.UserContext(), "HTTP Request",
 			slog.String("request_id", rid),
 			slog.String("method", c.Method()),
 			slog.String("path", c.Path()),

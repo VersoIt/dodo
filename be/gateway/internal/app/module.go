@@ -10,6 +10,7 @@ import (
 	"github.com/versoit/diploma/gateway/internal/api/http/router"
 	"github.com/versoit/diploma/gateway/internal/api/http/handlers"
 	"github.com/versoit/diploma/gateway/internal/infrastructure/grpc"
+	"github.com/versoit/diploma/pkg/telemetry"
 	"go.uber.org/fx"
 	"log/slog"
 )
@@ -18,9 +19,10 @@ var Module = fx.Options(
 	grpc.Module,
 	fx.Provide(
 		config.NewConfig,
-		func() *slog.Logger {
-			return common.NewLogger("gateway")
+		func(cfg *config.Config) *slog.Logger {
+			return common.NewLogger(cfg.App.Name)
 		},
+		telemetry.NewTracerProvider,
 		newFiberApp,
 		handlers.NewHealthHandler,
 		handlers.NewAuthHandler,
@@ -28,6 +30,7 @@ var Module = fx.Options(
 		handlers.NewOrderHandler,
 		handlers.NewKitchenHandler,
 		handlers.NewLogisticsHandler,
+		handlers.NewChatHandler,
 	),
 	fx.Invoke(
 		router.SetupRoutes,
@@ -47,9 +50,9 @@ func newFiberApp() *fiber.App {
 func startServer(lc fx.Lifecycle, app *fiber.App, cfg *config.Config, log *slog.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("Starting gateway server", "port", cfg.AppPort)
+			log.Info("Starting gateway server", "port", cfg.HTTP.Port)
 			go func() {
-				if err := app.Listen(":" + cfg.AppPort); err != nil {
+				if err := app.Listen(":" + cfg.HTTP.Port); err != nil {
 					log.Error("Failed to start server", "error", err)
 				}
 			}()

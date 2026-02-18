@@ -2,11 +2,12 @@ package grpc
 
 import (
 	"context"
-	"os"
 
 	kitchen_pb "github.com/versoit/diploma/be/kitchen/api/proto/pb"
+	"github.com/versoit/diploma/be/orders/internal/config"
 	"github.com/versoit/diploma/be/orders/internal/domain"
 	"go.uber.org/fx"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -15,13 +16,14 @@ type kitchenClient struct {
 	client kitchen_pb.TicketServiceClient
 }
 
-func NewKitchenClient(lc fx.Lifecycle) (domain.KitchenService, error) {
-	addr := os.Getenv("KITCHEN_SERVICE_ADDR")
-	if addr == "" {
-		addr = "kitchen:8080"
-	}
+func NewKitchenClient(lc fx.Lifecycle, cfg *config.Config) (domain.KitchenService, error) {
+	addr := cfg.Services.Kitchen
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		addr, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		return nil, err
 	}

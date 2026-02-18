@@ -6,14 +6,12 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/gofiber/contrib/websocket"
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/versoit/diploma/be/chat/internal/domain"
 )
 
 type Client struct {
-	Conn    *websocket.Conn
 	Hub     *Hub
 	OrderID uuid.UUID
 	Send    chan []byte

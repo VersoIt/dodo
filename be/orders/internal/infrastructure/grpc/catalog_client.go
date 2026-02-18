@@ -3,26 +3,28 @@ package grpc
 import (
 	"context"
 
+	"github.com/versoit/diploma/be/orders/internal/config"
 	"github.com/versoit/diploma/be/orders/internal/domain"
 	"github.com/versoit/diploma/pkg/common"
 	catalog_pb "github.com/versoit/diploma/be/catalog/api/proto/pb"
 	"go.uber.org/fx"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
 )
 
 type catalogClient struct {
 	client catalog_pb.ProductServiceClient
 }
 
-func NewCatalogClient(lc fx.Lifecycle) (domain.CatalogService, error) {
-	addr := os.Getenv("CATALOG_SERVICE_ADDR")
-	if addr == "" {
-		addr = "catalog:8080"
-	}
+func NewCatalogClient(lc fx.Lifecycle, cfg *config.Config) (domain.CatalogService, error) {
+	addr := cfg.Services.Catalog
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		addr, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		return nil, err
 	}

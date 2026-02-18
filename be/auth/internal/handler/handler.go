@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	authpb "github.com/versoit/diploma/be/auth/api/proto/pb"
+	"github.com/versoit/diploma/be/auth/internal/config"
 	"github.com/versoit/diploma/be/auth/internal/domain"
 	"github.com/versoit/diploma/be/auth/internal/usecase"
 	"google.golang.org/grpc"
@@ -15,18 +16,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var jwtKey = []byte("super-secret-key")
-
 type AuthHandler struct {
 	authpb.UnimplementedUserServiceServer
-	uc  *usecase.AuthUseCase
-	log *slog.Logger
+	uc     *usecase.AuthUseCase
+	log    *slog.Logger
+	jwtKey []byte
 }
 
-func NewAuthHandler(uc *usecase.AuthUseCase, log *slog.Logger) *AuthHandler {
+func NewAuthHandler(uc *usecase.AuthUseCase, log *slog.Logger, cfg *config.Config) *AuthHandler {
 	return &AuthHandler{
-		uc:  uc,
-		log: log,
+		uc:     uc,
+		log:    log,
+		jwtKey: []byte(cfg.Auth.JWTSecret),
 	}
 }
 
@@ -71,7 +72,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *authpb.LoginRequest) (*aut
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(h.jwtKey)
 	if err != nil {
 		h.log.Error("Token generation failed", slog.String("user_id", user.ID()), slog.Any("error", err))
 		return nil, status.Errorf(codes.Internal, "failed to generate token: %v", err)

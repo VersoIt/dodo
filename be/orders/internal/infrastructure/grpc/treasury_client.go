@@ -2,12 +2,13 @@ package grpc
 
 import (
 	"context"
-	"os"
 
+	"github.com/versoit/diploma/be/orders/internal/config"
+	"github.com/versoit/diploma/be/orders/internal/domain"
 	"github.com/versoit/diploma/pkg/common"
 	treasury_pb "github.com/versoit/diploma/be/treasury/api/proto/pb"
-	"github.com/versoit/diploma/be/orders/internal/domain"
 	"go.uber.org/fx"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -16,13 +17,14 @@ type treasuryClient struct {
 	client treasury_pb.PaymentServiceClient
 }
 
-func NewTreasuryClient(lc fx.Lifecycle) (domain.TreasuryService, error) {
-	addr := os.Getenv("TREASURY_SERVICE_ADDR")
-	if addr == "" {
-		addr = "treasury:8080"
-	}
+func NewTreasuryClient(lc fx.Lifecycle, cfg *config.Config) (domain.TreasuryService, error) {
+	addr := cfg.Services.Treasury
 
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		addr, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		return nil, err
 	}

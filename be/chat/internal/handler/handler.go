@@ -3,20 +3,22 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
-	"strconv"
-	"time"
 
-	"github.com/gofiber/contrib/websocket"
-	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	pb "github.com/versoit/diploma/be/chat/api/proto/pb"
 	"github.com/versoit/diploma/be/chat/internal/config"
 	"github.com/versoit/diploma/be/chat/internal/domain"
 	"github.com/versoit/diploma/be/chat/internal/service"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ChatHandler struct {
+	pb.UnimplementedChatServiceServer
 	svc service.MessageService
 	hub *service.Hub
 	cfg *config.Config
@@ -32,152 +34,174 @@ func NewChatHandler(svc service.MessageService, hub *service.Hub, cfg *config.Co
 	}
 }
 
-func (h *ChatHandler) GetHistory(c *fiber.Ctx) error {
-	orderIDStr := c.Query("order_id")
-	orderID, err := uuid.Parse(orderIDStr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "invalid order_id (UUID required)"})
-	}
-
-	limitStr := c.Query("limit", "50")
-	limit, _ := strconv.Atoi(limitStr)
-
-	messages, err := h.svc.GetHistory(c.Context(), orderID, limit)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	return c.JSON(messages)
+func (h *ChatHandler) Register(server *grpc.Server) {
+	pb.RegisterChatServiceServer(server, h)
 }
 
-func (h *ChatHandler) GetSync(c *fiber.Ctx) error {
-	orderIDStr := c.Query("order_id")
-	orderID, err := uuid.Parse(orderIDStr)
+func (h *ChatHandler) GetHistory(ctx context.Context, req *pb.GetHistoryRequest) (*pb.GetHistoryResponse, error) {
+	orderID, err := uuid.Parse(req.OrderId)
 	if err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "invalid order_id (UUID required)"})
+		return nil, status.Errorf(codes.InvalidArgument, "invalid order_id")
 	}
 
-	afterIDStr := c.Query("after_id")
-	afterID, _ := strconv.ParseInt(afterIDStr, 10, 64)
-
-	messages, err := h.svc.GetUpdates(c.Context(), orderID, afterID)
+	messages, err := h.svc.GetHistory(ctx, orderID, int(req.Limit))
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return nil, status.Errorf(codes.Internal, "failed to get history: %v", err)
 	}
 
-	return c.JSON(messages)
+	pbMessages := make([]*pb.Message, len(messages))
+	for i, m := range messages {
+		pbMessages[i] = &pb.Message{
+			Id:        m.ID,
+			OrderId:   m.OrderID.String(),
+			SenderId:  m.SenderID.String(),
+			Role:      string(m.Role),
+			Text:      m.Text,
+			IsRead:    m.IsRead,
+			CreatedAt: timestamppb.New(m.CreatedAt),
+		}
+	}
+
+	return &pb.GetHistoryResponse{Messages: pbMessages}, nil
 }
 
-func (h *ChatHandler) WSUpgrade(c *fiber.Ctx) error {
-	if websocket.IsWebSocketUpgrade(c) {
-		tokenStr := c.Query("token")
-		if tokenStr == "" {
-			tokenStr = c.Get("Sec-WebSocket-Protocol")
-		}
-
-		if tokenStr == "" {
-			return fiber.ErrUnauthorized
-		}
-
-		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			return []byte(h.cfg.JWTSecret), nil
-		})
-
-		if err != nil || !token.Valid {
-			return fiber.ErrUnauthorized
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			return fiber.ErrUnauthorized
-		}
-
-		c.Locals("user_id", claims["user_id"])
-		c.Locals("role", claims["role"])
-
-		return c.Next()
-	}
-	return fiber.ErrUpgradeRequired
-}
-
-func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
-	userIDStr, _ := c.Locals("user_id").(string)
-	roleStr, _ := c.Locals("role").(string)
-	orderIDStr := c.Query("order_id")
-	orderID, err := uuid.Parse(orderIDStr)
-
+func (h *ChatHandler) Connect(stream pb.ChatService_ConnectServer) error {
+	// 1. Read the first message (Connect handshake)
+	firstMsg, err := stream.Recv()
 	if err != nil {
-		h.log.Warn("WS connection with invalid order_id", slog.String("user_id", userIDStr), slog.String("order_id", orderIDStr))
-		_ = c.WriteJSON(fiber.Map{"error": "order_id query param is required and must be UUID"})
-		_ = c.Close()
-		return
+		return err
 	}
 
-	userID, _ := uuid.Parse(userIDStr)
+	connectEvent := firstMsg.GetConnect()
+	if connectEvent == nil {
+		return status.Errorf(codes.InvalidArgument, "expected ConnectEvent as first message")
+	}
 
+	orderID, err := uuid.Parse(connectEvent.OrderId)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "invalid order_id")
+	}
+	userID, err := uuid.Parse(connectEvent.UserId)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "invalid user_id")
+	}
+	role := domain.Role(connectEvent.Role)
+
+	h.log.Info("Client connected", slog.String("user_id", userID.String()), slog.String("order_id", orderID.String()))
+
+	// 2. Register Client
 	client := &service.Client{
-		Conn:    c,
 		Hub:     h.hub,
 		OrderID: orderID,
 		Send:    make(chan []byte, 256),
 	}
 	h.hub.Register <- client
 
-	go func() {
-		for msg := range client.Send {
-			if err := c.WriteMessage(websocket.TextMessage, msg); err != nil {
-				h.log.Error("WS write error", slog.Any("error", err))
-				break
-			}
-		}
-	}()
-
+	// 3. Cleanup on exit
 	defer func() {
 		h.hub.Unregister <- client
-		_ = c.Close()
 	}()
 
-	for {
-		_, payload, err := c.ReadMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				h.log.Error("WS read error", slog.Any("error", err))
+	// 4. Goroutine to send messages from Hub -> Stream
+	errChan := make(chan error, 1)
+	go func() {
+		for payload := range client.Send {
+			var wsMsg domain.WSMessage
+			if err := json.Unmarshal(payload, &wsMsg); err != nil {
+				h.log.Error("Failed to unmarshal broadcast message", slog.Any("error", err))
+				continue
 			}
-			break
+
+			// Convert domain.WSMessage to pb.ServerMessage
+			var serverMsg *pb.ServerMessage
+			switch wsMsg.Event {
+			case domain.EventNewMessage:
+				serverMsg = &pb.ServerMessage{
+					Event: &pb.ServerMessage_NewMessage{
+						NewMessage: &pb.NewMessageEvent{
+							MessageId: wsMsg.MessageID,
+							Text:      wsMsg.Text,
+							Role:      string(wsMsg.Role),
+							OrderId:   wsMsg.OrderID.String(),
+							CreatedAt: timestamppb.New(wsMsg.CreatedAt),
+						},
+					},
+				}
+			case domain.EventMessageAck:
+				serverMsg = &pb.ServerMessage{
+					Event: &pb.ServerMessage_Ack{
+						Ack: &pb.MessageAck{
+							RequestId: wsMsg.RequestID,
+							MessageId: wsMsg.MessageID,
+						},
+					},
+				}
+			case domain.EventError:
+				strPayload, _ := wsMsg.Payload.(string)
+				serverMsg = &pb.ServerMessage{
+					Event: &pb.ServerMessage_Error{
+						Error: &pb.ErrorEvent{
+							Message: strPayload,
+						},
+					},
+				}
+			}
+
+			if serverMsg != nil {
+				if err := stream.Send(serverMsg); err != nil {
+					h.log.Error("Stream send error", slog.Any("error", err))
+					errChan <- err
+					return
+				}
+			}
+		}
+	}()
+
+	// 5. Loop read from stream
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			select {
+			case sendErr := <-errChan:
+				return sendErr
+			default:
+				return err
+			}
 		}
 
-		var wsReq domain.WSMessage
-		if err := json.Unmarshal(payload, &wsReq); err != nil {
-			h.log.Warn("Invalid WS payload", slog.Any("error", err))
-			continue
-		}
-
-		switch wsReq.Action {
-		case domain.EventSendMessage:
+		switch event := in.Event.(type) {
+		case *pb.ClientMessage_SendMessage:
 			msg := &domain.Message{
 				OrderID:  orderID,
 				SenderID: userID,
-				Role:     domain.Role(roleStr),
-				Text:     wsReq.Text,
+				Role:     role,
+				Text:     event.SendMessage.Text,
 			}
 			
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			ctx, cancel := context.WithTimeout(stream.Context(), 5*time.Second)
 			err := h.svc.Save(ctx, msg)
 			cancel()
 
 			if err != nil {
 				h.log.Error("Failed to save message", slog.Any("error", err))
-				_ = c.WriteJSON(domain.WSMessage{
-					Event:   domain.EventError,
-					Payload: "Failed to save message",
+				_ = stream.Send(&pb.ServerMessage{
+					Event: &pb.ServerMessage_Error{
+						Error: &pb.ErrorEvent{Message: "Failed to save message"},
+					},
 				})
 				continue
 			}
 
-			_ = c.WriteJSON(domain.WSMessage{
-				Event:     domain.EventMessageAck,
-				RequestID: wsReq.RequestID,
-				MessageID: msg.ID,
+			_ = stream.Send(&pb.ServerMessage{
+				Event: &pb.ServerMessage_Ack{
+					Ack: &pb.MessageAck{
+						RequestId: event.SendMessage.RequestId,
+						MessageId: msg.ID,
+					},
+				},
 			})
 
 			h.svc.Broadcast(domain.WSMessage{
@@ -189,10 +213,10 @@ func (h *ChatHandler) WebSocketHandler(c *websocket.Conn) {
 				CreatedAt: msg.CreatedAt,
 			})
 
-		case domain.EventRead:
-			if wsReq.MessageID != 0 {
-				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-				_ = h.svc.MarkAsRead(ctx, wsReq.MessageID)
+		case *pb.ClientMessage_ReadMessage:
+			if event.ReadMessage.MessageId != 0 {
+				ctx, cancel := context.WithTimeout(stream.Context(), 2*time.Second)
+				_ = h.svc.MarkAsRead(ctx, event.ReadMessage.MessageId)
 				cancel()
 			}
 		}
