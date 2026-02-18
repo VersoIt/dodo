@@ -16,6 +16,7 @@ require (
 	github.com/versoit/diploma/be/notification v0.0.0-20260217214930-d3ab1be613b7
 	github.com/versoit/diploma/be/treasury v0.0.0-20260217214930-d3ab1be613b7
 	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.65.0
 	go.opentelemetry.io/otel/sdk v1.40.0
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.78.0

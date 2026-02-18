@@ -15,6 +15,8 @@ require (
 	github.com/versoit/diploma/be/logistics v0.0.0-20260208211213-389e778a5129
 	github.com/versoit/diploma/be/orders v0.0.0-20260208211213-389e778a5129
 	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.65.0
+	go.opentelemetry.io/otel/trace v1.40.0
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.78.0
 )
@@ -63,7 +65,6 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.40.0 // indirect
 	go.opentelemetry.io/otel/metric v1.40.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.40.0 // indirect
-	go.opentelemetry.io/otel/trace v1.40.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

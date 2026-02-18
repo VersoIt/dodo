@@ -11,6 +11,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.65.0
 	go.opentelemetry.io/otel/sdk v1.40.0
 	go.uber.org/fx v1.24.0
 	golang.org/x/crypto v0.48.0

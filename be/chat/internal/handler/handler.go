@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
 	pb "github.com/versoit/diploma/be/chat/api/proto/pb"

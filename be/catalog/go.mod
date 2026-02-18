@@ -11,6 +11,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/shopspring/decimal v1.4.0
 	github.com/versoit/diploma/pkg v0.0.0-20260214122137-9cedc0313251
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.65.0
 	go.opentelemetry.io/otel/sdk v1.40.0
 	go.uber.org/fx v1.24.0
 	google.golang.org/grpc v1.78.0

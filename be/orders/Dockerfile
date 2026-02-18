@@ -7,7 +7,7 @@ WORKDIR /app
 COPY go.work go.work.sum* ./
 
 # Copy ALL module files for workspace sync
-COPY pkg/go.mod pkg/go.sum* ./pkg/
+COPY be/pkg/go.mod be/pkg/go.sum* ./be/pkg/
 COPY be/auth/go.mod be/auth/go.sum* ./be/auth/
 COPY be/catalog/go.mod be/catalog/go.sum* ./be/catalog/
 COPY be/chat/go.mod be/chat/go.sum* ./be/chat/

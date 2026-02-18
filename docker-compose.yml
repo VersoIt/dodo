@@ -153,7 +153,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_SERVICE_NAME: auth-service
     ports:
-      - "9000:9000"
+      - "9900:9000"
     networks:
       - pizza-network
     restart: always
