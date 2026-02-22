@@ -166,14 +166,14 @@ onMounted(fetchData)
       <div class="space-y-8">
         <h2 class="text-2xl font-black uppercase tracking-tight">Активные заказы (Чат)</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="order in activeOrders" :key="order.id" class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all rounded-[1.5rem] overflow-hidden">
+          <div v-for="order in activeOrders" :key="order.order_id" class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all rounded-[1.5rem] overflow-hidden">
             <div class="card-body p-5">
               <div class="flex justify-between items-start mb-2">
                 <span class="font-black text-sm">#{{ order.order_number.split('-').pop() }}</span>
                 <span class="badge badge-xs font-bold uppercase tracking-tighter">{{ order.status }}</span>
               </div>
               <p class="text-xs opacity-50 mb-4 line-clamp-1">{{ order.address?.street }}</p>
-              <button @click="openChat(order.id)" class="btn btn-primary btn-sm btn-block rounded-xl gap-2 font-black">
+              <button @click="openChat(order.order_id)" class="btn btn-primary btn-sm btn-block rounded-xl gap-2 font-black">
                 <MessageSquare class="w-4 h-4" /> Чат
               </button>
             </div>

@@ -17,13 +17,14 @@ const (
 )
 
 type Message struct {
-	ID        int64     `json:"message_id"`
-	OrderID   uuid.UUID `json:"order_id"`
-	SenderID  uuid.UUID `json:"sender_id"` // User ID from Auth
-	Role      Role      `json:"role"`
-	Text      string    `json:"text"`
-	CreatedAt time.Time `json:"created_at"`
-	IsRead    bool      `json:"is_read"`
+	ID         int64     `json:"message_id"`
+	OrderID    uuid.UUID `json:"order_id"`
+	SenderID   uuid.UUID `json:"sender_id"` // User ID from Auth
+	SenderName string    `json:"sender_name"`
+	Role       Role      `json:"role"`
+	Text       string    `json:"text"`
+	CreatedAt  time.Time `json:"created_at"`
+	IsRead     bool      `json:"is_read"`
 }
 
 type MessageRepository interface {
@@ -46,13 +47,14 @@ const (
 )
 
 type WSMessage struct {
-	Action    WSEventType `json:"action,omitempty"` // From Client
-	Event     WSEventType `json:"event,omitempty"`  // To Client
-	RequestID string      `json:"request_id,omitempty"`
-	MessageID int64       `json:"message_id,omitempty"`
-	Text      string      `json:"text,omitempty"`
-	Role      Role        `json:"role,omitempty"`
-	OrderID   uuid.UUID   `json:"order_id,omitempty"`
-	CreatedAt time.Time   `json:"created_at,omitempty"`
-	Payload   interface{} `json:"payload,omitempty"`
+	Action     WSEventType `json:"action,omitempty"` // From Client
+	Event      WSEventType `json:"event,omitempty"`  // To Client
+	RequestID  string      `json:"request_id,omitempty"`
+	MessageID  int64       `json:"message_id,omitempty"`
+	Text       string      `json:"text,omitempty"`
+	Role       Role        `json:"role,omitempty"`
+	SenderName string      `json:"sender_name,omitempty"`
+	OrderID    uuid.UUID   `json:"order_id,omitempty"`
+	CreatedAt  time.Time   `json:"created_at,omitempty"`
+	Payload    interface{} `json:"payload,omitempty"`
 }

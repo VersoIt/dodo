@@ -53,13 +53,14 @@ func (h *ChatHandler) GetHistory(ctx context.Context, req *pb.GetHistoryRequest)
 	pbMessages := make([]*pb.Message, len(messages))
 	for i, m := range messages {
 		pbMessages[i] = &pb.Message{
-			Id:        m.ID,
-			OrderId:   m.OrderID.String(),
-			SenderId:  m.SenderID.String(),
-			Role:      string(m.Role),
-			Text:      m.Text,
-			IsRead:    m.IsRead,
-			CreatedAt: timestamppb.New(m.CreatedAt),
+			Id:         m.ID,
+			OrderId:    m.OrderID.String(),
+			SenderId:   m.SenderID.String(),
+			SenderName: m.SenderName,
+			Role:       string(m.Role),
+			Text:       m.Text,
+			IsRead:     m.IsRead,
+			CreatedAt:  timestamppb.New(m.CreatedAt),
 		}
 	}
 
@@ -87,6 +88,7 @@ func (h *ChatHandler) Connect(stream pb.ChatService_ConnectServer) error {
 		return status.Errorf(codes.InvalidArgument, "invalid user_id")
 	}
 	role := domain.Role(connectEvent.Role)
+	senderName := connectEvent.SenderName
 
 	h.log.Info("Client connected", slog.String("user_id", userID.String()), slog.String("order_id", orderID.String()))
 
@@ -120,11 +122,12 @@ func (h *ChatHandler) Connect(stream pb.ChatService_ConnectServer) error {
 				serverMsg = &pb.ServerMessage{
 					Event: &pb.ServerMessage_NewMessage{
 						NewMessage: &pb.NewMessageEvent{
-							MessageId: wsMsg.MessageID,
-							Text:      wsMsg.Text,
-							Role:      string(wsMsg.Role),
-							OrderId:   wsMsg.OrderID.String(),
-							CreatedAt: timestamppb.New(wsMsg.CreatedAt),
+							MessageId:  wsMsg.MessageID,
+							Text:       wsMsg.Text,
+							Role:       string(wsMsg.Role),
+							SenderName: wsMsg.SenderName,
+							OrderId:    wsMsg.OrderID.String(),
+							CreatedAt:  timestamppb.New(wsMsg.CreatedAt),
 						},
 					},
 				}
@@ -176,10 +179,11 @@ func (h *ChatHandler) Connect(stream pb.ChatService_ConnectServer) error {
 		switch event := in.Event.(type) {
 		case *pb.ClientMessage_SendMessage:
 			msg := &domain.Message{
-				OrderID:  orderID,
-				SenderID: userID,
-				Role:     role,
-				Text:     event.SendMessage.Text,
+				OrderID:    orderID,
+				SenderID:   userID,
+				SenderName: senderName,
+				Role:       role,
+				Text:       event.SendMessage.Text,
 			}
 
 			ctx, cancel := context.WithTimeout(stream.Context(), 5*time.Second)
@@ -206,12 +210,13 @@ func (h *ChatHandler) Connect(stream pb.ChatService_ConnectServer) error {
 			})
 
 			h.svc.Broadcast(domain.WSMessage{
-				Event:     domain.EventNewMessage,
-				MessageID: msg.ID,
-				Text:      msg.Text,
-				Role:      msg.Role,
-				OrderID:   orderID,
-				CreatedAt: msg.CreatedAt,
+				Event:      domain.EventNewMessage,
+				MessageID:  msg.ID,
+				Text:       msg.Text,
+				Role:       msg.Role,
+				SenderName: msg.SenderName,
+				OrderID:    orderID,
+				CreatedAt:  msg.CreatedAt,
 			})
 
 		case *pb.ClientMessage_ReadMessage:

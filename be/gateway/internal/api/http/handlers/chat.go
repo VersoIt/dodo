@@ -48,25 +48,27 @@ func (h *ChatHandler) GetHistory(c *fiber.Ctx) error {
 
 	// Map gRPC response to JSON
 	type Message struct {
-		MessageID int64  `json:"message_id"`
-		OrderID   string `json:"order_id"`
-		SenderID  string `json:"sender_id"`
-		Role      string `json:"role"`
-		Text      string `json:"text"`
-		IsRead    bool   `json:"is_read"`
-		CreatedAt string `json:"created_at"`
+		MessageID  int64  `json:"message_id"`
+		OrderID    string `json:"order_id"`
+		SenderID   string `json:"sender_id"`
+		SenderName string `json:"sender_name"`
+		Role       string `json:"role"`
+		Text       string `json:"text"`
+		IsRead     bool   `json:"is_read"`
+		CreatedAt  string `json:"created_at"`
 	}
 
 	messages := make([]Message, len(resp.Messages))
 	for i, m := range resp.Messages {
 		messages[i] = Message{
-			MessageID: m.Id,
-			OrderID:   m.OrderId,
-			SenderID:  m.SenderId,
-			Role:      m.Role,
-			Text:      m.Text,
-			IsRead:    m.IsRead,
-			CreatedAt: m.CreatedAt.AsTime().Format(time.RFC3339),
+			MessageID:  m.Id,
+			OrderID:    m.OrderId,
+			SenderID:   m.SenderId,
+			SenderName: m.SenderName,
+			Role:       m.Role,
+			Text:       m.Text,
+			IsRead:     m.IsRead,
+			CreatedAt:  m.CreatedAt.AsTime().Format(time.RFC3339),
 		}
 	}
 
@@ -109,6 +111,7 @@ func (h *ChatHandler) HandleWS(c *websocket.Conn) {
 	}
 
 	orderID := c.Query("order_id")
+	senderName := c.Query("name")
 	if orderID == "" {
 		_ = c.WriteJSON(fiber.Map{"error": "order_id required"})
 		_ = c.Close()
@@ -127,9 +130,10 @@ func (h *ChatHandler) HandleWS(c *websocket.Conn) {
 	err = stream.Send(&pb.ClientMessage{
 		Event: &pb.ClientMessage_Connect{
 			Connect: &pb.ConnectEvent{
-				UserId:  userID,
-				Role:    role,
-				OrderId: orderID,
+				UserId:     userID,
+				Role:       role,
+				OrderId:    orderID,
+				SenderName: senderName,
 			},
 		},
 	})
@@ -227,12 +231,13 @@ func (h *ChatHandler) HandleWS(c *websocket.Conn) {
 				switch event := in.Event.(type) {
 				case *pb.ServerMessage_NewMessage:
 					wsResp = map[string]interface{}{
-						"event":      "new_message",
-						"message_id": event.NewMessage.MessageId,
-						"text":       event.NewMessage.Text,
-						"role":       event.NewMessage.Role,
-						"order_id":   event.NewMessage.OrderId,
-						"created_at": event.NewMessage.CreatedAt.AsTime(),
+						"event":       "new_message",
+						"message_id":  event.NewMessage.MessageId,
+						"text":        event.NewMessage.Text,
+						"role":        event.NewMessage.Role,
+						"sender_name": event.NewMessage.SenderName,
+						"order_id":    event.NewMessage.OrderId,
+						"created_at":  event.NewMessage.CreatedAt.AsTime(),
 					}
 				case *pb.ServerMessage_Ack:
 					wsResp = map[string]interface{}{

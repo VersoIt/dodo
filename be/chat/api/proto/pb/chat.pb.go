@@ -4,7 +4,7 @@
 // 	protoc        v6.33.1
 // source: chat.proto
 
-package pb
+package chat_pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -223,6 +223,7 @@ type ConnectEvent struct {
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
 	OrderId       string                 `protobuf:"bytes,3,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	SenderName    string                 `protobuf:"bytes,4,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -274,6 +275,13 @@ func (x *ConnectEvent) GetRole() string {
 func (x *ConnectEvent) GetOrderId() string {
 	if x != nil {
 		return x.OrderId
+	}
+	return ""
+}
+
+func (x *ConnectEvent) GetSenderName() string {
+	if x != nil {
+		return x.SenderName
 	}
 	return ""
 }
@@ -433,6 +441,7 @@ type NewMessageEvent struct {
 	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	OrderId       string                 `protobuf:"bytes,4,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	SenderName    string                 `protobuf:"bytes,6,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -500,6 +509,13 @@ func (x *NewMessageEvent) GetCreatedAt() *timestamppb.Timestamp {
 		return x.CreatedAt
 	}
 	return nil
+}
+
+func (x *NewMessageEvent) GetSenderName() string {
+	if x != nil {
+		return x.SenderName
+	}
+	return ""
 }
 
 type ErrorEvent struct {
@@ -651,6 +667,7 @@ type Message struct {
 	Text          string                 `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
 	IsRead        bool                   `protobuf:"varint,6,opt,name=is_read,json=isRead,proto3" json:"is_read,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	SenderName    string                 `protobuf:"bytes,8,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -734,6 +751,13 @@ func (x *Message) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Message) GetSenderName() string {
+	if x != nil {
+		return x.SenderName
+	}
+	return ""
+}
+
 var File_chat_proto protoreflect.FileDescriptor
 
 const file_chat_proto_rawDesc = "" +
@@ -750,11 +774,13 @@ const file_chat_proto_rawDesc = "" +
 	"\vnew_message\x18\x02 \x01(\v2\x15.chat.NewMessageEventH\x00R\n" +
 	"newMessage\x12(\n" +
 	"\x05error\x18\x03 \x01(\v2\x10.chat.ErrorEventH\x00R\x05errorB\a\n" +
-	"\x05event\"V\n" +
+	"\x05event\"w\n" +
 	"\fConnectEvent\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04role\x18\x02 \x01(\tR\x04role\x12\x19\n" +
-	"\border_id\x18\x03 \x01(\tR\aorderId\"E\n" +
+	"\border_id\x18\x03 \x01(\tR\aorderId\x12\x1f\n" +
+	"\vsender_name\x18\x04 \x01(\tR\n" +
+	"senderName\"E\n" +
 	"\x10SendMessageEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x12\n" +
@@ -767,7 +793,7 @@ const file_chat_proto_rawDesc = "" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x02 \x01(\x03R\tmessageId\"\xae\x01\n" +
+	"message_id\x18\x02 \x01(\x03R\tmessageId\"\xcf\x01\n" +
 	"\x0fNewMessageEvent\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x12\n" +
@@ -775,7 +801,9 @@ const file_chat_proto_rawDesc = "" +
 	"\x04role\x18\x03 \x01(\tR\x04role\x12\x19\n" +
 	"\border_id\x18\x04 \x01(\tR\aorderId\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"&\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1f\n" +
+	"\vsender_name\x18\x06 \x01(\tR\n" +
+	"senderName\"&\n" +
 	"\n" +
 	"ErrorEvent\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"D\n" +
@@ -783,7 +811,7 @@ const file_chat_proto_rawDesc = "" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"?\n" +
 	"\x12GetHistoryResponse\x12)\n" +
-	"\bmessages\x18\x01 \x03(\v2\r.chat.MessageR\bmessages\"\xcd\x01\n" +
+	"\bmessages\x18\x01 \x03(\v2\r.chat.MessageR\bmessages\"\xee\x01\n" +
 	"\aMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\border_id\x18\x02 \x01(\tR\aorderId\x12\x1b\n" +
@@ -792,11 +820,13 @@ const file_chat_proto_rawDesc = "" +
 	"\x04text\x18\x05 \x01(\tR\x04text\x12\x17\n" +
 	"\ais_read\x18\x06 \x01(\bR\x06isRead\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt2\x87\x01\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1f\n" +
+	"\vsender_name\x18\b \x01(\tR\n" +
+	"senderName2\x87\x01\n" +
 	"\vChatService\x127\n" +
 	"\aConnect\x12\x13.chat.ClientMessage\x1a\x13.chat.ServerMessage(\x010\x01\x12?\n" +
 	"\n" +
-	"GetHistory\x12\x17.chat.GetHistoryRequest\x1a\x18.chat.GetHistoryResponseB1Z/github.com/versoit/diploma/be/chat/api/proto/pbb\x06proto3"
+	"GetHistory\x12\x17.chat.GetHistoryRequest\x1a\x18.chat.GetHistoryResponseB\x0eZ\f./pb;chat_pbb\x06proto3"
 
 var (
 	file_chat_proto_rawDescOnce sync.Once

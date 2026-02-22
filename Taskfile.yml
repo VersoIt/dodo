@@ -15,7 +15,7 @@ tasks:
     desc: Generate Go code into pb subfolders
     cmds:
       # Create pb directories
-      - powershell -Command "New-Item -ItemType Directory -Force be/orders/api/proto/pb, be/catalog/api/proto/pb, be/auth/api/proto/pb, be/kitchen/api/proto/pb, be/logistics/api/proto/pb, be/notification/api/proto/pb, be/treasury/api/proto/pb"
+      - powershell -Command "New-Item -ItemType Directory -Force be/orders/api/proto/pb, be/catalog/api/proto/pb, be/auth/api/proto/pb, be/kitchen/api/proto/pb, be/logistics/api/proto/pb, be/notification/api/proto/pb, be/treasury/api/proto/pb, be/chat/api/proto/pb"
       # Generate files
       - protoc --proto_path=be/orders/api/proto --go_out=be/orders/api/proto --go-grpc_out=be/orders/api/proto be/orders/api/proto/*.proto
       - protoc --proto_path=be/catalog/api/proto --go_out=be/catalog/api/proto --go-grpc_out=be/catalog/api/proto be/catalog/api/proto/*.proto
@@ -24,6 +24,7 @@ tasks:
       - protoc --proto_path=be/logistics/api/proto --go_out=be/logistics/api/proto --go-grpc_out=be/logistics/api/proto be/logistics/api/proto/*.proto
       - protoc --proto_path=be/notification/api/proto --go_out=be/notification/api/proto --go-grpc_out=be/notification/api/proto be/notification/api/proto/*.proto
       - protoc --proto_path=be/treasury/api/proto --go_out=be/treasury/api/proto --go-grpc_out=be/treasury/api/proto be/treasury/api/proto/*.proto
+      - protoc --proto_path=be/chat/api/proto --go_out=be/chat/api/proto --go-grpc_out=be/chat/api/proto be/chat/api/proto/*.proto
 
   docker-up:
     desc: Run infrastructure via docker-compose

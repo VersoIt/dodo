@@ -6,9 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Taskfile.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Taskfile.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/api/proto/chat.proto" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/api/proto/chat.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/api/proto/pb/chat.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/api/proto/pb/chat.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/api/proto/pb/chat_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/api/proto/pb/chat_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/domain/message.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/domain/message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/handler/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/handler/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/be/chat/internal/repository/message_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/chat/internal/repository/message_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/be/gateway/internal/api/http/handlers/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/gateway/internal/api/http/handlers/chat.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fe/src/api/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/api/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fe/src/components/ChatComponent.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/components/ChatComponent.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fe/src/views/ManagerView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/fe/src/views/ManagerView.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

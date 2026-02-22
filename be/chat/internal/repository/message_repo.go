@@ -32,8 +32,8 @@ func (r *messageRepo) Save(ctx context.Context, msg *domain.Message) error {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	
 	sqlStr, args, err := r.sb.Insert("chat_messages").
-		Columns("order_id", "sender_id", "role", "text", "is_read").
-		Values(msg.OrderID, msg.SenderID, msg.Role, msg.Text, msg.IsRead).
+		Columns("order_id", "sender_id", "sender_name", "role", "text", "is_read").
+		Values(msg.OrderID, msg.SenderID, msg.SenderName, msg.Role, msg.Text, msg.IsRead).
 		Suffix("RETURNING id, created_at").
 		ToSql()
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *messageRepo) Save(ctx context.Context, msg *domain.Message) error {
 func (r *messageRepo) GetHistory(ctx context.Context, orderID uuid.UUID, limit int) ([]domain.Message, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 	
-	sqlStr, args, err := r.sb.Select("id", "order_id", "sender_id", "role", "text", "created_at", "is_read").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "sender_id", "sender_name", "role", "text", "created_at", "is_read").
 		From("chat_messages").
 		Where(squirrel.Eq{"order_id": orderID}).
 		OrderBy("created_at DESC").
@@ -69,7 +69,7 @@ func (r *messageRepo) GetHistory(ctx context.Context, orderID uuid.UUID, limit i
 	var messages []domain.Message
 	for rows.Next() {
 		var msg domain.Message
-		if err := rows.Scan(&msg.ID, &msg.OrderID, &msg.SenderID, &msg.Role, &msg.Text, &msg.CreatedAt, &msg.IsRead); err != nil {
+		if err := rows.Scan(&msg.ID, &msg.OrderID, &msg.SenderID, &msg.SenderName, &msg.Role, &msg.Text, &msg.CreatedAt, &msg.IsRead); err != nil {
 			return nil, fmt.Errorf("scan message: %w", err)
 		}
 		messages = append(messages, msg)
@@ -85,7 +85,7 @@ func (r *messageRepo) GetHistory(ctx context.Context, orderID uuid.UUID, limit i
 func (r *messageRepo) GetAfterID(ctx context.Context, orderID uuid.UUID, afterID int64) ([]domain.Message, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 
-	sqlStr, args, err := r.sb.Select("id", "order_id", "sender_id", "role", "text", "created_at", "is_read").
+	sqlStr, args, err := r.sb.Select("id", "order_id", "sender_id", "sender_name", "role", "text", "created_at", "is_read").
 		From("chat_messages").
 		Where(squirrel.Eq{"order_id": orderID}).
 		Where(squirrel.Gt{"id": afterID}).
@@ -104,7 +104,7 @@ func (r *messageRepo) GetAfterID(ctx context.Context, orderID uuid.UUID, afterID
 	var messages []domain.Message
 	for rows.Next() {
 		var msg domain.Message
-		if err := rows.Scan(&msg.ID, &msg.OrderID, &msg.SenderID, &msg.Role, &msg.Text, &msg.CreatedAt, &msg.IsRead); err != nil {
+		if err := rows.Scan(&msg.ID, &msg.OrderID, &msg.SenderID, &msg.SenderName, &msg.Role, &msg.Text, &msg.CreatedAt, &msg.IsRead); err != nil {
 			return nil, fmt.Errorf("scan message: %w", err)
 		}
 		messages = append(messages, msg)

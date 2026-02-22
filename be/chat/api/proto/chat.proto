@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package chat;
 
-option go_package = "github.com/versoit/diploma/be/chat/api/proto/pb";
+option go_package = "./pb;chat_pb";
 
 import "google/protobuf/timestamp.proto";
 
@@ -31,6 +31,7 @@ message ConnectEvent {
   string user_id = 1;
   string role = 2;
   string order_id = 3;
+  string sender_name = 4;
 }
 
 message SendMessageEvent {
@@ -53,6 +54,7 @@ message NewMessageEvent {
   string role = 3;
   string order_id = 4;
   google.protobuf.Timestamp created_at = 5;
+  string sender_name = 6;
 }
 
 message ErrorEvent {
@@ -76,4 +78,5 @@ message Message {
   string text = 5;
   bool is_read = 6;
   google.protobuf.Timestamp created_at = 7;
+  string sender_name = 8;
 }

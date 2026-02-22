@@ -79,7 +79,8 @@ const connectWebSocket = () => {
   const token = localStorage.getItem('token')
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   const host = window.location.host
-  const wsUrl = `${protocol}//${host}/ws/chat?token=${token}&order_id=${props.orderId}`
+  const name = authStore.user?.name || ''
+  const wsUrl = `${protocol}//${host}/ws/chat?token=${token}&order_id=${props.orderId}&name=${encodeURIComponent(name)}`
   
   socket.value = new WebSocket(wsUrl)
 
