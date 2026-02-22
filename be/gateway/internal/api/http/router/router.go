@@ -49,11 +49,11 @@ func SetupRoutes(
 	catalog := api.Group("/catalog")
 	catalog.Get("/products", catalogHandler.ListProducts)
 	catalog.Get("/products/:id", catalogHandler.GetProduct)
-	catalog.Post("/products", middleware.NewAuthMiddleware(), middleware.RequireRole("manager"), catalogHandler.CreateProduct)
-	catalog.Put("/products/:id", middleware.NewAuthMiddleware(), middleware.RequireRole("manager"), catalogHandler.UpdateProduct)
+	catalog.Post("/products", middleware.NewAuthMiddleware(cfg.JWTSecret), middleware.RequireRole("manager"), catalogHandler.CreateProduct)
+	catalog.Put("/products/:id", middleware.NewAuthMiddleware(cfg.JWTSecret), middleware.RequireRole("manager"), catalogHandler.UpdateProduct)
 
 	// Protected routes
-	protected := api.Group("/", middleware.NewAuthMiddleware())
+	protected := api.Group("/", middleware.NewAuthMiddleware(cfg.JWTSecret))
 	protected.Get("/auth/me", authHandler.GetMe)
 	protected.Patch("/auth/me", authHandler.UpdateProfile)
 

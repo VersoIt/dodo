@@ -181,7 +181,7 @@ func (h *ChatHandler) Connect(stream pb.ChatService_ConnectServer) error {
 				Role:     role,
 				Text:     event.SendMessage.Text,
 			}
-			
+
 			ctx, cancel := context.WithTimeout(stream.Context(), 5*time.Second)
 			err := h.svc.Save(ctx, msg)
 			cancel()

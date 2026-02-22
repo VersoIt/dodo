@@ -67,9 +67,19 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const userStr = localStorage.getItem('user')
-  const user = userStr && userStr !== 'null' ? JSON.parse(userStr) : {}
-  const isAuthenticated = !!localStorage.getItem('token')
+  let user = null
+  try {
+    const userStr = localStorage.getItem('user')
+    if (userStr && userStr !== 'undefined') {
+      user = JSON.parse(userStr)
+    }
+  } catch (error) {
+    console.error('Failed to parse user from localStorage', error)
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+  }
+
+  const isAuthenticated = !!localStorage.getItem('token') && !!user
 
   // 1. Auth check
   if (to.meta.requiresAuth && !isAuthenticated) {
@@ -77,16 +87,16 @@ router.beforeEach((to, from, next) => {
   }
 
   // 2. Role-based access control
-  if (to.meta.role && user.role !== to.meta.role && user.role !== 'manager') {
+  if (to.meta.role && user?.role !== to.meta.role && user?.role !== 'manager') {
     return next({ name: 'home' })
   }
 
   // 3. Smart redirect for staff from Home page
   if (to.name === 'home' && isAuthenticated) {
-    if (user.role === 'chef') {
+    if (user?.role === 'chef') {
       return next({ name: 'kitchen' })
     }
-    if (user.role === 'courier') {
+    if (user?.role === 'courier') {
       return next({ name: 'logistics' })
     }
   }

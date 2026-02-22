@@ -152,6 +152,7 @@ services:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_SERVICE_NAME: auth-service
+      JWT_SECRET: super-secret-key
     ports:
       - "9900:9000"
     networks:
@@ -305,6 +306,7 @@ services:
       - CHAT_SERVICE_ADDR=chat:9009
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - OTEL_SERVICE_NAME=gateway-service
+      - JWT_SECRET=super-secret-key
     ports:
       - "8080:8080"
     networks:

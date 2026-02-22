@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	App      AppConfig      `yaml:"app"`
-	HTTP     HTTPConfig     `yaml:"http"`
-	Services ServicesConfig `yaml:"services"`
+	App       AppConfig      `yaml:"app"`
+	HTTP      HTTPConfig     `yaml:"http"`
+	Services  ServicesConfig `yaml:"services"`
+	JWTSecret string         `env:"JWT_SECRET" env-default:"secret"`
 }
 
 type AppConfig struct {

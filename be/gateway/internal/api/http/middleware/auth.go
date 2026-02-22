@@ -7,9 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("super-secret-key")
-
-func NewAuthMiddleware() fiber.Handler {
+func NewAuthMiddleware(secret string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
@@ -27,7 +25,7 @@ func NewAuthMiddleware() fiber.Handler {
 
 		tokenString := parts[1]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
+			return []byte(secret), nil
 		})
 
 		if err != nil || !token.Valid {
