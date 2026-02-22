@@ -2,8 +2,8 @@
 import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
+import { authApi } from '../api'
 import { UserPlus, Mail, Lock, User, ShieldCheck, AlertCircle } from 'lucide-vue-next'
-import axios from 'axios'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -19,8 +19,8 @@ const handleRegister = async () => {
   if (!name.value || !email.value || !password.value) { error.value = 'Пожалуйста, заполните все поля'; return }
   loading.value = true; error.value = ''
   try {
-    const response = await axios.post('/api/v1/auth/register', { name: name.value, email: email.value, password: password.value, role: role.value })
-    if (response.data.success) {
+    const response = await authApi.register({ name: name.value, email: email.value, password: password.value, role: role.value })
+    if (response.success) {
       addToast('Регистрация успешна!', 'success')
       const loginSuccess = await authStore.login(email.value, password.value)
       if (loginSuccess) {
@@ -29,7 +29,7 @@ const handleRegister = async () => {
         else router.push('/')
       } else { router.push('/login') }
     }
-  } catch (err: any) { error.value = err.response?.data?.error || 'Ошибка при регистрации' } finally { loading.value = false }
+  } catch (err: any) { error.value = err.message || 'Ошибка при регистрации' } finally { loading.value = false }
 }
 </script>
 

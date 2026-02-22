@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { PartyPopper, CheckCircle2, Home, Package } from 'lucide-vue-next'
-import axios from 'axios'
+import { ordersApi } from '../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,9 +12,9 @@ const loading = ref(true)
 
 const fetchOrderDetails = async () => {
   try {
-    const response = await axios.get(`/api/v1/orders/${orderId}`)
-    if (response.data.success) {
-      orderNumber.value = response.data.data.order_number
+    const response = await ordersApi.getOrder(orderId)
+    if (response.success && response.data) {
+      orderNumber.value = response.data.order_number
     }
   } catch (err) {
     console.error('Failed to load order info')

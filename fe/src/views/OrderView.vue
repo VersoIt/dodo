@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { ordersApi } from '../api'
 import { CheckCircle2, Clock, Truck, PackageCheck, CreditCard, MapPin, ChefHat } from 'lucide-vue-next'
 import ChatComponent from '../components/ChatComponent.vue'
 
@@ -13,9 +13,9 @@ let pollInterval: any = null
 
 const fetchOrder = async () => {
   try {
-    const response = await axios.get(`/api/v1/orders/${orderId}`)
-    if (response.data.success) {
-      order.value = response.data.data
+    const response = await ordersApi.getOrder(orderId)
+    if (response.success) {
+      order.value = response.data
     }
   } catch (error) {
     console.error('Failed to fetch order:', error)
@@ -50,8 +50,8 @@ const steps = [
 
 const handlePayment = async () => {
   try {
-    const resp = await axios.post(`/api/v1/orders/${orderId}/pay`)
-    if (resp.data.success) {
+    const resp = await ordersApi.payOrder(orderId)
+    if (resp.success) {
       fetchOrder()
     }
   } catch (error) {
