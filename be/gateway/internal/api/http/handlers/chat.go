@@ -6,26 +6,71 @@ import (
 	"io"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	pb "github.com/versoit/diploma/be/chat/api/proto/pb"
+	"github.com/versoit/diploma/gateway/internal/config"
 )
 
 type ChatHandler struct {
-	client pb.ChatServiceClient
-	log    *slog.Logger
-	// We need the JWT secret here to validate the token from Query param
-	// Usually this is in config, but for now I'll assume it's passed or available.
-	// Ideally Gateway config has it.
+	client    pb.ChatServiceClient
+	log       *slog.Logger
+	jwtSecret string
 }
 
-func NewChatHandler(client pb.ChatServiceClient, log *slog.Logger) *ChatHandler {
+func NewChatHandler(client pb.ChatServiceClient, log *slog.Logger, cfg *config.Config) *ChatHandler {
 	return &ChatHandler{
-		client: client,
-		log:    log,
+		client:    client,
+		log:       log,
+		jwtSecret: cfg.JWTSecret,
 	}
+}
+
+// GetHistory handles HTTP requests for chat history
+func (h *ChatHandler) GetHistory(c *fiber.Ctx) error {
+	orderID := c.Query("order_id")
+	if orderID == "" {
+		return ErrorResponse(c, fiber.StatusBadRequest, "order_id required")
+	}
+	limit := c.QueryInt("limit", 50)
+
+	ctx := context.Background()
+	resp, err := h.client.GetHistory(ctx, &pb.GetHistoryRequest{
+		OrderId: orderID,
+		Limit:   int32(limit),
+	})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to fetch history")
+	}
+
+	// Map gRPC response to JSON
+	type Message struct {
+		MessageID int64  `json:"message_id"`
+		OrderID   string `json:"order_id"`
+		SenderID  string `json:"sender_id"`
+		Role      string `json:"role"`
+		Text      string `json:"text"`
+		IsRead    bool   `json:"is_read"`
+		CreatedAt string `json:"created_at"`
+	}
+
+	messages := make([]Message, len(resp.Messages))
+	for i, m := range resp.Messages {
+		messages[i] = Message{
+			MessageID: m.Id,
+			OrderID:   m.OrderId,
+			SenderID:  m.SenderId,
+			Role:      m.Role,
+			Text:      m.Text,
+			IsRead:    m.IsRead,
+			CreatedAt: m.CreatedAt.AsTime().Format(time.RFC3339),
+		}
+	}
+
+	return c.JSON(messages) // Return raw array as frontend expects
 }
 
 // WSUpgrade handles the WebSocket upgrade
@@ -43,13 +88,9 @@ func (h *ChatHandler) HandleWS(c *websocket.Conn) {
 	if tokenStr == "" {
 		tokenStr = c.Cookies("token") // or header
 	}
-	// Simplified validation: In a real gateway, we'd use a shared secret or call Auth service.
-	// Assuming "super-secret-key" for now as per other services, BUT Gateway should probably get user info from Auth middleware if possible.
-	// Since WS upgrade is tricky with middleware, we parse manually.
 	
-	// FIX: Hardcoded secret for demo purposes, should be from Config.
 	token, _ := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte("super-secret-key"), nil
+		return []byte(h.jwtSecret), nil
 	})
 
 	var userID, role string
