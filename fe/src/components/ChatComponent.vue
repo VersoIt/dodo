@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
-import axios from 'axios'
+import { chatApi } from '../api'
 import { Send, Check, CheckCheck, Clock, User, AlertCircle } from 'lucide-vue-next'
 import { useAuthStore } from '../store/auth'
 
@@ -40,15 +40,17 @@ const scrollToBottom = async () => {
 
 const fetchHistory = async () => {
   try {
-    const response = await axios.get(`/api/v1/chat/history?order_id=${props.orderId}&limit=50`)
-    messages.value = response.data.map((m: any) => ({
-      ...m,
-      status: m.is_read ? 'read' : 'sent'
-    }))
-    if (messages.value.length > 0) {
-      lastSeenId.value = Math.max(...messages.value.map(m => m.message_id || 0))
+    const response = await chatApi.getHistory(props.orderId)
+    if (response.success && response.data) {
+      messages.value = response.data.map((m: any) => ({
+        ...m,
+        status: m.is_read ? 'read' : 'sent'
+      }))
+      if (messages.value.length > 0) {
+        lastSeenId.value = Math.max(...messages.value.map(m => m.message_id || 0))
+      }
+      scrollToBottom()
     }
-    scrollToBottom()
   } catch (err) {
     console.error('Failed to fetch chat history', err)
   }
@@ -56,15 +58,17 @@ const fetchHistory = async () => {
 
 const syncMessages = async () => {
   try {
-    const response = await axios.get(`/api/v1/chat/sync?order_id=${props.orderId}&after_id=${lastSeenId.value}`)
-    const newMsgs = response.data.map((m: any) => ({
-      ...m,
-      status: m.is_read ? 'read' : 'sent'
-    }))
-    if (newMsgs.length > 0) {
-      messages.value.push(...newMsgs)
-      lastSeenId.value = Math.max(lastSeenId.value, ...newMsgs.map((m: any) => m.message_id || 0))
-      scrollToBottom()
+    const response = await chatApi.syncMessages(props.orderId, lastSeenId.value)
+    if (response.success && response.data) {
+      const newMsgs = response.data.map((m: any) => ({
+        ...m,
+        status: m.is_read ? 'read' : 'sent'
+      }))
+      if (newMsgs.length > 0) {
+        messages.value.push(...newMsgs)
+        lastSeenId.value = Math.max(lastSeenId.value, ...newMsgs.map((m: any) => m.message_id || 0))
+        scrollToBottom()
+      }
     }
   } catch (err) {
     console.error('Failed to sync messages', err)

@@ -70,7 +70,7 @@ func (h *ChatHandler) GetHistory(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.JSON(messages) // Return raw array as frontend expects
+	return SuccessResponse(c, messages)
 }
 
 // WSUpgrade handles the WebSocket upgrade

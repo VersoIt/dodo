@@ -71,3 +71,11 @@ export const authApi = {
   getMe: (): Promise<ApiResponse<User>> => client.get('/api/v1/auth/me'),
   updateProfile: (data: Partial<User>): Promise<ApiResponse<User>> => client.patch('/api/v1/auth/me', data),
 }
+
+// --- Chat API ---
+export const chatApi = {
+  getHistory: (orderId: string | number, limit: number = 50): Promise<ApiResponse<any[]>> => 
+    client.get(`/api/v1/chat/history`, { params: { order_id: orderId, limit } }),
+  syncMessages: (orderId: string | number, afterId: number): Promise<ApiResponse<any[]>> => 
+    client.get(`/api/v1/chat/sync`, { params: { order_id: orderId, after_id: afterId } }),
+}
