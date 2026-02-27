@@ -72,6 +72,7 @@ func TestOrderUseCase_CreateOrder(t *testing.T) {
 		Address: domain.DeliveryAddress{
 			City:   "Moscow",
 			Street: "Red Square",
+			House:  "1",
 		},
 		Items: []OrderItemInput{
 			{
