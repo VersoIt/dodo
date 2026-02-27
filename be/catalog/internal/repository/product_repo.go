@@ -45,7 +45,18 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*domain.Product, error) {
 	}
 	defer rows.Close()
 
-	var products []*domain.Product
+	type prodData struct {
+		pid     string
+		name    string
+		desc    string
+		cat     int
+		price   float64
+		img     string
+		isAvail bool
+	}
+	var pDataList []prodData
+	var pids []string
+
 	for rows.Next() {
 		var (
 			pid, name string
@@ -57,17 +68,58 @@ func (r *productRepo) FindAll(ctx context.Context) ([]*domain.Product, error) {
 		if err := rows.Scan(&pid, &name, &desc, &cat, &price, &img, &isAvail); err != nil {
 			return nil, fmt.Errorf("scan product: %w", err)
 		}
-
-		ingredients, err := r.fetchIngredients(ctx, pid)
-		if err != nil {
-			return nil, fmt.Errorf("fetch ingredients: %w", err)
-		}
-
-		products = append(products, domain.ReconstructProduct(pid, name, desc.String, domain.CategoryType(cat), price, img.String, isAvail, ingredients))
+		pDataList = append(pDataList, prodData{pid, name, desc.String, cat, price, img.String, isAvail})
+		pids = append(pids, pid)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows error: %w", err)
 	}
+
+	if len(pids) == 0 {
+		return nil, nil
+	}
+
+	// Fetch all ingredients for these products
+	ingSql, ingArgs, err := r.sb.Select("product_id", "ingredient_id", "quantity", "is_removable").
+		From("product_ingredients").
+		Where(squirrel.Eq{"product_id": pids}).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("build ingredients query: %w", err)
+	}
+
+	ingRows, err := db.Query(ctx, ingSql, ingArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("query ingredients: %w", err)
+	}
+	defer ingRows.Close()
+
+	ingredientsByProduct := make(map[string][]domain.IngredientRef)
+	for ingRows.Next() {
+		var (
+			pID, iID string
+			qty      float64
+			rem      bool
+		)
+		if err := ingRows.Scan(&pID, &iID, &qty, &rem); err != nil {
+			return nil, fmt.Errorf("scan ingredient: %w", err)
+		}
+		ingredientsByProduct[pID] = append(ingredientsByProduct[pID], domain.IngredientRef{
+			IngredientID: iID,
+			Quantity:     qty,
+			IsRemovable:  rem,
+		})
+	}
+
+	var products []*domain.Product
+	for _, p := range pDataList {
+		ings := ingredientsByProduct[p.pid]
+		if ings == nil {
+			ings = []domain.IngredientRef{}
+		}
+		products = append(products, domain.ReconstructProduct(p.pid, p.name, p.desc, domain.CategoryType(p.cat), p.price, p.img, p.isAvail, ings))
+	}
+
 	return products, nil
 }
 

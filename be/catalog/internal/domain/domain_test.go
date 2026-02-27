@@ -1,8 +1,10 @@
 package domain
 
 import (
-	"github.com/shopspring/decimal"
+	"errors"
 	"testing"
+
+	"github.com/shopspring/decimal"
 )
 
 func TestNewProduct(t *testing.T) {
@@ -33,7 +35,7 @@ func TestProduct_UpdatePrice(t *testing.T) {
 	}
 
 	_, err := NewPrice(-1)
-	if err != ErrNegativePrice {
+	if !errors.Is(err, ErrNegativePrice) {
 		t.Errorf("expected ErrNegativePrice, got %v", err)
 	}
 }

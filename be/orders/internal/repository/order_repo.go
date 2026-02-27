@@ -176,26 +176,7 @@ func (r *orderRepo) FindByID(ctx context.Context, id string) (*domain.Order, err
 }
 
 func (r *orderRepo) FindByCustomerID(ctx context.Context, customerID string) ([]*domain.Order, error) {
-	db := r.getter.DefaultTrOrDB(ctx, r.pool)
-	rows, err := db.Query(ctx, "SELECT id FROM orders WHERE customer_id = $1 ORDER BY created_at DESC", customerID)
-	if err != nil {
-		return nil, fmt.Errorf("query orders: %w", err)
-	}
-	defer rows.Close()
-
-	var result []*domain.Order
-	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err == nil {
-			if o, err := r.FindByID(ctx, id); err == nil {
-				result = append(result, o)
-			}
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %w", err)
-	}
-	return result, nil
+	return r.FindFiltered(ctx, domain.OrderFilter{CustomerID: &customerID})
 }
 
 func (r *orderRepo) FindAll(ctx context.Context) ([]*domain.Order, error) {
@@ -205,7 +186,8 @@ func (r *orderRepo) FindAll(ctx context.Context) ([]*domain.Order, error) {
 func (r *orderRepo) FindFiltered(ctx context.Context, filter domain.OrderFilter) ([]*domain.Order, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
 
-	builder := r.sb.Select("id").From("orders").OrderBy("created_at DESC")
+	builder := r.sb.Select("id", "order_number", "customer_id", "status", "created_at", "delivery_city", "delivery_street", "delivery_house", "delivery_apartment", "delivery_floor", "delivery_entrance", "delivery_comment", "delivery_price", "discount", "promo_code", "final_price", "chef_id", "courier_id").
+		From("orders").OrderBy("created_at DESC")
 
 	if filter.StartAt != nil {
 		builder = builder.Where(squirrel.GtOrEq{"created_at": *filter.StartAt})
@@ -215,6 +197,9 @@ func (r *orderRepo) FindFiltered(ctx context.Context, filter domain.OrderFilter)
 	}
 	if filter.Status != nil {
 		builder = builder.Where(squirrel.Eq{"status": *filter.Status})
+	}
+	if filter.CustomerID != nil {
+		builder = builder.Where(squirrel.Eq{"customer_id": *filter.CustomerID})
 	}
 
 	sqlStr, args, err := builder.ToSql()
@@ -228,18 +213,98 @@ func (r *orderRepo) FindFiltered(ctx context.Context, filter domain.OrderFilter)
 	}
 	defer rows.Close()
 
-	var result []*domain.Order
+	var orders []*domain.Order
+	var orderIDs []string
+
 	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err == nil {
-			if o, err := r.FindByID(ctx, id); err == nil {
-				result = append(result, o)
-			}
+		var (
+			oid, number, cid, promo, city, street, house, apartment, floor, entrance, comment string
+			status                                                                            int
+			createdAt                                                                         time.Time
+			delPrice, discount, finalPrice                                                    common.Money
+			chefID, courierID                                                                 sql.NullString
+		)
+		if err := rows.Scan(&oid, &number, &cid, &status, &createdAt, &city, &street, &house, &apartment, &floor, &entrance, &comment, &delPrice, &discount, &promo, &finalPrice, &chefID, &courierID); err != nil {
+			return nil, fmt.Errorf("scan order: %w", err)
 		}
+		addr := domain.DeliveryAddress{City: city, Street: street, House: house, Apartment: apartment, Floor: floor, Entrance: entrance, Comment: comment}
+		o := domain.ReconstructOrder(oid, number, cid, domain.OrderStatus(status), createdAt, addr, delPrice, discount, promo, finalPrice, nil, chefID.String, courierID.String)
+		orders = append(orders, o)
+		orderIDs = append(orderIDs, oid)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows error: %w", err)
 	}
+
+	if len(orderIDs) == 0 {
+		return orders, nil
+	}
+
+	itemsSql, itemsArgs, err := r.sb.Select("i.id", "i.order_id", "i.product_id", "i.product_name", "i.quantity", "i.base_price", "i.size_multiplier", "t.name", "t.price").
+		From("order_items i").
+		LeftJoin("order_item_toppings t ON i.id = t.order_item_id").
+		Where(squirrel.Eq{"i.order_id": orderIDs}).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("build items query: %w", err)
+	}
+
+	itemRows, err := db.Query(ctx, itemsSql, itemsArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("query items: %w", err)
+	}
+	defer itemRows.Close()
+
+	type itemData struct {
+		item    *domain.OrderItem
+		orderID string
+	}
+	itemsByOrder := make(map[string][]*domain.OrderItem)
+	itemsMap := make(map[string]*itemData)
+	var itemsList []*itemData
+
+	for itemRows.Next() {
+		var (
+			iid, oid, pid, pname string
+			qty                  int
+			base                 common.Money
+			size                 float64
+			tname                sql.NullString
+			tprice               *common.Money
+		)
+		if err := itemRows.Scan(&iid, &oid, &pid, &pname, &qty, &base, &size, &tname, &tprice); err != nil {
+			return nil, fmt.Errorf("scan item/topping: %w", err)
+		}
+
+		iData, ok := itemsMap[iid]
+		if !ok {
+			item := domain.ReconstructOrderItem(iid, pid, pname, qty, base, size, nil)
+			iData = &itemData{item: item, orderID: oid}
+			itemsMap[iid] = iData
+			itemsList = append(itemsList, iData)
+		}
+
+		if tname.Valid && tprice != nil {
+			iData.item.AddReconstructedTopping(tname.String, *tprice)
+		}
+	}
+
+	// Preserve item order
+	for _, iData := range itemsList {
+		itemsByOrder[iData.orderID] = append(itemsByOrder[iData.orderID], iData.item)
+	}
+
+	var result []*domain.Order
+	for _, o := range orders {
+		items := itemsByOrder[o.ID()]
+		if items == nil {
+			items = make([]*domain.OrderItem, 0)
+		}
+		addr := o.Address()
+		fullOrder := domain.ReconstructOrder(o.ID(), o.OrderNumber(), o.CustomerID(), o.Status(), o.CreatedAt(), addr, o.DeliveryPrice(), o.Discount(), o.PromoCode(), o.FinalPrice(), items, o.ChefID(), o.CourierID())
+		result = append(result, fullOrder)
+	}
+
 	return result, nil
 }
 

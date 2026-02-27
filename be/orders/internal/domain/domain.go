@@ -371,9 +371,10 @@ func generateOrderNumber() string {
 }
 
 type OrderFilter struct {
-	StartAt *time.Time
-	EndAt   *time.Time
-	Status  *OrderStatus
+	StartAt    *time.Time
+	EndAt      *time.Time
+	Status     *OrderStatus
+	CustomerID *string
 }
 
 type OrderRepository interface {

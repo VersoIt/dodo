@@ -34,7 +34,7 @@ type Price struct {
 func NewPrice(amount float64) (Price, error) {
 	money := common.NewMoney(amount)
 	if money.IsNegative() {
-		return Price{}, fmt.Errorf("price cannot be negative")
+		return Price{}, ErrNegativePrice
 	}
 	return Price{amount: money}, nil
 }
@@ -42,7 +42,7 @@ func NewPrice(amount float64) (Price, error) {
 // FromMoney allows creating Price from existing Money object, validating it
 func NewPriceFromMoney(m common.Money) (Price, error) {
 	if m.IsNegative() {
-		return Price{}, fmt.Errorf("price cannot be negative")
+		return Price{}, ErrNegativePrice
 	}
 	return Price{amount: m}, nil
 }
