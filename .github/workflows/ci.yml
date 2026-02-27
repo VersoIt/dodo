@@ -47,14 +47,14 @@ jobs:
           go-version: '1.24'
           cache-dependency-path: "**/*.mod"
       - name: Start Services
-        run: docker-compose up -d postgres nats
+        run: docker compose up -d postgres nats
       - name: Wait for Services
         run: |
           echo "Waiting for PostgreSQL to be ready..."
-          until docker-compose exec -T postgres pg_isready -U pizza_user -d pizza_db; do sleep 1; done
+          until docker compose exec -T postgres pg_isready -U pizza_user -d pizza_db; do sleep 1; done
           echo "PostgreSQL is ready."
       - name: Run Migrations
-        run: docker-compose up migrations
+        run: docker compose up migrations
       - name: Run Tests
         run: |
           # Test root pkg

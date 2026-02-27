@@ -27,14 +27,14 @@ tasks:
       - protoc --proto_path=be/chat/api/proto --go_out=be/chat/api/proto --go-grpc_out=be/chat/api/proto be/chat/api/proto/*.proto
 
   docker-up:
-    desc: Run infrastructure via docker-compose
+    desc: Run infrastructure via docker compose
     cmds:
-      - docker-compose up --build -d
+      - docker compose up --build -d
 
   docker-down:
-    desc: Stop docker-compose
+    desc: Stop docker compose
     cmds:
-      - docker-compose down
+      - docker compose down
 
   k8s-deploy:
     desc: Deploy all services to Kubernetes
