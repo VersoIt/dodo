@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	sheetDashboard = "Dashboard"
-	sheetOrders    = "Orders"
+	sheetDashboard = "Сводка"
+	sheetOrders    = "Заказы"
 )
 
 type ReportGenerator struct{}
@@ -99,7 +99,7 @@ func (g *ReportGenerator) createDashboardSheet(f *excelize.File, analytics *Anal
 	}
 
 	// Title
-	if err := f.SetCellValue(sheetDashboard, "A1", "Sales Performance Report"); err != nil {
+	if err := f.SetCellValue(sheetDashboard, "A1", "Отчет по эффективности продаж"); err != nil {
 		return err
 	}
 	if err := f.SetCellStyle(sheetDashboard, "A1", "A1", styleTitle); err != nil {
@@ -111,16 +111,16 @@ func (g *ReportGenerator) createDashboardSheet(f *excelize.File, analytics *Anal
 
 	// Metadata
 	metaRow := 2
-	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("A%d", metaRow), "Generated at:"); err != nil {
+	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("A%d", metaRow), "Сформирован:"); err != nil {
 		return err
 	}
-	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("B%d", metaRow), time.Now().Format(time.RFC1123)); err != nil {
+	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("B%d", metaRow), time.Now().Format("02.01.2006 15:04:05")); err != nil {
 		return err
 	}
 
 	// Summary
 	summaryStartRow := 4
-	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("A%d", summaryStartRow), "Kpi Metrics"); err != nil {
+	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("A%d", summaryStartRow), "Ключевые показатели"); err != nil {
 		return err
 	}
 	if err := f.SetCellStyle(sheetDashboard, fmt.Sprintf("A%d", summaryStartRow), fmt.Sprintf("B%d", summaryStartRow), styleHeader); err != nil {
@@ -132,11 +132,11 @@ func (g *ReportGenerator) createDashboardSheet(f *excelize.File, analytics *Anal
 		Value interface{}
 		Style int
 	}{
-		{"Total Orders", analytics.OrdersCount, styleValue},
-		{"Total Revenue", analytics.TotalRevenue, styleCurrency},
-		{"Average Order Value", analytics.AvgCheck, styleCurrency},
-		{"Current Cooking", analytics.CookingCount, styleValue},
-		{"Current Delivering", analytics.DeliveringCount, styleValue},
+		{"Всего заказов", analytics.OrdersCount, styleValue},
+		{"Общая выручка", analytics.TotalRevenue, styleCurrency},
+		{"Средний чек", analytics.AvgCheck, styleCurrency},
+		{"Готовится", analytics.CookingCount, styleValue},
+		{"В доставке", analytics.DeliveringCount, styleValue},
 	}
 
 	for i, m := range metrics {
@@ -148,14 +148,14 @@ func (g *ReportGenerator) createDashboardSheet(f *excelize.File, analytics *Anal
 
 	// Top Products
 	tpStartRow := summaryStartRow + len(metrics) + 2
-	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("A%d", tpStartRow), "Top Selling Products"); err != nil {
+	if err := f.SetCellValue(sheetDashboard, fmt.Sprintf("A%d", tpStartRow), "Топ продаж"); err != nil {
 		return err
 	}
 	if err := f.SetCellStyle(sheetDashboard, fmt.Sprintf("A%d", tpStartRow), fmt.Sprintf("C%d", tpStartRow), styleHeader); err != nil {
 		return err
 	}
 
-	headers := []string{"Product", "Sold (Qty)", "Revenue"}
+	headers := []string{"Товар", "Продано (шт.)", "Выручка"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, tpStartRow+1)
 		_ = f.SetCellValue(sheetDashboard, cell, h)
@@ -200,14 +200,14 @@ func (g *ReportGenerator) createOrdersSheet(f *excelize.File, orders []*domain.O
 
 	// Header row
 	headers := []interface{}{
-		excelize.Cell{StyleID: styleHeader, Value: "Order ID"},
-		excelize.Cell{StyleID: styleHeader, Value: "Created At"},
-		excelize.Cell{StyleID: styleHeader, Value: "Status"},
-		excelize.Cell{StyleID: styleHeader, Value: "Customer"},
-		excelize.Cell{StyleID: styleHeader, Value: "Address"},
-		excelize.Cell{StyleID: styleHeader, Value: "Amount"},
-		excelize.Cell{StyleID: styleHeader, Value: "Promo Code"},
-		excelize.Cell{StyleID: styleHeader, Value: "Items Summary"},
+		excelize.Cell{StyleID: styleHeader, Value: "ID Заказа"},
+		excelize.Cell{StyleID: styleHeader, Value: "Дата создания"},
+		excelize.Cell{StyleID: styleHeader, Value: "Статус"},
+		excelize.Cell{StyleID: styleHeader, Value: "Клиент"},
+		excelize.Cell{StyleID: styleHeader, Value: "Адрес"},
+		excelize.Cell{StyleID: styleHeader, Value: "Сумма"},
+		excelize.Cell{StyleID: styleHeader, Value: "Промо-код"},
+		excelize.Cell{StyleID: styleHeader, Value: "Состав заказа"},
 	}
 
 	if err := sw.SetRow("A1", headers); err != nil {
@@ -266,4 +266,3 @@ func (g *ReportGenerator) createOrdersSheet(f *excelize.File, orders []*domain.O
 
 	return nil
 }
-
