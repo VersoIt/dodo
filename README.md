@@ -1,4 +1,4 @@
-# 🍕 Pizza Delivery System — Senior-Level Microservices
+# 🍕 Pizza Delivery System — Microservices Architecture
 
 [![CI Pipeline](https://github.com/versoit/diploma/actions/workflows/ci.yml/badge.svg)](https://github.com/versoit/diploma/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/Go-1.24-00ADD8?style=flat&logo=go)](https://golang.org/)
