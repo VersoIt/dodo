@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a546a6c-2159-4902-a8ac-0cad4c44bbae" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/be/orders/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/internal/domain/domain.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/domain/domain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/internal/repository/order_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/repository/order_repo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/be/orders/internal/usecase/usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/be/orders/internal/usecase/usecase.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

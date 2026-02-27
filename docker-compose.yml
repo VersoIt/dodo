@@ -123,8 +123,11 @@ services:
         condition: service_completed_successfully
       otel-collector:
         condition: service_started
+      nats:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      NATS_URL: nats://nats:4222
       CATALOG_SERVICE_ADDR: catalog:9001
       KITCHEN_SERVICE_ADDR: kitchen:9003
       LOGISTICS_SERVICE_ADDR: logistics:9004
@@ -189,8 +192,11 @@ services:
         condition: service_completed_successfully
       otel-collector:
         condition: service_started
+      nats:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      NATS_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_SERVICE_NAME: kitchen-service
     ports:
@@ -209,8 +215,11 @@ services:
         condition: service_completed_successfully
       otel-collector:
         condition: service_started
+      nats:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      NATS_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_SERVICE_NAME: logistics-service
     ports:
@@ -229,8 +238,11 @@ services:
         condition: service_completed_successfully
       otel-collector:
         condition: service_started
+      nats:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://pizza_user:pizza_password@postgres:5432/pizza_db?sslmode=disable
+      NATS_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_SERVICE_NAME: notification-service
     ports:

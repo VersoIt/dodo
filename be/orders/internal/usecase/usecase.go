@@ -189,19 +189,29 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 			}
 		}
 
-		paidEvent, _ := json.Marshal(domain.OrderPaidEvent{
+		paidEvent, err := json.Marshal(domain.OrderPaidEvent{
 			OrderID:     order.ID(),
 			OrderNumber: order.OrderNumber(),
 			Items:       itemsPayload,
 		})
-		uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.paid", paidEvent))
+		if err != nil {
+			return fmt.Errorf("marshal paid event: %w", err)
+		}
+		if err := uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.paid", paidEvent)); err != nil {
+			return fmt.Errorf("save outbox paid event: %w", err)
+		}
 
-		statusEvent, _ := json.Marshal(domain.OrderStatusChangedEvent{
+		statusEvent, err := json.Marshal(domain.OrderStatusChangedEvent{
 			CustomerID: order.CustomerID(),
 			OrderID:    order.ID(),
 			Status:     order.Status().String(),
 		})
-		uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.status_changed", statusEvent))
+		if err != nil {
+			return fmt.Errorf("marshal status event: %w", err)
+		}
+		if err := uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.status_changed", statusEvent)); err != nil {
+			return fmt.Errorf("save outbox status event: %w", err)
+		}
 
 		return nil
 	})
@@ -258,21 +268,31 @@ func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, status
 					Quantity:    item.Quantity(),
 				}
 			}
-			readyEvent, _ := json.Marshal(domain.OrderReadyEvent{
+			readyEvent, err := json.Marshal(domain.OrderReadyEvent{
 				OrderID:     order.ID(),
 				OrderNumber: order.OrderNumber(),
 				Address:     order.Address(),
 				Items:       itemsPayload,
 			})
-			uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.ready", readyEvent))
+			if err != nil {
+				return fmt.Errorf("marshal ready event: %w", err)
+			}
+			if err := uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.ready", readyEvent)); err != nil {
+				return fmt.Errorf("save outbox ready event: %w", err)
+			}
 		}
 
-		statusEvent, _ := json.Marshal(domain.OrderStatusChangedEvent{
+		statusEvent, err := json.Marshal(domain.OrderStatusChangedEvent{
 			CustomerID: order.CustomerID(),
 			OrderID:    order.ID(),
 			Status:     order.Status().String(),
 		})
-		uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.status_changed", statusEvent))
+		if err != nil {
+			return fmt.Errorf("marshal status event: %w", err)
+		}
+		if err := uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.status_changed", statusEvent)); err != nil {
+			return fmt.Errorf("save outbox status event: %w", err)
+		}
 
 		return nil
 	})

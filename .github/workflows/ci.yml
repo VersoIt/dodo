@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
-          cache-dependency-path: go.work.sum
+          cache-dependency-path: "**/*.mod"
       - name: Start Services
         run: docker-compose up -d postgres nats
       - name: Wait for Services
@@ -57,7 +57,13 @@ jobs:
         run: docker-compose up migrations
       - name: Run Tests
         run: |
-          for D in pkg be/*; do
+          # Test root pkg
+          if [ -d "pkg" ]; then
+            echo "--- Running tests in pkg ---"
+            (cd pkg && go test -v -race ./...)
+          fi
+          # Test services in be/
+          for D in be/*; do
             if [ -d "${D}" ] && [ -f "${D}/go.mod" ]; then
               echo "--- Running tests in ${D} ---"
               (cd "${D}" && go test -v -race ./...)
@@ -75,26 +81,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to Docker Hub
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push backend services
+      - name: Build backend services
         if: matrix.service != 'frontend'
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./be/${{ matrix.service }}/Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: versoit/pizza-${{ matrix.service }}:latest
-
-      - name: Build and push frontend
+        run: |
+          docker build -t pizza-${{ matrix.service }}:latest -f be/${{ matrix.service }}/Dockerfile .
+      - name: Build frontend
         if: matrix.service == 'frontend'
-        uses: docker/build-push-action@v5
-        with:
-          context: ./fe
-          file: ./fe/Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: versoit/pizza-${{ matrix.service }}:latest
+        run: |
+          docker build -t pizza-frontend:latest -f fe/Dockerfile fe
