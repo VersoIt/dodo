@@ -81,10 +81,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
+      - name: Build and push backend services
+        if: matrix.service != 'frontend'
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./${{ matrix.service == 'frontend' && 'fe/Dockerfile' || 'be/' + matrix.service + '/Dockerfile' }}
+          file: ./be/${{ matrix.service }}/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: versoit/pizza-${{ matrix.service }}:latest
+
+      - name: Build and push frontend
+        if: matrix.service == 'frontend'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./fe
+          file: ./fe/Dockerfile
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: versoit/pizza-${{ matrix.service }}:latest
