@@ -8,21 +8,27 @@ const client: AxiosInstance = axios.create({
   }
 })
 
-// Auth Interceptor
-client.interceptors.request.use((config) => {
+// Create a separate client for file downloads that doesn't have the global response interceptor
+const fileClient: AxiosInstance = axios.create({
+  baseURL: '',
+})
+
+// Auth Interceptor for both clients
+const authInterceptor = (config: any) => {
   const token = localStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
-})
+}
+client.interceptors.request.use(authInterceptor)
+fileClient.interceptors.request.use(authInterceptor)
 
-// Global Error Interceptor
+// Global Error Interceptor for JSON client
 client.interceptors.response.use(
   (response: AxiosResponse) => response.data,
   (error) => {
     const message = error.response?.data?.error || 'Произошла непредвиденная ошибка'
-    // Here we can trigger global toast or redirect to login on 401
     return Promise.reject(new Error(message))
   }
 )
@@ -48,11 +54,18 @@ export const ordersApi = {
   deletePromo: (id: string): Promise<ApiResponse<any>> => client.delete(`/api/v1/promos/${id}`),
   checkPromoCode: (code: string): Promise<ApiResponse<PromoCode>> => client.get(`/api/v1/promos/check/${code}`),
   getAnalytics: (): Promise<ApiResponse<Analytics>> => client.get('/api/v1/orders/analytics'),
-  exportReport: (start?: string, end?: string): Promise<ApiResponse<Blob>> => 
-    client.get('/api/v1/orders/report', { 
-      params: { start, end },
-      responseType: 'blob' 
-    }).then(res => ({ success: true, data: res.data })),
+  exportReport: async (start?: string, end?: string): Promise<ApiResponse<Blob>> => {
+    try {
+      const response = await fileClient.get('/api/v1/orders/report', {
+        params: { start, end },
+        responseType: 'blob'
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('Export failed', error);
+      return { success: false, error: 'Failed to download file' };
+    }
+  },
 }
 
 // --- Kitchen API ---
