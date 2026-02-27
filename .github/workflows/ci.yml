@@ -51,7 +51,7 @@ jobs:
       - name: Wait for Services
         run: |
           echo "Waiting for PostgreSQL to be ready..."
-          until docker exec diploma-postgres-1 pg_isready -U pizza_user -d pizza_db; do sleep 1; done
+          until docker-compose exec -T postgres pg_isready -U pizza_user -d pizza_db; do sleep 1; done
           echo "PostgreSQL is ready."
       - name: Run Migrations
         run: docker-compose up migrations
@@ -86,5 +86,5 @@ jobs:
         with:
           context: .
           file: ./${{ matrix.service == 'frontend' && 'fe/Dockerfile' || 'be/' + matrix.service + '/Dockerfile' }}
-          push: (github.ref == 'refs/heads/main')
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: versoit/pizza-${{ matrix.service }}:latest
