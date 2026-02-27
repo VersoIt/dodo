@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -163,32 +164,49 @@ func (uc *OrderUseCase) PayOrder(ctx context.Context, orderID string) error {
 	}
 
 	// 2. Update order status in DB
-	var finalOrder *domain.Order
 	err = uc.tm.Do(ctx, func(ctx context.Context) error {
 		var err error
-		finalOrder, err = uc.repo.FindByID(ctx, orderID) // refetch in tx
+		order, err = uc.repo.FindByID(ctx, orderID) // refetch in tx
 		if err != nil {
 			return err
 		}
 
-		if err = finalOrder.MarkPaid(); err != nil {
+		if err = order.MarkPaid(); err != nil {
 			return err
 		}
 
-		return uc.repo.Save(ctx, finalOrder)
+		if err := uc.repo.Save(ctx, order); err != nil {
+			return err
+		}
+
+		// Outbox Events
+		itemsPayload := make([]domain.OrderItemPayload, len(order.Items()))
+		for i, item := range order.Items() {
+			itemsPayload[i] = domain.OrderItemPayload{
+				ProductID:   item.ProductID(),
+				ProductName: item.ProductName(),
+				Quantity:    item.Quantity(),
+			}
+		}
+
+		paidEvent, _ := json.Marshal(domain.OrderPaidEvent{
+			OrderID:     order.ID(),
+			OrderNumber: order.OrderNumber(),
+			Items:       itemsPayload,
+		})
+		uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.paid", paidEvent))
+
+		statusEvent, _ := json.Marshal(domain.OrderStatusChangedEvent{
+			CustomerID: order.CustomerID(),
+			OrderID:    order.ID(),
+			Status:     order.Status().String(),
+		})
+		uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.status_changed", statusEvent))
+
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("save paid status: %w", err)
-	}
-
-	// 3. Create ticket in Kitchen - NOW OUTSIDE TX
-	if err := uc.kitchenService.CreateTicket(ctx, finalOrder.ID(), finalOrder.OrderNumber(), finalOrder.Items()); err != nil {
-		uc.log.Error("failed to create kitchen ticket", slog.String("order_id", finalOrder.ID()), slog.Any("error", err))
-	}
-
-	// 4. Notify user - NOW OUTSIDE TX
-	if err := uc.notifyService.NotifyStatusChanged(ctx, finalOrder.CustomerID(), finalOrder.ID(), domain.StatusPaid); err != nil {
-		uc.log.Warn("failed to send notification", slog.Any("error", err))
 	}
 
 	return nil
@@ -229,23 +247,38 @@ func (uc *OrderUseCase) UpdateStatus(ctx context.Context, orderID string, status
 		if err := uc.repo.Save(ctx, order); err != nil {
 			return fmt.Errorf("save order: %w", err)
 		}
+
+		// Outbox Events
+		if status == domain.StatusReady {
+			itemsPayload := make([]domain.OrderItemPayload, len(order.Items()))
+			for i, item := range order.Items() {
+				itemsPayload[i] = domain.OrderItemPayload{
+					ProductID:   item.ProductID(),
+					ProductName: item.ProductName(),
+					Quantity:    item.Quantity(),
+				}
+			}
+			readyEvent, _ := json.Marshal(domain.OrderReadyEvent{
+				OrderID:     order.ID(),
+				OrderNumber: order.OrderNumber(),
+				Address:     order.Address(),
+				Items:       itemsPayload,
+			})
+			uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.ready", readyEvent))
+		}
+
+		statusEvent, _ := json.Marshal(domain.OrderStatusChangedEvent{
+			CustomerID: order.CustomerID(),
+			OrderID:    order.ID(),
+			Status:     order.Status().String(),
+		})
+		uc.repo.SaveOutboxEvent(ctx, domain.NewOutboxEvent("order.status_changed", statusEvent))
+
 		return nil
 	})
 
 	if err != nil {
 		return nil, err
-	}
-
-	// Trigger external actions outside of transaction
-	if status == domain.StatusReady {
-		if err := uc.logisticService.CreateDelivery(ctx, order.ID(), order.OrderNumber(), order.Address(), order.Items()); err != nil {
-			uc.log.Error("failed to create delivery", slog.String("order_id", order.ID()), slog.Any("error", err))
-		}
-	}
-
-	// Always notify
-	if err := uc.notifyService.NotifyStatusChanged(ctx, order.CustomerID(), order.ID(), status); err != nil {
-		uc.log.Warn("failed to send status notification", slog.String("order_id", order.ID()), slog.Any("error", err))
 	}
 
 	return order, nil

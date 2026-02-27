@@ -10,6 +10,7 @@ type Config struct {
 	App      AppConfig      `yaml:"app"`
 	GRPC     GRPCConfig     `yaml:"grpc"`
 	Database DatabaseConfig `yaml:"database"`
+	Nats     NatsConfig     `yaml:"nats"`
 }
 
 type AppConfig struct {
@@ -23,6 +24,10 @@ type GRPCConfig struct {
 
 type DatabaseConfig struct {
 	URL string `yaml:"url" env:"DATABASE_URL" env-required:"true"`
+}
+
+type NatsConfig struct {
+	URL string `yaml:"url" env:"NATS_URL" env-default:"nats://nats:4222"`
 }
 
 func NewConfig() (*Config, error) {

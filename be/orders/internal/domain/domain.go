@@ -384,11 +384,31 @@ type OrderRepository interface {
 	FindAll(ctx context.Context) ([]*Order, error)
 	FindFiltered(ctx context.Context, filter OrderFilter) ([]*Order, error)
 
+	// Outbox
+	SaveOutboxEvent(ctx context.Context, event *OutboxEvent) error
+
 	// Promo codes
 	SavePromo(ctx context.Context, p *PromoCode) error
 	FindPromoByCode(ctx context.Context, code string) (*PromoCode, error)
 	ListPromos(ctx context.Context) ([]*PromoCode, error)
 	DeletePromo(ctx context.Context, id string) error
+}
+
+type OutboxEvent struct {
+	ID        string
+	Type      string
+	Payload   []byte
+	CreatedAt time.Time
+}
+
+func NewOutboxEvent(eventType string, payload []byte) *OutboxEvent {
+	id, _ := uuid.NewV7()
+	return &OutboxEvent{
+		ID:        id.String(),
+		Type:      eventType,
+		Payload:   payload,
+		CreatedAt: time.Now(),
+	}
 }
 
 type ProductInfo struct {

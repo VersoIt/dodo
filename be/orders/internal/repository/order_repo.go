@@ -309,6 +309,24 @@ func (r *orderRepo) FindFiltered(ctx context.Context, filter domain.OrderFilter)
 }
 
 
+// --- Outbox ---
+
+func (r *orderRepo) SaveOutboxEvent(ctx context.Context, event *domain.OutboxEvent) error {
+	db := r.getter.DefaultTrOrDB(ctx, r.pool)
+	sqlStr, args, err := r.sb.Insert("outbox_events").
+		Columns("id", "type", "payload", "created_at").
+		Values(event.ID, event.Type, event.Payload, event.CreatedAt).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("build outbox query: %w", err)
+	}
+
+	if _, err = db.Exec(ctx, sqlStr, args...); err != nil {
+		return fmt.Errorf("exec save outbox event: %w", err)
+	}
+	return nil
+}
+
 // --- Promo Codes ---
 
 func (r *orderRepo) SavePromo(ctx context.Context, p *domain.PromoCode) error {
