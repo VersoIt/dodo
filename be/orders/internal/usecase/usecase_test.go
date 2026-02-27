@@ -36,6 +36,7 @@ func (m *MockOrderRepo) FindByID(ctx context.Context, id string) (*domain.Order,
 func (m *MockOrderRepo) FindByCustomerID(ctx context.Context, cid string) ([]*domain.Order, error) { return nil, nil }
 func (m *MockOrderRepo) FindAll(ctx context.Context) ([]*domain.Order, error) { return nil, nil }
 func (m *MockOrderRepo) FindFiltered(ctx context.Context, filter domain.OrderFilter) ([]*domain.Order, error) { return nil, nil }
+func (m *MockOrderRepo) SaveOutboxEvent(ctx context.Context, event *domain.OutboxEvent) error { return nil }
 func (m *MockOrderRepo) SavePromo(ctx context.Context, p *domain.PromoCode) error { return nil }
 func (m *MockOrderRepo) FindPromoByCode(ctx context.Context, code string) (*domain.PromoCode, error) { return nil, nil }
 func (m *MockOrderRepo) ListPromos(ctx context.Context) ([]*domain.PromoCode, error) { return nil, nil }

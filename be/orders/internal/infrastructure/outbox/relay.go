@@ -39,7 +39,9 @@ func (r *Relay) processBatch(ctx context.Context) {
 		r.log.Error("failed to begin outbox tx", "error", err)
 		return
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, type, payload

@@ -1,0 +1,129 @@
+@startuml
+!theme spacelab
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing true
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+
+title Pizza Delivery System - Senior Level Architecture
+
+actor "Customer" as Client
+actor "Manager" as Manager
+actor "Chef" as Chef
+actor "Courier" as Courier
+
+package "Frontend (Vue.js 3)" {
+    [Web App] as FE
+}
+
+package "API Gateway" {
+    [HTTP Handler] as GW_HTTP
+    [Auth Middleware] as GW_Auth
+}
+
+package "Core Services (Go)" {
+    
+    package "Auth Service" {
+        [Auth Handler] as Auth_H
+        database "Postgres" as Auth_DB
+    }
+
+    package "Catalog Service" {
+        [Catalog Handler] as Cat_H
+        database "Postgres" as Cat_DB
+    }
+
+    package "Order Service" {
+        [Order Handler] as Ord_H
+        [Order UseCase] as Ord_UC
+        [Transactional Outbox] as Outbox
+        [Outbox Relay] as Relay
+        database "Postgres" as Ord_DB
+    }
+
+    package "Kitchen Service" {
+        [Kitchen Handler] as Kitch_H
+        [Kitchen NATS Consumer] as Kitch_NATS
+        database "Postgres" as Kitch_DB
+    }
+
+    package "Logistics Service" {
+        [Logistics Handler] as Log_H
+        [Logistics NATS Consumer] as Log_NATS
+        database "Postgres" as Log_DB
+    }
+
+    package "Notification Service" {
+        [Notify Handler] as Notif_H
+        [Notify NATS Consumer] as Notif_NATS
+        database "Postgres" as Notif_DB
+    }
+
+    package "Treasury Service" {
+        [Treasury Handler] as Tre_H
+        database "Postgres" as Tre_DB
+    }
+
+    package "Chat Service" {
+        [Chat Handler] as Chat_H
+        database "Postgres" as Chat_DB
+    }
+}
+
+queue "NATS Broker" as NATS
+
+package "Observability Stack" {
+    [OTEL Collector] as OTEL
+    [Prometheus] as Prom
+    [Grafana] as Graf
+    [Tempo (Tracing)] as Tempo
+    [Loki (Logging)] as Loki
+}
+
+' --- Relationships ---
+
+Client <--> FE
+Manager <--> FE
+Chef <--> FE
+Courier <--> FE
+
+FE <--> GW_HTTP : REST / JSON / WebSocket
+GW_HTTP ..> GW_Auth : Check JWT
+GW_Auth --> Auth_H : gRPC
+GW_HTTP --> Cat_H : gRPC
+GW_HTTP --> Ord_H : gRPC
+GW_HTTP --> Chat_H : gRPC / WS
+
+' Order Flow with Outbox
+Ord_H --> Ord_UC
+Ord_UC --> Ord_DB : Store Order & Event (Atomic)
+Ord_DB ..> Outbox : Table
+Relay --> Outbox : Read (Skip Locked)
+Relay --> NATS : Publish Events
+
+' Async Processing via NATS
+NATS --> Kitch_NATS : "order.paid"
+Kitch_NATS --> Kitch_DB : Create Ticket
+
+NATS --> Log_NATS : "order.ready"
+Log_NATS --> Log_DB : Assign Courier
+
+NATS --> Notif_NATS : "order.status_changed"
+Notif_NATS --> Notif_DB : Send Push/Email
+
+' Direct Calls
+Ord_UC --> Tre_H : gRPC (Sync Payment)
+Ord_UC --> Cat_H : gRPC (Fetch Prices)
+
+' Monitoring
+All_Services ..> OTEL : Push Metrics/Traces/Logs
+OTEL --> Prom
+OTEL --> Tempo
+OTEL --> Loki
+Prom --> Graf
+Tempo --> Graf
+Loki --> Graf
+
+footer Final Year Project - Senior Microservices Architecture
+@enduml
