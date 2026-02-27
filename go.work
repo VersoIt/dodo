@@ -9,6 +9,6 @@ use (
 	./be/logistics
 	./be/notification
 	./be/orders
-	./be/pkg
 	./be/treasury
+	./pkg
 )

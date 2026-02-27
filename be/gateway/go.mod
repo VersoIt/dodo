@@ -21,7 +21,7 @@ require (
 	google.golang.org/grpc v1.78.0
 )
 
-replace github.com/versoit/diploma/pkg => ../pkg
+replace github.com/versoit/diploma/pkg => ../../pkg
 
 replace github.com/versoit/diploma/be/auth => ../auth
 

@@ -18,7 +18,7 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-replace github.com/versoit/diploma/pkg => ../pkg
+replace github.com/versoit/diploma/pkg => ../../pkg
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect

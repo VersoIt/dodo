@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         path: [
-          "be/pkg",
+          "pkg",
           "be/auth",
           "be/catalog",
           "be/chat",
@@ -57,8 +57,8 @@ jobs:
         run: docker-compose up migrations
       - name: Run Tests
         run: |
-          for D in be/*; do
-            if [ -d "${D}" ]; then
+          for D in pkg be/*; do
+            if [ -d "${D}" ] && [ -f "${D}/go.mod" ]; then
               echo "--- Running tests in ${D} ---"
               (cd "${D}" && go test -v -race ./...)
             fi
