@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, inject, computed } from 'vue'
-import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign, ChefHat, Truck, MessageSquare } from 'lucide-vue-next'
+import { Tag, Plus, Trash2, TrendingUp, ShoppingBag, DollarSign, ChefHat, Truck, MessageSquare, Download } from 'lucide-vue-next'
 import { ordersApi } from '../api'
 import type { PromoCode, Analytics } from '../types'
 import AppModal from '../components/shared/AppModal.vue'
@@ -9,6 +9,7 @@ import ChatComponent from '../components/ChatComponent.vue'
 const addToast = inject('addToast') as (msg: string, type?: any) => void
 
 const loading = ref(true)
+const exporting = ref(false)
 const promos = ref<PromoCode[]>([])
 const analytics = ref<Analytics | null>(null)
 const activeOrders = ref<any[]>([])
@@ -18,6 +19,11 @@ const showChatModal = ref(false)
 const activeOrderId = ref<string | null>(null)
 const newPromo = ref<{ code: string, amount: number, type: 'percent' | 'fixed' }>({ code: '', amount: 0, type: 'percent' })
 
+const exportDates = ref({
+  start: '',
+  end: ''
+})
+
 const openChat = (orderId: string) => {
   activeOrderId.value = orderId
   showChatModal.value = true
@@ -26,6 +32,28 @@ const openChat = (orderId: string) => {
 const isPromoValid = computed(() => {
   return newPromo.value.code.trim().length > 0 && newPromo.value.amount > 0
 })
+
+const handleExport = async () => {
+  try {
+    exporting.value = true
+    const res = await ordersApi.exportReport(exportDates.value.start, exportDates.value.end)
+    if (res.success && res.data) {
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      const filename = `report_${new Date().toISOString().split('T')[0]}.xlsx`
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      addToast('Отчет загружен', 'success')
+    }
+  } catch (err) {
+    addToast('Ошибка экспорта', 'error')
+  } finally {
+    exporting.value = false
+  }
+}
 
 const fetchData = async () => {
   try {
@@ -71,6 +99,19 @@ onMounted(fetchData)
       <div>
         <h1 class="text-4xl font-black tracking-tighter uppercase">Панель Управления</h1>
         <p class="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">Управление промокодами и аналитика</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-4 bg-base-100 p-4 rounded-[2rem] border border-base-200 shadow-sm">
+        <div class="flex items-center gap-2">
+          <input v-model="exportDates.start" type="date" class="input input-sm input-bordered rounded-xl font-bold text-xs" />
+          <span class="opacity-30">—</span>
+          <input v-model="exportDates.end" type="date" class="input input-sm input-bordered rounded-xl font-bold text-xs" />
+        </div>
+        <button @click="handleExport" :disabled="exporting" class="btn btn-primary btn-sm rounded-xl font-black px-6 gap-2">
+          <span v-if="exporting" class="loading loading-spinner loading-xs"></span>
+          <Download v-else class="w-4 h-4" />
+          Excel
+        </button>
       </div>
     </div>
 

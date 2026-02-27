@@ -171,3 +171,24 @@ func (h *OrderHandler) GetAnalytics(c *fiber.Ctx) error {
 	if err != nil { return HandleGrpcError(c, h.log, err, "failed to get analytics") }
 	return SuccessResponse(c, resp)
 }
+
+func (h *OrderHandler) ExportReport(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	start := c.Query("start")
+	end := c.Query("end")
+
+	resp, err := h.client.ExportReport(ctx, &orders_pb.ExportReportRequest{
+		StartDate: start,
+		EndDate:   end,
+	})
+	if err != nil {
+		return HandleGrpcError(c, h.log, err, "failed to export report")
+	}
+
+	c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Set("Content-Disposition", `attachment; filename="report_`+time.Now().Format("2006-01-02")+`.xlsx"`)
+	
+	return c.Send(resp.FileContent)
+}

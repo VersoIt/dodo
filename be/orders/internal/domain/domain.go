@@ -370,11 +370,18 @@ func generateOrderNumber() string {
 	return fmt.Sprintf("PG-%s-%s", time.Now().Format("2006.01.02"), id.String()[24:])
 }
 
+type OrderFilter struct {
+	StartAt *time.Time
+	EndAt   *time.Time
+	Status  *OrderStatus
+}
+
 type OrderRepository interface {
 	Save(ctx context.Context, o *Order) error
 	FindByID(ctx context.Context, id string) (*Order, error)
 	FindByCustomerID(ctx context.Context, customerID string) ([]*Order, error)
 	FindAll(ctx context.Context) ([]*Order, error)
+	FindFiltered(ctx context.Context, filter OrderFilter) ([]*Order, error)
 
 	// Promo codes
 	SavePromo(ctx context.Context, p *PromoCode) error

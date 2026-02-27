@@ -59,6 +59,7 @@ func SetupRoutes(
 	orders.Get("/my", orderHandler.ListOrders)
 	orders.Get("/all", middleware.RequireRole("chef", "courier", "manager"), orderHandler.ListAllOrders)
 	orders.Get("/analytics", middleware.RequireRole("manager"), orderHandler.GetAnalytics)
+	orders.Get("/report", middleware.RequireRole("manager"), orderHandler.ExportReport)
 	orders.Get("/:id", orderHandler.GetOrderStatus)
 	orders.Patch("/:id/status", middleware.RequireRole("chef", "courier", "manager"), orderHandler.UpdateOrderStatus)
 	orders.Post("/:id/pay", orderHandler.PayOrder)

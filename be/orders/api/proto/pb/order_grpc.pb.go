@@ -30,6 +30,7 @@ const (
 	OrderService_DeletePromo_FullMethodName       = "/orders.v1.OrderService/DeletePromo"
 	OrderService_CheckPromoCode_FullMethodName    = "/orders.v1.OrderService/CheckPromoCode"
 	OrderService_GetAnalytics_FullMethodName      = "/orders.v1.OrderService/GetAnalytics"
+	OrderService_ExportReport_FullMethodName      = "/orders.v1.OrderService/ExportReport"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -49,6 +50,7 @@ type OrderServiceClient interface {
 	CheckPromoCode(ctx context.Context, in *CheckPromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error)
 	// Analytics
 	GetAnalytics(ctx context.Context, in *GetAnalyticsRequest, opts ...grpc.CallOption) (*AnalyticsResponse, error)
+	ExportReport(ctx context.Context, in *ExportReportRequest, opts ...grpc.CallOption) (*ExportReportResponse, error)
 }
 
 type orderServiceClient struct {
@@ -169,6 +171,16 @@ func (c *orderServiceClient) GetAnalytics(ctx context.Context, in *GetAnalyticsR
 	return out, nil
 }
 
+func (c *orderServiceClient) ExportReport(ctx context.Context, in *ExportReportRequest, opts ...grpc.CallOption) (*ExportReportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExportReportResponse)
+	err := c.cc.Invoke(ctx, OrderService_ExportReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
@@ -186,6 +198,7 @@ type OrderServiceServer interface {
 	CheckPromoCode(context.Context, *CheckPromoCodeRequest) (*PromoCodeResponse, error)
 	// Analytics
 	GetAnalytics(context.Context, *GetAnalyticsRequest) (*AnalyticsResponse, error)
+	ExportReport(context.Context, *ExportReportRequest) (*ExportReportResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -228,6 +241,9 @@ func (UnimplementedOrderServiceServer) CheckPromoCode(context.Context, *CheckPro
 }
 func (UnimplementedOrderServiceServer) GetAnalytics(context.Context, *GetAnalyticsRequest) (*AnalyticsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAnalytics not implemented")
+}
+func (UnimplementedOrderServiceServer) ExportReport(context.Context, *ExportReportRequest) (*ExportReportResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExportReport not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 func (UnimplementedOrderServiceServer) testEmbeddedByValue()                      {}
@@ -448,6 +464,24 @@ func _OrderService_GetAnalytics_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_ExportReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).ExportReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_ExportReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).ExportReport(ctx, req.(*ExportReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -498,6 +532,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAnalytics",
 			Handler:    _OrderService_GetAnalytics_Handler,
+		},
+		{
+			MethodName: "ExportReport",
+			Handler:    _OrderService_ExportReport_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

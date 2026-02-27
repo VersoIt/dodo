@@ -305,8 +305,8 @@ type ProductStat struct {
 	Revenue float64
 }
 
-func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*AnalyticsResult, error) {
-	orders, err := uc.repo.FindAll(ctx)
+func (uc *OrderUseCase) GetAnalytics(ctx context.Context, filter domain.OrderFilter) (*AnalyticsResult, error) {
+	orders, err := uc.repo.FindFiltered(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -362,4 +362,37 @@ func (uc *OrderUseCase) GetAnalytics(ctx context.Context) (*AnalyticsResult, err
 		CookingCount:    cookingCount,
 		DeliveringCount: deliveringCount,
 	}, nil
+}
+
+func (uc *OrderUseCase) ExportReport(ctx context.Context, start, end string) ([]byte, error) {
+	filter := domain.OrderFilter{}
+	if start != "" {
+		t, err := time.Parse("2006-01-02", start)
+		if err == nil {
+			filter.StartAt = &t
+		}
+	}
+	if end != "" {
+		t, err := time.Parse("2006-01-02", end)
+		if err == nil {
+			// Set to end of day
+			t = t.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+			filter.EndAt = &t
+		}
+	}
+
+	// 1. Fetch Data
+	analytics, err := uc.GetAnalytics(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("fetch analytics: %w", err)
+	}
+
+	orders, err := uc.repo.FindFiltered(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("fetch orders: %w", err)
+	}
+
+	// 2. Generate Excel
+	gen := NewReportGenerator()
+	return gen.Generate(analytics, orders)
 }

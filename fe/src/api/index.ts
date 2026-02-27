@@ -48,6 +48,11 @@ export const ordersApi = {
   deletePromo: (id: string): Promise<ApiResponse<any>> => client.delete(`/api/v1/promos/${id}`),
   checkPromoCode: (code: string): Promise<ApiResponse<PromoCode>> => client.get(`/api/v1/promos/check/${code}`),
   getAnalytics: (): Promise<ApiResponse<Analytics>> => client.get('/api/v1/orders/analytics'),
+  exportReport: (start?: string, end?: string): Promise<ApiResponse<Blob>> => 
+    client.get('/api/v1/orders/report', { 
+      params: { start, end },
+      responseType: 'blob' 
+    }).then(res => ({ success: true, data: res.data })),
 }
 
 // --- Kitchen API ---

@@ -145,7 +145,8 @@ func (h *OrdersHandler) CheckPromoCode(ctx context.Context, req *orderspb.CheckP
 }
 
 func (h *OrdersHandler) GetAnalytics(ctx context.Context, _ *orderspb.GetAnalyticsRequest) (*orderspb.AnalyticsResponse, error) {
-	res, err := h.uc.GetAnalytics(ctx)
+	// For main dashboard we show all-time or default analytics
+	res, err := h.uc.GetAnalytics(ctx, domain.OrderFilter{})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get analytics: %v", err)
 	}
@@ -167,6 +168,15 @@ func (h *OrdersHandler) GetAnalytics(ctx context.Context, _ *orderspb.GetAnalyti
 		CookingCount:    int32(res.CookingCount),
 		DeliveringCount: int32(res.DeliveringCount),
 	}, nil
+}
+
+func (h *OrdersHandler) ExportReport(ctx context.Context, req *orderspb.ExportReportRequest) (*orderspb.ExportReportResponse, error) {
+	content, err := h.uc.ExportReport(ctx, req.StartDate, req.EndDate)
+	if err != nil {
+		h.log.Error("failed to export report", slog.Any("error", err))
+		return nil, status.Errorf(codes.Internal, "failed to export report")
+	}
+	return &orderspb.ExportReportResponse{FileContent: content}, nil
 }
 
 func (h *OrdersHandler) mapOrder(o *domain.Order) *orderspb.OrderResponse {

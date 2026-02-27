@@ -18,6 +18,16 @@ service OrderService {
 
   // Analytics
   rpc GetAnalytics(GetAnalyticsRequest) returns (AnalyticsResponse);
+  rpc ExportReport(ExportReportRequest) returns (ExportReportResponse);
+}
+
+message ExportReportRequest {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message ExportReportResponse {
+  bytes file_content = 1;
 }
 
 message CreateOrderRequest {

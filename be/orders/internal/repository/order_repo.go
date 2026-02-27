@@ -199,10 +199,32 @@ func (r *orderRepo) FindByCustomerID(ctx context.Context, customerID string) ([]
 }
 
 func (r *orderRepo) FindAll(ctx context.Context) ([]*domain.Order, error) {
+	return r.FindFiltered(ctx, domain.OrderFilter{})
+}
+
+func (r *orderRepo) FindFiltered(ctx context.Context, filter domain.OrderFilter) ([]*domain.Order, error) {
 	db := r.getter.DefaultTrOrDB(ctx, r.pool)
-	rows, err := db.Query(ctx, "SELECT id FROM orders ORDER BY created_at DESC")
+
+	builder := r.sb.Select("id").From("orders").OrderBy("created_at DESC")
+
+	if filter.StartAt != nil {
+		builder = builder.Where(squirrel.GtOrEq{"created_at": *filter.StartAt})
+	}
+	if filter.EndAt != nil {
+		builder = builder.Where(squirrel.LtOrEq{"created_at": *filter.EndAt})
+	}
+	if filter.Status != nil {
+		builder = builder.Where(squirrel.Eq{"status": *filter.Status})
+	}
+
+	sqlStr, args, err := builder.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("query all: %w", err)
+		return nil, fmt.Errorf("build filtered query: %w", err)
+	}
+
+	rows, err := db.Query(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query filtered orders: %w", err)
 	}
 	defer rows.Close()
 
@@ -220,6 +242,7 @@ func (r *orderRepo) FindAll(ctx context.Context) ([]*domain.Order, error) {
 	}
 	return result, nil
 }
+
 
 // --- Promo Codes ---
 
