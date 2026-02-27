@@ -107,10 +107,10 @@ onMounted(fetchData)
           <span class="opacity-30">—</span>
           <input v-model="exportDates.end" type="date" class="input input-sm input-bordered rounded-xl font-bold text-xs" />
         </div>
-        <button @click="handleExport" :disabled="exporting" class="btn btn-primary btn-sm rounded-xl font-black px-6 gap-2">
+        <button @click="handleExport" :disabled="exporting" class="btn border-none text-primary-content bg-gradient-to-tr from-primary to-accent shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 transition-all duration-300 ease-in-out rounded-xl font-black px-6 gap-2">
           <span v-if="exporting" class="loading loading-spinner loading-xs"></span>
           <Download v-else class="w-4 h-4" />
-          Excel
+          Экспорт
         </button>
       </div>
     </div>
