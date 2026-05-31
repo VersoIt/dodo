@@ -1,6 +1,10 @@
+# syntax=docker/dockerfile:1.7
+
 # Stage 1: Build
 FROM golang:1.24-alpine AS builder
 WORKDIR /app
+ENV GOPROXY=https://proxy.golang.org,direct \
+    GOSUMDB=sum.golang.org
 
 # First, copy over the files that define dependencies
 COPY go.work go.work.sum ./
@@ -15,14 +19,18 @@ COPY be/orders/go.mod be/orders/go.sum ./be/orders/
 COPY be/treasury/go.mod be/treasury/go.sum ./be/treasury/
 COPY be/gateway/go.mod be/gateway/go.sum ./be/gateway/
 
-# Download dependencies. This layer is cached and only runs if go.mod/go.sum files change.
-RUN go work sync
+# Download dependencies once and reuse them across parallel service builds.
+RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,target=/root/.cache/go-build,sharing=locked \
+    sh -ec 'go work sync && for mod in ./pkg ./be/auth ./be/catalog ./be/chat ./be/gateway ./be/kitchen ./be/logistics ./be/notification ./be/orders ./be/treasury; do (cd "$mod" && go mod download); done'
 
 # Copy the rest of the source code
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/service ./be/treasury/cmd/main.go
+RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,target=/root/.cache/go-build,sharing=locked \
+    CGO_ENABLED=0 GOOS=linux go build -o /app/bin/service ./be/treasury/cmd/main.go
 
 # Stage 2: Final image
 FROM alpine:latest

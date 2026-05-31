@@ -38,6 +38,7 @@ services:
       - sh
       - -c
       - |
+        set -eu
         for service in auth catalog chat kitchen logistics notification orders treasury; do
           dir="be/$$service/migrations"
           if [ -d "$$dir" ]; then

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAuthStore } from '../store/auth'
 import { useCartStore } from '../store/cart'
 import { useRouter } from 'vue-router'
@@ -7,6 +8,9 @@ import { ShoppingCart, User, LogOut, Pizza, Menu, Info, ChefHat, Truck, BarChart
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
+const staffRoles = ['manager', 'chef', 'courier']
+
+const showCartButton = computed(() => !staffRoles.includes(authStore.user?.role))
 
 const handleLogout = () => {
   authStore.logout()
@@ -46,7 +50,7 @@ const handleLogout = () => {
         </template>
       </div>
 
-      <router-link to="/cart" class="btn btn-ghost btn-circle w-12 h-12 relative bg-base-200/50 hover:bg-primary/10 hover:text-primary group transition-all duration-300">
+      <router-link v-if="showCartButton" to="/cart" class="btn btn-ghost btn-circle w-12 h-12 relative bg-base-200/50 hover:bg-primary/10 hover:text-primary group transition-all duration-300">
         <ShoppingCart class="w-5 h-5 transition-transform group-hover:scale-110" />
         <span v-if="cartStore.totalItems > 0" class="badge badge-primary badge-sm absolute top-0 right-0 font-bold animate-in zoom-in border-2 border-base-100 shadow-md">{{ cartStore.totalItems }}</span>
       </router-link>
